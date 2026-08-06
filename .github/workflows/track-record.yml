@@ -1,0 +1,27 @@
+name: Track Record
+
+on:
+  schedule:
+    - cron: '30 21 * * 1-5' # weekdays, ~4:30pm ET after market close
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/log-track-record.mjs
+        env:
+          TWELVE_DATA_KEY: ${{ secrets.TWELVE_DATA_KEY }}
+      - run: |
+          git config user.name "confluence-bot"
+          git config user.email "actions@github.com"
+          git add data/track-record.json
+          git diff --staged --quiet || git commit -m "Log daily track record ($(date -u +%Y-%m-%d))"
+          git push
