@@ -1,4 +1,4 @@
-import { rsiSeries, macdHistogramSeries } from './indicators'
+import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries } from './indicators'
 
 function summarize(occurrences) {
   if (occurrences.length === 0) return { sampleSize: 0 }
@@ -71,6 +71,64 @@ export function backtestTicker(bars, { forwardDays = 5 } = {}) {
     macdBearishCross: forwardReturns(closes, bearish, forwardDays),
     rsiExitOversold: forwardReturns(closes, exitOversold, forwardDays),
     rsiEnterOverbought: forwardReturns(closes, enterOverbought, forwardDays),
+  }
+}
+
+// Classifies each historical day as an up/down/choppy market regime using
+// SPY's own 50-vs-200-day trend. A setup's base rate computed across a
+// two-year raging bull market says very little about how it'll behave in a
+// chop market — this lets backtests condition on "what kind of market was
+// it" instead of blending every regime together.
+export function regimeSeries(spyBars) {
+  const closes = spyBars.map((b) => b.close)
+  const sma50Arr = smaSeries(closes, 50)
+  const sma200Arr = smaSeries(closes, 200)
+  const map = new Map()
+  for (let i = 0; i < spyBars.length; i++) {
+    if (sma50Arr[i] == null || sma200Arr[i] == null) continue
+    let regime = 'choppy'
+    if (closes[i] > sma50Arr[i] && sma50Arr[i] > sma200Arr[i]) regime = 'up'
+    else if (closes[i] < sma50Arr[i] && sma50Arr[i] < sma200Arr[i]) regime = 'down'
+    map.set(spyBars[i].date, regime)
+  }
+  return map
+}
+
+const REGIME_LABELS = { up: 'uptrending', down: 'downtrending', choppy: 'choppy/range-bound' }
+
+// The core of the "multi-condition" upgrade: instead of four independent
+// single-signal base rates, this buckets every past day by its *combined*
+// confluence score (see scoreSeries) and reports what actually happened
+// afterward — split into "every time this score occurred" and "every time
+// this score occurred in a market regime like today's." That second, smaller
+// number is the more honest one to weigh a current setup against.
+export function backtestByScore(bars, spyBars, { forwardDays = 5 } = {}) {
+  const closes = bars.map((b) => b.close)
+  const scores = scoreSeries(bars)
+  const regimeMap = regimeSeries(spyBars)
+  const currentRegime = regimeMap.get(bars[bars.length - 1].date) ?? null
+
+  const buckets = new Map()
+  for (let i = 0; i < scores.length - forwardDays; i++) {
+    if (scores[i] == null) continue
+    const ret = (closes[i + forwardDays] - closes[i]) / closes[i]
+    const regime = regimeMap.get(bars[i].date) ?? null
+    if (!buckets.has(scores[i])) buckets.set(scores[i], { all: [], regimeMatched: [] })
+    const bucket = buckets.get(scores[i])
+    bucket.all.push({ return: ret })
+    if (regime && currentRegime && regime === currentRegime) bucket.regimeMatched.push({ return: ret })
+  }
+
+  const rows = [...buckets.entries()]
+    .map(([score, occ]) => ({ score, all: summarize(occ.all), regimeMatched: summarize(occ.regimeMatched) }))
+    .sort((a, b) => b.score - a.score)
+
+  return {
+    forwardDays,
+    currentScore: scores[scores.length - 1],
+    currentRegime,
+    currentRegimeLabel: currentRegime ? REGIME_LABELS[currentRegime] : null,
+    rows,
   }
 }
 

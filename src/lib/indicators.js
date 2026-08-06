@@ -4,6 +4,55 @@ export function sma(values, period) {
   return slice.reduce((a, b) => a + b, 0) / period
 }
 
+export function smaSeries(values, period) {
+  const result = new Array(values.length).fill(null)
+  let sum = 0
+  for (let i = 0; i < values.length; i++) {
+    sum += values[i]
+    if (i >= period) sum -= values[i - period]
+    if (i >= period - 1) result[i] = sum / period
+  }
+  return result
+}
+
+// Aggregates daily bars into weekly (Mon-Fri) bars. Resampled from the same
+// daily series rather than fetched separately — keeps demo and live modes
+// consistent and costs zero extra API calls against the free-tier limit.
+export function resampleWeekly(bars) {
+  const weeks = []
+  let bucket = []
+  for (const bar of bars) {
+    const dow = new Date(bar.date + 'T00:00:00Z').getUTCDay()
+    if (dow === 1 && bucket.length) {
+      weeks.push(bucket)
+      bucket = []
+    }
+    bucket.push(bar)
+  }
+  if (bucket.length) weeks.push(bucket)
+  return weeks.map((week) => ({
+    date: week[week.length - 1].date,
+    open: week[0].open,
+    high: Math.max(...week.map((b) => b.high)),
+    low: Math.min(...week.map((b) => b.low)),
+    close: week[week.length - 1].close,
+    volume: week.reduce((a, b) => a + b.volume, 0),
+  }))
+}
+
+// Bigger-picture trend check: is price above or below its 10-week average?
+// The point of checking a second timeframe is that a daily signal firing
+// against the weekly trend is a materially weaker setup than one firing
+// with it, even though the daily indicators look identical either way.
+export function weeklyTrend(bars, period = 10) {
+  const weekly = resampleWeekly(bars)
+  const weeklyCloses = weekly.map((w) => w.close)
+  const weeklySma = sma(weeklyCloses, period)
+  if (weeklySma == null) return { trend: null, weeklySma: null, weeklyClose: null }
+  const weeklyClose = weeklyCloses[weeklyCloses.length - 1]
+  return { trend: weeklyClose > weeklySma ? 'up' : 'down', weeklySma, weeklyClose }
+}
+
 function stdev(values) {
   const mean = values.reduce((a, b) => a + b, 0) / values.length
   const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length
@@ -209,6 +258,47 @@ export function detectDivergence(bars, lookback = 60) {
   return { bullish, bearish }
 }
 
+// The confluence score computed for every historical day, not just today.
+// This is what makes the backtest a real statement about "confluence" as a
+// combined condition, rather than four separate single-signal base rates
+// added together after the fact. Deliberately excludes divergence — swing
+// detection is expensive to recompute per day across the whole history —
+// so this tracks RSI + MACD + trend + weekly alignment only.
+export function scoreSeries(bars) {
+  const closes = bars.map((b) => b.close)
+  const rsiArr = rsiSeries(closes, 14)
+  const macdArr = macdHistogramSeries(closes)
+  const sma50Arr = smaSeries(closes, 50)
+  const sma200Arr = smaSeries(closes, 200)
+  const scores = new Array(bars.length).fill(null)
+
+  for (let i = 0; i < bars.length; i++) {
+    if (sma200Arr[i] == null) continue
+    let bullish = 0
+    let bearish = 0
+    if (rsiArr[i] != null) {
+      if (rsiArr[i] < 30) bullish++
+      else if (rsiArr[i] > 70) bearish++
+    }
+    if (macdArr[i] != null) {
+      if (macdArr[i].histogram > 0) bullish++
+      else bearish++
+    }
+    if (sma50Arr[i] != null) {
+      if (sma50Arr[i] > sma200Arr[i]) bullish++
+      else bearish++
+      if (closes[i] > sma50Arr[i]) bullish++
+      else bearish++
+    }
+    const weekly = weeklyTrend(bars.slice(0, i + 1))
+    if (weekly.trend === 'up') bullish++
+    else if (weekly.trend === 'down') bearish++
+
+    scores[i] = bullish - bearish
+  }
+  return scores
+}
+
 export function computeSignals(bars) {
   const closes = bars.map((b) => b.close)
   const price = closes[closes.length - 1]
@@ -261,6 +351,26 @@ export function computeSignals(bars) {
     else bearish++
   }
 
+  const weekly = weeklyTrend(bars)
+  if (weekly.trend) {
+    const dailyLean = bullish > bearish ? 'bullish' : bearish > bullish ? 'bearish' : 'neutral'
+    if (weekly.trend === 'up') {
+      bullish++
+      notes.push(
+        dailyLean === 'bearish'
+          ? 'Weekly trend is up (price above its 10-week average) — this daily signal is fighting the bigger-picture trend, a weaker setup than it looks'
+          : 'Weekly trend is up (price above its 10-week average) — the bigger picture agrees with the daily signal'
+      )
+    } else {
+      bearish++
+      notes.push(
+        dailyLean === 'bullish'
+          ? 'Weekly trend is down (price below its 10-week average) — this daily signal is fighting the bigger-picture trend, a weaker setup than it looks'
+          : 'Weekly trend is down (price below its 10-week average) — the bigger picture agrees with the daily signal'
+      )
+    }
+  }
+
   if (divergence.bullish) {
     bullish += 2
     notes.push('Bullish RSI divergence — price made a lower low but RSI made a higher low, momentum is fading on the downside')
@@ -288,6 +398,7 @@ export function computeSignals(bars) {
     relVolume: relVol,
     divergence,
     levels,
+    weekly,
     score,
     verdict,
     notes,

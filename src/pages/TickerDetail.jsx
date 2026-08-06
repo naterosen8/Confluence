@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
 import { getSeries, HAS_LIVE_DATA } from '../lib/dataProvider'
 import { computeSignals } from '../lib/indicators'
-import { backtestTicker, mostRecentEvent, SIGNAL_LABELS } from '../lib/backtest'
+import { backtestTicker, backtestByScore, mostRecentEvent, SIGNAL_LABELS } from '../lib/backtest'
 import Sparkline from '../components/Sparkline'
 import VerdictBadge from '../components/VerdictBadge'
 
@@ -17,8 +17,10 @@ export default function TickerDetail() {
   const meta = TICKERS.find((t) => t.symbol === symbol)
   const bars = getSeries(symbol)
   const closes = bars.map((b) => b.close)
+  const spyBars = getSeries('SPY')
   const signals = useMemo(() => computeSignals(bars), [bars])
   const backtest = useMemo(() => backtestTicker(bars), [bars])
+  const scoreBacktest = useMemo(() => backtestByScore(bars, spyBars), [bars, spyBars])
   const trigger = useMemo(() => mostRecentEvent(bars), [bars])
 
   return (
@@ -136,10 +138,58 @@ export default function TickerDetail() {
         </Section>
       )}
 
-      <Section title={`Historical base rates (next ${backtest.forwardDays} sessions)`}>
+      <Section title={`Confluence score history (next ${scoreBacktest.forwardDays} sessions)`}>
         <p className="muted small">
-          Every prior time each event fired in this ticker's tracked history, forward-looking outcome. Small sample
-          sizes are common and are called out — treat anything under ~15 occurrences as a hint, not a statistic.
+          Individual events (below) tell you whether one mechanism has mattered on its own. This is the more honest
+          "confluence" question: every day in this ticker's history is scored the same way as the badge at the top of
+          this page (RSI + MACD + trend + weekly alignment), grouped by that score, and compared to what happened
+          next. Today's market is currently <strong>{scoreBacktest.currentRegimeLabel || 'unclassified'}</strong> (based
+          on SPY's own trend) — the "regime-matched" column restricts the sample to days when the broader market was
+          in the same kind of regime as today, which is usually a much smaller, more relevant sample than "all
+          history."
+        </p>
+        <div className="score-table-wrap">
+          <table className="score-table">
+            <thead>
+              <tr>
+                <th>Score</th>
+                <th colSpan={3}>All history</th>
+                <th colSpan={3}>Regime-matched ({scoreBacktest.currentRegimeLabel || '—'})</th>
+              </tr>
+              <tr className="score-table-subhead">
+                <th></th>
+                <th>N</th>
+                <th>Win %</th>
+                <th>Avg return</th>
+                <th>N</th>
+                <th>Win %</th>
+                <th>Avg return</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scoreBacktest.rows.map((row) => (
+                <tr key={row.score} className={row.score === scoreBacktest.currentScore ? 'score-row-active' : ''}>
+                  <td>
+                    <strong>{row.score > 0 ? `+${row.score}` : row.score}</strong>
+                    {row.score === scoreBacktest.currentScore && <span className="muted small"> ← today</span>}
+                  </td>
+                  <td>{row.all.sampleSize}</td>
+                  <td>{row.all.sampleSize ? `${row.all.winRate.toFixed(0)}%` : '—'}</td>
+                  <td>{row.all.sampleSize ? pct(row.all.avgReturn) : '—'}</td>
+                  <td>{row.regimeMatched.sampleSize}</td>
+                  <td>{row.regimeMatched.sampleSize ? `${row.regimeMatched.winRate.toFixed(0)}%` : '—'}</td>
+                  <td>{row.regimeMatched.sampleSize ? pct(row.regimeMatched.avgReturn) : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Section>
+
+      <Section title={`Individual-signal base rates (next ${backtest.forwardDays} sessions)`}>
+        <p className="muted small">
+          Every prior time each single event fired in this ticker's tracked history, forward-looking outcome. Small
+          sample sizes are common and are called out — treat anything under ~15 occurrences as a hint, not a statistic.
         </p>
         <div className="backtest-grid">
           {Object.entries(SIGNAL_LABELS).map(([key, label]) => (
