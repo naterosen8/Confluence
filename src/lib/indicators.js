@@ -4,7 +4,13 @@ export function sma(values, period) {
   return slice.reduce((a, b) => a + b, 0) / period
 }
 
-function emaSeries(values, period) {
+function stdev(values) {
+  const mean = values.reduce((a, b) => a + b, 0) / values.length
+  const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length
+  return Math.sqrt(variance)
+}
+
+export function emaSeries(values, period) {
   const result = new Array(values.length).fill(null)
   if (values.length < period) return result
   const k = 2 / (period + 1)
@@ -17,42 +23,204 @@ function emaSeries(values, period) {
   return result
 }
 
-export function rsi(values, period = 14) {
-  if (values.length < period + 1) return null
+// Wilder's smoothing — the standard RSI formula (first value is a plain average
+// of the first `period` changes, every value after is smoothed against it).
+export function rsiSeries(closes, period = 14) {
+  const result = new Array(closes.length).fill(null)
+  if (closes.length < period + 1) return result
   let gains = 0
   let losses = 0
-  for (let i = values.length - period; i < values.length; i++) {
-    const diff = values[i] - values[i - 1]
+  for (let i = 1; i <= period; i++) {
+    const diff = closes[i] - closes[i - 1]
     if (diff >= 0) gains += diff
     else losses -= diff
   }
-  const avgGain = gains / period
-  const avgLoss = losses / period
-  if (avgLoss === 0) return 100
-  const rs = avgGain / avgLoss
-  return 100 - 100 / (1 + rs)
+  let avgGain = gains / period
+  let avgLoss = losses / period
+  result[period] = avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss)
+  for (let i = period + 1; i < closes.length; i++) {
+    const diff = closes[i] - closes[i - 1]
+    const gain = diff > 0 ? diff : 0
+    const loss = diff < 0 ? -diff : 0
+    avgGain = (avgGain * (period - 1) + gain) / period
+    avgLoss = (avgLoss * (period - 1) + loss) / period
+    result[i] = avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss)
+  }
+  return result
 }
 
-export function macd(values, fast = 12, slow = 26, signalPeriod = 9) {
-  if (values.length < slow + signalPeriod) return null
-  const fastEma = emaSeries(values, fast)
-  const slowEma = emaSeries(values, slow)
-  const macdLine = values
-    .map((_, i) => (fastEma[i] != null && slowEma[i] != null ? fastEma[i] - slowEma[i] : null))
-    .filter((v) => v != null)
-  const signalSeries = emaSeries(macdLine, signalPeriod)
-  const macdVal = macdLine[macdLine.length - 1]
-  const signalVal = signalSeries[signalSeries.length - 1]
-  if (macdVal == null || signalVal == null) return null
-  return { macd: macdVal, signal: signalVal, histogram: macdVal - signalVal }
+export function rsi(closes, period = 14) {
+  const series = rsiSeries(closes, period)
+  return series[series.length - 1]
 }
 
-export function computeSignals(closes) {
+// Returns the MACD histogram (macd line minus signal line) for every index,
+// null until enough history exists. Single pass — used by both the live
+// snapshot and the backtester so "just crossed" events are detected the
+// same way in both places.
+export function macdHistogramSeries(closes, fast = 12, slow = 26, signalPeriod = 9) {
+  const fastEma = emaSeries(closes, fast)
+  const slowEma = emaSeries(closes, slow)
+  const macdLine = closes.map((_, i) => (fastEma[i] != null && slowEma[i] != null ? fastEma[i] - slowEma[i] : null))
+  const validStart = macdLine.findIndex((v) => v != null)
+  const histogram = new Array(closes.length).fill(null)
+  if (validStart === -1) return histogram
+  const compact = macdLine.slice(validStart)
+  const signalCompact = emaSeries(compact, signalPeriod)
+  for (let i = 0; i < compact.length; i++) {
+    if (signalCompact[i] != null) histogram[validStart + i] = { macd: compact[i], signal: signalCompact[i], histogram: compact[i] - signalCompact[i] }
+  }
+  return histogram
+}
+
+export function macd(closes, fast = 12, slow = 26, signalPeriod = 9) {
+  const series = macdHistogramSeries(closes, fast, slow, signalPeriod)
+  return series[series.length - 1]
+}
+
+function trueRanges(bars) {
+  const tr = new Array(bars.length).fill(null)
+  for (let i = 1; i < bars.length; i++) {
+    const cur = bars[i]
+    const prevClose = bars[i - 1].close
+    tr[i] = Math.max(cur.high - cur.low, Math.abs(cur.high - prevClose), Math.abs(cur.low - prevClose))
+  }
+  return tr
+}
+
+export function atrSeries(bars, period = 14) {
+  const tr = trueRanges(bars)
+  const result = new Array(bars.length).fill(null)
+  for (let i = period; i < bars.length; i++) {
+    const window = tr.slice(i - period + 1, i + 1)
+    if (window.some((v) => v == null)) continue
+    result[i] = window.reduce((a, b) => a + b, 0) / period
+  }
+  return result
+}
+
+// Where today's ATR sits versus its own recent history — 0-100 percentile.
+// Low percentile = volatility is compressed ("squeeze"), which historically
+// often precedes a larger move (direction unknown). High percentile = the
+// move has likely already happened; late to chase.
+export function atrPercentile(bars, period = 14, lookback = 100) {
+  const series = atrSeries(bars, period).filter((v) => v != null)
+  if (series.length < 10) return null
+  const recent = series.slice(-lookback)
+  const latest = recent[recent.length - 1]
+  const below = recent.filter((v) => v < latest).length
+  return (below / recent.length) * 100
+}
+
+export function bollinger(closes, period = 20, mult = 2) {
+  if (closes.length < period) return null
+  const slice = closes.slice(-period)
+  const middle = slice.reduce((a, b) => a + b, 0) / period
+  const sd = stdev(slice)
+  const upper = middle + mult * sd
+  const lower = middle - mult * sd
+  const price = closes[closes.length - 1]
+  return { middle, upper, lower, percentB: (price - lower) / (upper - lower), bandwidth: (upper - lower) / middle }
+}
+
+export function bollingerSqueeze(closes, period = 20, mult = 2, lookback = 100) {
+  const series = []
+  for (let i = period - 1; i < closes.length; i++) {
+    const b = bollinger(closes.slice(0, i + 1), period, mult)
+    series.push(b ? b.bandwidth : null)
+  }
+  const valid = series.filter((v) => v != null)
+  if (valid.length < 20) return null
+  const recent = valid.slice(-lookback)
+  const latest = recent[recent.length - 1]
+  const below = recent.filter((v) => v < latest).length
+  const percentile = (below / recent.length) * 100
+  return { percentile, isSqueeze: percentile < 20 }
+}
+
+export function relativeVolume(bars, period = 20) {
+  if (bars.length < period + 1) return null
+  const latest = bars[bars.length - 1].volume
+  const priorSlice = bars.slice(-period - 1, -1).map((b) => b.volume)
+  const avg = priorSlice.reduce((a, b) => a + b, 0) / priorSlice.length
+  if (!avg) return null
+  return latest / avg
+}
+
+// Local extrema: a bar whose high/low is the most extreme within `strength`
+// bars on either side. This is what real support/resistance is — a price
+// level the market has already reacted to — as opposed to a moving average,
+// which is just a lagging trend line with no reason for price to respect it.
+export function findSwingPoints(bars, strength = 3) {
+  const highs = []
+  const lows = []
+  for (let i = strength; i < bars.length - strength; i++) {
+    const window = bars.slice(i - strength, i + strength + 1)
+    if (bars[i].high === Math.max(...window.map((b) => b.high))) {
+      highs.push({ index: i, price: bars[i].high, date: bars[i].date })
+    }
+    if (bars[i].low === Math.min(...window.map((b) => b.low))) {
+      lows.push({ index: i, price: bars[i].low, date: bars[i].date })
+    }
+  }
+  return { highs, lows }
+}
+
+export function nearestLevels(bars, price, lookback = 150) {
+  const recentBars = bars.slice(-lookback)
+  const { highs, lows } = findSwingPoints(recentBars, 3)
+  const resistance = highs.filter((h) => h.price > price).sort((a, b) => a.price - b.price)[0] || null
+  const support = lows.filter((l) => l.price < price).sort((a, b) => b.price - a.price)[0] || null
+  return { support, resistance }
+}
+
+// Bearish divergence: price makes a higher swing high, RSI makes a lower one
+// — momentum isn't confirming the new high. Bullish divergence is the mirror
+// case on swing lows. Restricted to the most recent two swings within
+// `lookback` bars so it reflects current structure, not ancient history.
+export function detectDivergence(bars, lookback = 60) {
+  const closes = bars.map((b) => b.close)
+  const rsiArr = rsiSeries(closes)
+  const { highs, lows } = findSwingPoints(bars, 3)
+  const floor = bars.length - lookback
+
+  let bearish = null
+  const recentHighs = highs.filter((h) => h.index >= floor).slice(-2)
+  if (recentHighs.length === 2) {
+    const [a, b] = recentHighs
+    const rsiA = rsiArr[a.index]
+    const rsiB = rsiArr[b.index]
+    if (b.price > a.price && rsiA != null && rsiB != null && rsiB < rsiA) {
+      bearish = { priorDate: a.date, priorPrice: a.price, priorRsi: rsiA, recentDate: b.date, recentPrice: b.price, recentRsi: rsiB }
+    }
+  }
+
+  let bullish = null
+  const recentLows = lows.filter((l) => l.index >= floor).slice(-2)
+  if (recentLows.length === 2) {
+    const [a, b] = recentLows
+    const rsiA = rsiArr[a.index]
+    const rsiB = rsiArr[b.index]
+    if (b.price < a.price && rsiA != null && rsiB != null && rsiB > rsiA) {
+      bullish = { priorDate: a.date, priorPrice: a.price, priorRsi: rsiA, recentDate: b.date, recentPrice: b.price, recentRsi: rsiB }
+    }
+  }
+
+  return { bullish, bearish }
+}
+
+export function computeSignals(bars) {
+  const closes = bars.map((b) => b.close)
   const price = closes[closes.length - 1]
   const rsiVal = rsi(closes, 14)
   const sma50 = sma(closes, 50)
   const sma200 = sma(closes, 200)
   const macdRes = macd(closes)
+  const atrPct = atrPercentile(bars)
+  const squeeze = bollingerSqueeze(closes)
+  const relVol = relativeVolume(bars)
+  const divergence = detectDivergence(bars)
+  const levels = nearestLevels(bars, price)
 
   let bullish = 0
   let bearish = 0
@@ -61,36 +229,45 @@ export function computeSignals(closes) {
   if (rsiVal != null) {
     if (rsiVal < 30) {
       bullish++
-      notes.push('RSI oversold')
+      notes.push('RSI oversold (<30) — recent selling has outpaced buying by a wide margin')
     } else if (rsiVal > 70) {
       bearish++
-      notes.push('RSI overbought')
+      notes.push('RSI overbought (>70) — recent buying has outpaced selling by a wide margin')
     }
   }
 
   if (macdRes) {
     if (macdRes.histogram > 0) {
       bullish++
-      notes.push('MACD above signal')
+      notes.push('MACD above signal — short-term momentum (12/26-day EMA spread) is accelerating upward')
     } else {
       bearish++
-      notes.push('MACD below signal')
+      notes.push('MACD below signal — short-term momentum is accelerating downward')
     }
   }
 
   if (sma50 != null && sma200 != null) {
     if (sma50 > sma200) {
       bullish++
-      notes.push('50-SMA above 200-SMA')
+      notes.push('50-day average above 200-day average — intermediate trend is up')
     } else {
       bearish++
-      notes.push('50-SMA below 200-SMA')
+      notes.push('50-day average below 200-day average — intermediate trend is down')
     }
   }
 
   if (sma50 != null) {
     if (price > sma50) bullish++
     else bearish++
+  }
+
+  if (divergence.bullish) {
+    bullish += 2
+    notes.push('Bullish RSI divergence — price made a lower low but RSI made a higher low, momentum is fading on the downside')
+  }
+  if (divergence.bearish) {
+    bearish += 2
+    notes.push('Bearish RSI divergence — price made a higher high but RSI made a lower high, momentum is fading on the upside')
   }
 
   const score = bullish - bearish
@@ -100,5 +277,19 @@ export function computeSignals(closes) {
   else if (score <= -3) verdict = 'Strong Bearish'
   else if (score <= -1) verdict = 'Bearish'
 
-  return { price, rsi: rsiVal, macd: macdRes, sma50, sma200, score, verdict, notes }
+  return {
+    price,
+    rsi: rsiVal,
+    macd: macdRes,
+    sma50,
+    sma200,
+    atrPercentile: atrPct,
+    squeeze,
+    relVolume: relVol,
+    divergence,
+    levels,
+    score,
+    verdict,
+    notes,
+  }
 }

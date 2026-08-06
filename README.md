@@ -17,7 +17,7 @@ npm install
 npm run dev
 ```
 
-Without an API key, the dashboard runs on deterministic demo data (a seeded random walk per symbol) so it works out of the box.
+Without an API key, the dashboard runs on deterministic demo data (a seeded random walk per symbol) so it works out of the box. The mechanics — divergence detection, base rates, volatility context — are real; the numbers they're computed from aren't, until real historical data is behind them. The app flags this on every ticker page when running in demo mode.
 
 To use real quotes, copy `.env.example` to `.env.local` and set `VITE_TWELVE_DATA_KEY` to a free Twelve Data API key. With a key set, tickers refresh on a ~3 minute cycle, throttled to stay under the free-tier rate limit.
 
@@ -25,13 +25,13 @@ To use real quotes, copy `.env.example` to `.env.local` and set `VITE_TWELVE_DAT
 
 ~20 tickers (major indices, mega-cap tech, a couple of crypto pairs) rather than "every stock" — keeps the free data tier viable and the UI scannable. See `src/lib/tickers.js` to adjust the list.
 
-## Indicators (v1)
+## Indicators
 
-- RSI(14) — overbought/oversold
-- MACD(12,26,9) — histogram sign
-- 50-day / 200-day SMA — trend direction
+- RSI(14), MACD(12,26,9), 50-day / 200-day SMA trend — the screener-level signals, shown as a "Confluence" badge on the dashboard.
+- ATR-based volatility percentile, Bollinger Band squeeze detection, relative volume, RSI divergence, and swing-derived support/resistance — the ticker detail page's depth layer (`src/lib/indicators.js`).
+- **Historical base rates** (`src/lib/backtest.js`): for each ticker, every past occurrence of a given event (e.g. "MACD crosses above signal") is found in its tracked history, and the forward return over the next N sessions is summarized — sample size, win rate, average/best/worst return. This is the answer to "does this indicator actually mean anything for this ticker," not just "what is the indicator's current value."
 
-Each contributes to a bullish/bearish tally per ticker (`src/lib/indicators.js`), shown as a "Confluence" badge: Strong Bullish → Strong Bearish.
+Detail pages lead with whichever event most recently triggered and surface its base rate first.
 
 ## Deploying
 

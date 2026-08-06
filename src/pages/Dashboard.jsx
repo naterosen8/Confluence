@@ -36,9 +36,9 @@ export default function Dashboard() {
   const rows = useMemo(
     () =>
       TICKERS.map((t) => {
-        const closes = getSeries(t.symbol)
-        const signals = computeSignals(closes)
-        return { ...t, closes, signals }
+        const bars = getSeries(t.symbol)
+        const signals = computeSignals(bars)
+        return { ...t, bars, signals }
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tick]
@@ -61,35 +61,40 @@ export default function Dashboard() {
             <th>Trend</th>
             <th>RSI(14)</th>
             <th>MACD</th>
+            <th>Flags</th>
             <th>Confluence</th>
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.symbol}>
-              <td>
-                <Link to={`/ticker/${encodeURIComponent(row.symbol)}`} className="symbol-link">
-                  <strong>{row.symbol}</strong>
-                  <span className="muted small">{row.name}</span>
-                </Link>
-              </td>
-              <td>${row.signals.price.toFixed(2)}</td>
-              <td>
-                <Sparkline values={row.closes.slice(-40)} />
-              </td>
-              <td>{row.signals.rsi != null ? row.signals.rsi.toFixed(1) : '—'}</td>
-              <td>
-                {row.signals.macd
-                  ? row.signals.macd.histogram > 0
-                    ? 'Bullish cross'
-                    : 'Bearish cross'
-                  : '—'}
-              </td>
-              <td>
-                <VerdictBadge verdict={row.signals.verdict} />
-              </td>
-            </tr>
-          ))}
+          {rows.map((row) => {
+            const { signals } = row
+            const flags = []
+            if (signals.divergence.bullish) flags.push('bullish divergence')
+            if (signals.divergence.bearish) flags.push('bearish divergence')
+            if (signals.squeeze?.isSqueeze) flags.push('volatility squeeze')
+            if (signals.relVolume != null && signals.relVolume >= 1.5) flags.push(`${signals.relVolume.toFixed(1)}x volume`)
+
+            return (
+              <tr key={row.symbol}>
+                <td>
+                  <Link to={`/ticker/${encodeURIComponent(row.symbol)}`} className="symbol-link">
+                    <strong>{row.symbol}</strong>
+                    <span className="muted small">{row.name}</span>
+                  </Link>
+                </td>
+                <td>${signals.price.toFixed(2)}</td>
+                <td>
+                  <Sparkline values={row.bars.slice(-40).map((b) => b.close)} />
+                </td>
+                <td>{signals.rsi != null ? signals.rsi.toFixed(1) : '—'}</td>
+                <td>{signals.macd ? (signals.macd.histogram > 0 ? 'Above signal' : 'Below signal') : '—'}</td>
+                <td className="muted small">{flags.length ? flags.join(', ') : '—'}</td>
+                <td>
+                  <VerdictBadge verdict={signals.verdict} />
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>
