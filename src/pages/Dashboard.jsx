@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
-import { getSeries, refreshAll, HAS_LIVE_DATA } from '../lib/dataProvider'
+import { getSeries, HAS_LIVE_DATA, DATA_GENERATED_AT } from '../lib/dataProvider'
 import { computeSignals } from '../lib/indicators'
 import { backtestByScore } from '../lib/backtest'
 import { pollLivePrices, HAS_LIVE_PRICE } from '../lib/livePrice'
@@ -9,8 +9,12 @@ import Sparkline from '../components/Sparkline'
 import VerdictBadge from '../components/VerdictBadge'
 import LivePrice from '../components/LivePrice'
 
-const REFRESH_MS = HAS_LIVE_DATA ? 3 * 60 * 1000 : 15 * 1000
 const MIN_SAMPLE = 8
+
+function formatSyncTime(iso) {
+  if (!iso) return null
+  return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+}
 
 // Ranks a ticker's *current* setup by how much real historical evidence
 // backs it — not just whether the badge says Bullish. Prefers the
@@ -31,30 +35,7 @@ function rankSetup(bars, spyBars) {
 }
 
 export default function Dashboard() {
-  const [tick, setTick] = useState(0)
-  const [lastUpdated, setLastUpdated] = useState(null)
   const [livePrices, setLivePrices] = useState({})
-  const abortRef = useRef(null)
-
-  useEffect(() => {
-    const symbols = TICKERS.map((t) => t.symbol)
-
-    const run = () => {
-      abortRef.current?.abort()
-      const controller = new AbortController()
-      abortRef.current = controller
-      refreshAll(symbols, () => setTick((t) => t + 1), { signal: controller.signal }).then(() =>
-        setLastUpdated(new Date())
-      )
-    }
-
-    run()
-    const interval = setInterval(run, REFRESH_MS)
-    return () => {
-      clearInterval(interval)
-      abortRef.current?.abort()
-    }
-  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -73,8 +54,7 @@ export default function Dashboard() {
       const setup = rankSetup(bars, spyBars)
       return { ...t, bars, signals, setup }
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tick])
+  }, [])
 
   const topSetups = useMemo(
     () =>
@@ -89,10 +69,11 @@ export default function Dashboard() {
     <div>
       <div className="toolbar">
         <span className="muted">
-          {HAS_LIVE_DATA ? 'Live data (Twelve Data)' : 'Demo data — set VITE_TWELVE_DATA_KEY for live quotes'}
+          {HAS_LIVE_DATA
+            ? `Daily market data — last synced ${formatSyncTime(DATA_GENERATED_AT)}`
+            : 'Demo data — market data syncs daily via GitHub Actions (not run yet)'}
           {HAS_LIVE_PRICE && ' + live price ticker (Finnhub)'}
         </span>
-        <span className="muted">{lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : 'Loading…'}</span>
       </div>
 
       {topSetups.length > 0 && (

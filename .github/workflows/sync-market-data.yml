@@ -1,4 +1,4 @@
-name: Track Record
+name: Sync Market Data
 
 on:
   schedule:
@@ -9,19 +9,19 @@ permissions:
   contents: write
 
 jobs:
-  log:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: node scripts/log-track-record.mjs
+      - run: node scripts/sync-market-data.mjs
         env:
           TWELVE_DATA_KEY: ${{ secrets.TWELVE_DATA_KEY }}
       - run: |
           git config user.name "confluence-bot"
           git config user.email "actions@github.com"
-          git add data/track-record.json
-          git diff --staged --quiet || git commit -m "Log daily track record ($(date -u +%Y-%m-%d))"
+          git add data/market-data.json data/track-record.json
+          git diff --staged --quiet || git commit -m "Sync market data ($(date -u +%Y-%m-%d))"
           git push

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
-import { getSeries, HAS_LIVE_DATA } from '../lib/dataProvider'
+import { getSeries, hasRealData } from '../lib/dataProvider'
 import { computeSignals } from '../lib/indicators'
 import { backtestTicker, backtestByScore, mostRecentEvent, SIGNAL_LABELS } from '../lib/backtest'
 import { pollLivePrices } from '../lib/livePrice'
@@ -51,11 +51,11 @@ export default function TickerDetail() {
         <Sparkline values={closes.slice(-90)} width={480} height={120} />
       </div>
 
-      {!HAS_LIVE_DATA && (
+      {!hasRealData(symbol) && (
         <div className="callout">
-          Running on generated demo data (a random walk), not real price history. The mechanics below — divergence
-          detection, base rates, volatility context — are real; the numbers they're computed from aren't, until a
-          data source is connected.
+          Running on generated demo data (a random walk), not real price history — either the daily sync hasn't run
+          yet, or it failed to fetch this symbol most recently. The mechanics below — divergence detection, base
+          rates, volatility context — are real; the numbers they're computed from aren't.
         </div>
       )}
 

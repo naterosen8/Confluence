@@ -1,5 +1,14 @@
-const API_KEY = import.meta.env.VITE_TWELVE_DATA_KEY
-export const HAS_LIVE_DATA = Boolean(API_KEY)
+import marketData from '../../data/market-data.json'
+
+// True once a real snapshot has been synced (see scripts/sync-market-data.mjs)
+// — not tied to any browser-side API key, because there isn't one anymore.
+// Every indicator here is daily-bar based, so there's nothing to gain from
+// polling continuously from the client: the snapshot updates once a day,
+// server-side, and every visitor reads the same file. No API key ships to
+// the browser, and usage doesn't scale with how many people have the site
+// open — it's a fixed ~22 requests/day regardless of traffic.
+export const HAS_LIVE_DATA = Object.keys(marketData.bars || {}).length > 0
+export const DATA_GENERATED_AT = marketData.generatedAt
 
 // Deterministic PRNG so each symbol's demo history is stable across reloads.
 function hashCode(str) {
@@ -25,9 +34,9 @@ function isoDaysAgo(n) {
 }
 
 // NOTE: this is a random walk, not a market simulation. It's here so the app
-// is fully explorable without an API key. Backtest stats computed against it
-// are illustrative of the *mechanism* only — they say nothing about real
-// markets until a real historical feed is behind them.
+// is fully explorable before the first sync has run, or for any symbol the
+// sync failed to fetch. Backtest stats computed against it are illustrative
+// of the *mechanism* only — they say nothing about real markets.
 function generateMockBars(symbol, length = 260) {
   const rand = mulberry32(hashCode(symbol))
   let price = 20 + (Math.abs(hashCode(symbol)) % 400)
@@ -50,65 +59,15 @@ function generateMockBars(symbol, length = 260) {
 
 const seriesStore = {}
 
+// Real synced data for a symbol is returned as-is (frozen for the session —
+// it only changes when the next daily sync ships a new build). Falls back
+// to a demo random walk for any symbol the snapshot doesn't have.
 export function getSeries(symbol) {
+  if (marketData.bars?.[symbol]?.length) return marketData.bars[symbol]
   if (!seriesStore[symbol]) seriesStore[symbol] = generateMockBars(symbol)
   return seriesStore[symbol]
 }
 
-function tickMock(symbol) {
-  const bars = getSeries(symbol)
-  const last = bars[bars.length - 1]
-  const drift = (Math.random() - 0.5) * 0.015
-  const close = Math.max(1, last.close * (1 + drift))
-  const wick = Math.abs(drift) * last.close * 0.5
-  bars.push({
-    date: new Date().toISOString().slice(0, 10),
-    open: last.close,
-    high: Math.max(last.close, close) + wick * Math.random(),
-    low: Math.max(0.5, Math.min(last.close, close) - wick * Math.random()),
-    close,
-    volume: Math.round(last.volume * (0.6 + Math.random() * 0.8)),
-  })
-  if (bars.length > 320) bars.shift()
-  return bars
-}
-
-async function fetchLiveSeries(symbol, interval = '1day', outputsize = 260) {
-  const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(
-    symbol
-  )}&interval=${interval}&outputsize=${outputsize}&apikey=${API_KEY}`
-  const res = await fetch(url)
-  const data = await res.json()
-  if (data.status === 'error') throw new Error(data.message || 'Twelve Data request failed')
-  const bars = data.values
-    .slice()
-    .reverse()
-    .map((v) => ({
-      date: v.datetime,
-      open: parseFloat(v.open),
-      high: parseFloat(v.high),
-      low: parseFloat(v.low),
-      close: parseFloat(v.close),
-      volume: parseFloat(v.volume) || 0,
-    }))
-  seriesStore[symbol] = bars
-  return bars
-}
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-
-// Refreshes every symbol in sequence, calling onUpdate(symbol, bars) as each lands.
-// Throttled to stay under Twelve Data's free-tier 8 req/min cap when a key is set.
-export async function refreshAll(symbols, onUpdate, { signal } = {}) {
-  for (const symbol of symbols) {
-    if (signal?.aborted) return
-    let bars
-    try {
-      bars = HAS_LIVE_DATA ? await fetchLiveSeries(symbol) : tickMock(symbol)
-    } catch {
-      bars = tickMock(symbol)
-    }
-    onUpdate(symbol, bars)
-    if (HAS_LIVE_DATA) await sleep(7500)
-  }
+export function hasRealData(symbol) {
+  return Boolean(marketData.bars?.[symbol]?.length)
 }
