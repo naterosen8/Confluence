@@ -107,6 +107,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      <div className="table-wrap">
       <table className="grid">
         <thead>
           <tr>
@@ -157,6 +158,7 @@ export default function Dashboard() {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

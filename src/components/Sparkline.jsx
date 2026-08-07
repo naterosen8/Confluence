@@ -9,7 +9,12 @@ export default function Sparkline({ values, width = 120, height = 36, stroke = '
     .join(' ')
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="price trend">
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      style={{ width: '100%', maxWidth: width, height: 'auto', display: 'block' }}
+      role="img"
+      aria-label="price trend"
+    >
       <polyline points={points} fill="none" stroke={stroke} strokeWidth="1.5" />
     </svg>
   )

@@ -151,13 +151,17 @@ main {
   color: #e0715a;
 }
 
-table.grid {
-  width: 100%;
-  border-collapse: collapse;
+.table-wrap {
+  overflow-x: auto;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
-  overflow: hidden;
+}
+
+table.grid {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
 }
 
 .grid th,
