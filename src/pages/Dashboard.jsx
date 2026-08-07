@@ -4,8 +4,10 @@ import { TICKERS } from '../lib/tickers'
 import { getSeries, refreshAll, HAS_LIVE_DATA } from '../lib/dataProvider'
 import { computeSignals } from '../lib/indicators'
 import { backtestByScore } from '../lib/backtest'
+import { pollLivePrices, HAS_LIVE_PRICE } from '../lib/livePrice'
 import Sparkline from '../components/Sparkline'
 import VerdictBadge from '../components/VerdictBadge'
+import LivePrice from '../components/LivePrice'
 
 const REFRESH_MS = HAS_LIVE_DATA ? 3 * 60 * 1000 : 15 * 1000
 const MIN_SAMPLE = 8
@@ -31,6 +33,7 @@ function rankSetup(bars, spyBars) {
 export default function Dashboard() {
   const [tick, setTick] = useState(0)
   const [lastUpdated, setLastUpdated] = useState(null)
+  const [livePrices, setLivePrices] = useState({})
   const abortRef = useRef(null)
 
   useEffect(() => {
@@ -51,6 +54,15 @@ export default function Dashboard() {
       clearInterval(interval)
       abortRef.current?.abort()
     }
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const symbols = TICKERS.map((t) => t.symbol)
+    pollLivePrices(symbols, (symbol, quote) => setLivePrices((prev) => ({ ...prev, [symbol]: quote })), {
+      signal: controller.signal,
+    })
+    return () => controller.abort()
   }, [])
 
   const rows = useMemo(() => {
@@ -78,6 +90,7 @@ export default function Dashboard() {
       <div className="toolbar">
         <span className="muted">
           {HAS_LIVE_DATA ? 'Live data (Twelve Data)' : 'Demo data — set VITE_TWELVE_DATA_KEY for live quotes'}
+          {HAS_LIVE_PRICE && ' + live price ticker (Finnhub)'}
         </span>
         <span className="muted">{lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : 'Loading…'}</span>
       </div>
@@ -143,7 +156,9 @@ export default function Dashboard() {
                     <span className="muted small">{row.name}</span>
                   </Link>
                 </td>
-                <td>${signals.price.toFixed(2)}</td>
+                <td>
+                  <LivePrice basePrice={signals.price} liveQuote={livePrices[row.symbol]} />
+                </td>
                 <td>
                   <Sparkline values={row.bars.slice(-40).map((b) => b.close)} />
                 </td>

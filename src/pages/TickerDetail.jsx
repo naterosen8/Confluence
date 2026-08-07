@@ -1,11 +1,13 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
 import { getSeries, HAS_LIVE_DATA } from '../lib/dataProvider'
 import { computeSignals } from '../lib/indicators'
 import { backtestTicker, backtestByScore, mostRecentEvent, SIGNAL_LABELS } from '../lib/backtest'
+import { pollLivePrices } from '../lib/livePrice'
 import Sparkline from '../components/Sparkline'
 import VerdictBadge from '../components/VerdictBadge'
+import LivePrice from '../components/LivePrice'
 
 function pct(v, digits = 2) {
   if (v == null) return '—'
@@ -22,6 +24,14 @@ export default function TickerDetail() {
   const backtest = useMemo(() => backtestTicker(bars), [bars])
   const scoreBacktest = useMemo(() => backtestByScore(bars, spyBars), [bars, spyBars])
   const trigger = useMemo(() => mostRecentEvent(bars), [bars])
+  const [liveQuote, setLiveQuote] = useState(null)
+
+  useEffect(() => {
+    setLiveQuote(null)
+    const controller = new AbortController()
+    pollLivePrices([symbol], (_, quote) => setLiveQuote(quote), { signal: controller.signal })
+    return () => controller.abort()
+  }, [symbol])
 
   return (
     <div>
@@ -70,7 +80,7 @@ export default function TickerDetail() {
 
       <Section title="Volatility, volume & structure">
         <div className="stat-grid">
-          <Stat label="Price" value={`$${signals.price.toFixed(2)}`} />
+          <Stat label="Price" value={<LivePrice basePrice={signals.price} liveQuote={liveQuote} />} />
           <Stat
             label="Volatility (ATR percentile)"
             value={signals.atrPercentile != null ? `${signals.atrPercentile.toFixed(0)}th` : 'not enough data'}
