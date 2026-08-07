@@ -1,1 +1,114 @@
-[]
+[
+  {
+    "date": "2026-08-07",
+    "symbol": "AMD",
+    "verdict": "Bearish",
+    "score": -2,
+    "price": 483.48001
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "AMZN",
+    "verdict": "Strong Bullish",
+    "score": 4,
+    "price": 274.44
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "BTC/USD",
+    "verdict": "Bullish",
+    "score": 2,
+    "price": 64938.14
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "CRM",
+    "verdict": "Bullish",
+    "score": 2,
+    "price": 192.72
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "CVX",
+    "verdict": "Bullish",
+    "score": 2,
+    "price": 186.55
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "DIA",
+    "verdict": "Strong Bullish",
+    "score": 4,
+    "price": 539.59998
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "ETH/USD",
+    "verdict": "Bearish",
+    "score": -2,
+    "price": 1916.43
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "IWM",
+    "verdict": "Strong Bullish",
+    "score": 4,
+    "price": 301.5
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "META",
+    "verdict": "Strong Bearish",
+    "score": -4,
+    "price": 591.815
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "MSFT",
+    "verdict": "Bullish",
+    "score": 1,
+    "price": 499.89001
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "NVDA",
+    "verdict": "Bullish",
+    "score": 2,
+    "price": 223.98
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "QQQ",
+    "verdict": "Strong Bullish",
+    "score": 4,
+    "price": 723.015015
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "SPY",
+    "verdict": "Strong Bullish",
+    "score": 4,
+    "price": 773.12
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "TSLA",
+    "verdict": "Bearish",
+    "score": -2,
+    "price": 328.58499
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "UNH",
+    "verdict": "Bearish",
+    "score": -2,
+    "price": 407.059998
+  },
+  {
+    "date": "2026-08-07",
+    "symbol": "XOM",
+    "verdict": "Bullish",
+    "score": 2,
+    "price": 152.94501
+  }
+]
