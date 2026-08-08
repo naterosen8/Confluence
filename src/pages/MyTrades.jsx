@@ -86,6 +86,9 @@ export default function MyTrades() {
     )
   }
 
+  const openTrades = trades?.filter((t) => t.status === 'open') ?? []
+  const pastTrades = trades?.filter((t) => t.status !== 'open') ?? []
+
   return (
     <div>
       <h1>My trades</h1>
@@ -104,72 +107,137 @@ export default function MyTrades() {
           No simulated trades yet. Open one from any <Link to="/">ticker's page</Link>.
         </p>
       ) : (
-        <div className="table-wrap">
-          <table className="grid trades-table">
-            <thead>
-              <tr>
-                <th>Symbol</th>
-                <th>Direction</th>
-                <th>Entry</th>
-                <th>Current / Close</th>
-                <th>Capital</th>
-                <th>Leverage</th>
-                <th>P&amp;L</th>
-                <th>Status</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {trades.map((trade) => {
-                const isOpen = trade.status === 'open'
-                const price = isOpen ? currentPriceFor(trade.symbol) : trade.close_price
-                const pnl = computePnl({
-                  direction: trade.direction,
-                  entryPrice: trade.entry_price,
-                  currentPrice: price,
-                  capital: trade.capital,
-                  leverage: trade.leverage,
-                })
-                return (
-                  <tr key={trade.id}>
-                    <td>
-                      <Link to={`/ticker/${encodeURIComponent(trade.symbol)}`} className="symbol-link">
-                        <strong>{trade.symbol}</strong>
-                      </Link>
-                    </td>
-                    <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
-                    <td>${trade.entry_price.toFixed(2)}</td>
-                    <td>${price.toFixed(2)}</td>
-                    <td>${trade.capital.toFixed(0)}</td>
-                    <td>{trade.leverage}x</td>
-                    <td className={pnl.pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
-                      {pct(pnl.pnlPct)} ({pnl.pnlDollars >= 0 ? '+' : ''}${pnl.pnlDollars.toFixed(2)})
-                    </td>
-                    <td className="muted small" style={{ textTransform: 'capitalize' }}>
-                      {trade.status}
-                    </td>
-                    <td>
-                      <div className="trade-actions">
-                        {isOpen && (
-                          <button className="button-secondary" disabled={closingId === trade.id} onClick={() => handleClose(trade)}>
-                            {closingId === trade.id ? 'Closing…' : 'Close'}
-                          </button>
-                        )}
-                        <button
-                          className="button-secondary"
-                          disabled={deletingId === trade.id}
-                          onClick={() => handleDelete(trade)}
-                        >
-                          {deletingId === trade.id ? 'Deleting…' : 'Delete'}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <section className="detail-section">
+            <h2>Open positions</h2>
+            {openTrades.length === 0 ? (
+              <p className="muted small">No open positions right now.</p>
+            ) : (
+              <div className="table-wrap">
+                <table className="grid trades-table">
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th>Direction</th>
+                      <th>Entry</th>
+                      <th>Current</th>
+                      <th>Capital</th>
+                      <th>Leverage</th>
+                      <th>P&amp;L</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {openTrades.map((trade) => {
+                      const price = currentPriceFor(trade.symbol)
+                      const pnl = computePnl({
+                        direction: trade.direction,
+                        entryPrice: trade.entry_price,
+                        currentPrice: price,
+                        capital: trade.capital,
+                        leverage: trade.leverage,
+                      })
+                      return (
+                        <tr key={trade.id}>
+                          <td>
+                            <Link to={`/ticker/${encodeURIComponent(trade.symbol)}`} className="symbol-link">
+                              <strong>{trade.symbol}</strong>
+                            </Link>
+                          </td>
+                          <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
+                          <td>${trade.entry_price.toFixed(2)}</td>
+                          <td>${price.toFixed(2)}</td>
+                          <td>${trade.capital.toFixed(0)}</td>
+                          <td>{trade.leverage}x</td>
+                          <td className={pnl.pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
+                            {pct(pnl.pnlPct)} ({pnl.pnlDollars >= 0 ? '+' : ''}${pnl.pnlDollars.toFixed(2)})
+                          </td>
+                          <td>
+                            <div className="trade-actions">
+                              <button className="button-secondary" disabled={closingId === trade.id} onClick={() => handleClose(trade)}>
+                                {closingId === trade.id ? 'Closing…' : 'Close'}
+                              </button>
+                              <button
+                                className="button-secondary"
+                                disabled={deletingId === trade.id}
+                                onClick={() => handleDelete(trade)}
+                              >
+                                {deletingId === trade.id ? 'Deleting…' : 'Delete'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          {pastTrades.length > 0 && (
+            <section className="detail-section">
+              <h2>Past trades</h2>
+              <div className="table-wrap">
+                <table className="grid trades-table">
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th>Direction</th>
+                      <th>Entry</th>
+                      <th>Close</th>
+                      <th>Capital</th>
+                      <th>Leverage</th>
+                      <th>P&amp;L</th>
+                      <th>Result</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pastTrades.map((trade) => {
+                      const pnl = computePnl({
+                        direction: trade.direction,
+                        entryPrice: trade.entry_price,
+                        currentPrice: trade.close_price,
+                        capital: trade.capital,
+                        leverage: trade.leverage,
+                      })
+                      return (
+                        <tr key={trade.id}>
+                          <td>
+                            <Link to={`/ticker/${encodeURIComponent(trade.symbol)}`} className="symbol-link">
+                              <strong>{trade.symbol}</strong>
+                            </Link>
+                          </td>
+                          <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
+                          <td>${trade.entry_price.toFixed(2)}</td>
+                          <td>${trade.close_price.toFixed(2)}</td>
+                          <td>${trade.capital.toFixed(0)}</td>
+                          <td>{trade.leverage}x</td>
+                          <td className={pnl.pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
+                            {pct(pnl.pnlPct)} ({pnl.pnlDollars >= 0 ? '+' : ''}${pnl.pnlDollars.toFixed(2)})
+                          </td>
+                          <td className={trade.status === 'liquidated' ? 'pnl-negative' : 'muted small'} style={{ textTransform: 'capitalize' }}>
+                            {trade.status}
+                          </td>
+                          <td>
+                            <button
+                              className="button-secondary"
+                              disabled={deletingId === trade.id}
+                              onClick={() => handleDelete(trade)}
+                            >
+                              {deletingId === trade.id ? 'Deleting…' : 'Delete'}
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+        </>
       )}
     </div>
   )
