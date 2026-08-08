@@ -132,6 +132,30 @@ export function backtestByScore(bars, spyBars, { forwardDays = 5 } = {}) {
   }
 }
 
+const MIN_SAMPLE = 8
+
+// Ranks a ticker's *current* setup by how much real historical evidence
+// backs it — not just whether the badge says Bullish. Prefers the
+// regime-matched sample (today's kind of market specifically); falls back to
+// the full-history sample if the regime-matched one is too thin to mean
+// anything; reports no edge at all if neither has enough occurrences. Shared
+// by the dashboard leaderboard and the shareable ticker card so both agree
+// on what "the best available stat" means.
+export function bestAvailableStat(bars, spyBars, { minSample = MIN_SAMPLE } = {}) {
+  const scoreBacktest = backtestByScore(bars, spyBars)
+  const row = scoreBacktest.rows.find((r) => r.score === scoreBacktest.currentScore)
+  if (!row) {
+    return { edge: 0, stat: null, source: null, currentScore: scoreBacktest.currentScore, currentRegimeLabel: scoreBacktest.currentRegimeLabel }
+  }
+
+  const useRegime = row.regimeMatched.sampleSize >= minSample
+  const useAll = !useRegime && row.all.sampleSize >= minSample
+  const stat = useRegime ? row.regimeMatched : useAll ? row.all : null
+  const source = useRegime ? 'regime-matched' : useAll ? 'all-history' : null
+  const edge = stat ? (stat.winRate - 50) * Math.sqrt(stat.sampleSize) : 0
+  return { edge, stat, source, currentScore: scoreBacktest.currentScore, currentRegimeLabel: scoreBacktest.currentRegimeLabel }
+}
+
 // Which of the tracked events (if any) fired in the last few bars, so the
 // detail page can lead with "this exact setup just triggered" rather than
 // making the reader hunt for what's relevant among four stat blocks.

@@ -3,11 +3,12 @@ import { useParams, Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
 import { getSeries, hasRealData } from '../lib/dataProvider'
 import { computeSignals } from '../lib/indicators'
-import { backtestTicker, backtestByScore, mostRecentEvent, SIGNAL_LABELS } from '../lib/backtest'
+import { backtestTicker, backtestByScore, bestAvailableStat, mostRecentEvent, SIGNAL_LABELS } from '../lib/backtest'
 import { pollLivePrices } from '../lib/livePrice'
 import Sparkline from '../components/Sparkline'
 import VerdictBadge from '../components/VerdictBadge'
 import LivePrice from '../components/LivePrice'
+import ShareCard from '../components/ShareCard'
 
 function pct(v, digits = 2) {
   if (v == null) return '—'
@@ -23,6 +24,7 @@ export default function TickerDetail() {
   const signals = useMemo(() => computeSignals(bars), [bars])
   const backtest = useMemo(() => backtestTicker(bars), [bars])
   const scoreBacktest = useMemo(() => backtestByScore(bars, spyBars), [bars, spyBars])
+  const setup = useMemo(() => bestAvailableStat(bars, spyBars), [bars, spyBars])
   const trigger = useMemo(() => mostRecentEvent(bars), [bars])
   const [liveQuote, setLiveQuote] = useState(null)
 
@@ -206,6 +208,22 @@ export default function TickerDetail() {
             <BacktestCard key={key} label={label} result={backtest[key]} active={trigger?.key === key} />
           ))}
         </div>
+      </Section>
+
+      <Section title="Share this setup">
+        <p className="muted small">
+          Generates a downloadable image and a ready-to-paste caption from what's on this page right now — the
+          disclaimer is baked into the caption automatically.
+        </p>
+        <ShareCard
+          symbol={symbol}
+          name={meta?.name || ''}
+          price={signals.price}
+          verdict={signals.verdict}
+          closes={closes.slice(-90)}
+          stat={setup.stat}
+          statSource={setup.source}
+        />
       </Section>
     </div>
   )

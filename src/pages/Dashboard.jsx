@@ -3,35 +3,15 @@ import { Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
 import { getSeries, HAS_LIVE_DATA, DATA_GENERATED_AT } from '../lib/dataProvider'
 import { computeSignals } from '../lib/indicators'
-import { backtestByScore } from '../lib/backtest'
+import { bestAvailableStat } from '../lib/backtest'
 import { pollLivePrices, HAS_LIVE_PRICE } from '../lib/livePrice'
 import Sparkline from '../components/Sparkline'
 import VerdictBadge from '../components/VerdictBadge'
 import LivePrice from '../components/LivePrice'
 
-const MIN_SAMPLE = 8
-
 function formatSyncTime(iso) {
   if (!iso) return null
   return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
-}
-
-// Ranks a ticker's *current* setup by how much real historical evidence
-// backs it — not just whether the badge says Bullish. Prefers the
-// regime-matched sample (today's kind of market specifically); falls back to
-// the full-history sample if the regime-matched one is too thin to mean
-// anything; reports no edge at all if neither has enough occurrences.
-function rankSetup(bars, spyBars) {
-  const scoreBacktest = backtestByScore(bars, spyBars)
-  const row = scoreBacktest.rows.find((r) => r.score === scoreBacktest.currentScore)
-  if (!row) return { edge: 0, stat: null, source: null, currentScore: scoreBacktest.currentScore }
-
-  const useRegime = row.regimeMatched.sampleSize >= MIN_SAMPLE
-  const useAll = !useRegime && row.all.sampleSize >= MIN_SAMPLE
-  const stat = useRegime ? row.regimeMatched : useAll ? row.all : null
-  const source = useRegime ? 'regime-matched' : useAll ? 'all-history' : null
-  const edge = stat ? (stat.winRate - 50) * Math.sqrt(stat.sampleSize) : 0
-  return { edge, stat, source, currentScore: scoreBacktest.currentScore }
 }
 
 export default function Dashboard() {
@@ -51,7 +31,7 @@ export default function Dashboard() {
     return TICKERS.map((t) => {
       const bars = getSeries(t.symbol)
       const signals = computeSignals(bars)
-      const setup = rankSetup(bars, spyBars)
+      const setup = bestAvailableStat(bars, spyBars)
       return { ...t, bars, signals, setup }
     })
   }, [])

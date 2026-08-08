@@ -369,6 +369,60 @@ table.grid {
   color: var(--accent);
 }
 
+.share-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.share-card-canvas {
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+}
+
+.share-card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.button-primary,
+.button-secondary {
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+.button-primary {
+  background: var(--accent);
+  color: #04211d;
+  border-color: transparent;
+}
+
+.button-secondary {
+  background: var(--panel);
+  color: var(--text);
+}
+
+.share-card-caption {
+  width: 100%;
+  max-width: 480px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 12px;
+  resize: vertical;
+}
+
 .error-boundary {
   max-width: 480px;
   margin: 60px auto;
