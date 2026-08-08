@@ -9,6 +9,7 @@ import Sparkline from '../components/Sparkline'
 import VerdictBadge from '../components/VerdictBadge'
 import LivePrice from '../components/LivePrice'
 import ShareCard from '../components/ShareCard'
+import SimulateTradeForm from '../components/SimulateTradeForm'
 
 function pct(v, digits = 2) {
   if (v == null) return '—'
@@ -224,6 +225,10 @@ export default function TickerDetail() {
           stat={setup.stat}
           statSource={setup.source}
         />
+      </Section>
+
+      <Section title="Simulate a trade">
+        <SimulateTradeForm symbol={symbol} currentPrice={liveQuote?.price ?? signals.price} />
       </Section>
     </div>
   )

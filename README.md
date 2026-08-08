@@ -48,6 +48,12 @@ Detail pages lead with whichever event most recently triggered and surface its b
 
 `VITE_FINNHUB_KEY` (browser-side, Vercel env var) enables a ~30s-refresh price overlay from Finnhub's free tier, shown as a pulsing "live" dot next to the price wherever it appears. Purely cosmetic — it never feeds the indicator or backtest engine, which stay on the daily-synced Twelve Data snapshot regardless. Stock/ETF symbols only; crypto pairs fall back to the snapshot price silently. Chosen over a WebSocket feed because Finnhub's free tier caps one API key at a single concurrent connection, which rules out every visitor's browser connecting directly — a shared relay would be real new infrastructure this app doesn't need yet for a value-add that's purely visual.
 
+## Simulated trades (optional)
+
+`/my-trades` and the "Simulate a trade" section on each ticker page let a signed-in user record a hypothetical position — their own choice of direction, capital, and leverage — and track its P&L against real synced prices over time. The app never picks a direction or leverage; it only does the bookkeeping. This is the load-bearing distinction versus investment advice: the recommendation always comes from the user, never from the app. A leveraged loss is clamped at -100% and flagged "liquidated" rather than shown going further negative, which is both accurate to how real leveraged positions work and the actual lesson a simulator should teach.
+
+Backed by [Supabase](https://supabase.com) (free tier) — Postgres for storage, built-in magic-link auth (no passwords). No custom backend: the browser talks to Supabase directly, and row-level security (`supabase/schema.sql`) enforces that a user can only ever read or write their own trades — that's a database-level guarantee, not application code. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (browser-side, safe to expose — see `.env.example`) to enable; without them both features show a "not set up yet" message instead of breaking.
+
 ## Deploying
 
 Configured for Vercel (`vercel.json` has the SPA rewrite). Push to a repo, import into Vercel. Set `VITE_FINNHUB_KEY` there if using the live price overlay — no Twelve Data key needed in Vercel at all, since the browser never calls Twelve Data.

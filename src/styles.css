@@ -67,6 +67,8 @@ body {
 
 .site-nav {
   margin-left: auto;
+  display: flex;
+  gap: 20px;
 }
 
 .site-nav a {
@@ -421,6 +423,79 @@ table.grid {
   font-size: 0.85rem;
   padding: 12px;
   resize: vertical;
+}
+
+.simulate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 480px;
+}
+
+.simulate-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.simulate-form input[type='email'],
+.simulate-form input[type='number'] {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.simulate-row input[type='email'] {
+  flex: 1;
+  min-width: 200px;
+}
+
+.simulate-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.direction-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.direction-toggle button {
+  flex: 1;
+  padding: 10px 20px;
+  background: var(--panel);
+  color: var(--muted);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.direction-active-long {
+  background: rgba(76, 175, 125, 0.18) !important;
+  color: #4caf7d !important;
+}
+
+.direction-active-short {
+  background: rgba(224, 113, 90, 0.18) !important;
+  color: #e0715a !important;
+}
+
+.trades-table td.pnl-positive {
+  color: #4caf7d;
+}
+
+.trades-table td.pnl-negative {
+  color: #e0715a;
 }
 
 .error-boundary {
