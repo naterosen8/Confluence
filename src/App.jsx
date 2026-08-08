@@ -1,7 +1,22 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import Dashboard from './pages/Dashboard'
 import TickerDetail from './pages/TickerDetail'
 import TrackRecord from './pages/TrackRecord'
+import ErrorBoundary from './components/ErrorBoundary'
+
+function RoutedContent() {
+  const location = useLocation()
+  return (
+    <ErrorBoundary key={location.pathname}>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/ticker/:symbol" element={<TickerDetail />} />
+        <Route path="/track-record" element={<TrackRecord />} />
+      </Routes>
+    </ErrorBoundary>
+  )
+}
 
 export default function App() {
   return (
@@ -17,17 +32,14 @@ export default function App() {
       </header>
 
       <main>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/ticker/:symbol" element={<TickerDetail />} />
-          <Route path="/track-record" element={<TrackRecord />} />
-        </Routes>
+        <RoutedContent />
       </main>
 
       <footer className="site-footer">
         Indicators are lagging by construction and everyone else sees the same numbers. This is a screening tool
         to scan many tickers at once, not investment advice.
       </footer>
+      <Analytics />
     </BrowserRouter>
   )
 }

@@ -369,6 +369,27 @@ table.grid {
   color: var(--accent);
 }
 
+.error-boundary {
+  max-width: 480px;
+  margin: 60px auto;
+  text-align: center;
+}
+
+.error-boundary h1 {
+  margin-bottom: 12px;
+}
+
+.error-boundary button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: var(--accent);
+  color: #04211d;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .site-footer {
   padding: 20px 28px;
   border-top: 1px solid var(--border);
