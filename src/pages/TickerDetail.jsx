@@ -54,6 +54,10 @@ export default function TickerDetail() {
         <Sparkline values={closes.slice(-90)} width={480} height={120} />
       </div>
 
+      <Section title="Simulate a trade">
+        <SimulateTradeForm symbol={symbol} currentPrice={liveQuote?.price ?? signals.price} />
+      </Section>
+
       {!hasRealData(symbol) && (
         <div className="callout">
           Running on generated demo data (a random walk), not real price history — either the daily sync hasn't run
@@ -225,10 +229,6 @@ export default function TickerDetail() {
           stat={setup.stat}
           statSource={setup.source}
         />
-      </Section>
-
-      <Section title="Simulate a trade">
-        <SimulateTradeForm symbol={symbol} currentPrice={liveQuote?.price ?? signals.price} />
       </Section>
     </div>
   )

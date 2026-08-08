@@ -5,7 +5,6 @@ import { HAS_SUPABASE } from '../lib/supabaseClient'
 import { listTrades, closeTrade } from '../lib/trades'
 import { getSeries } from '../lib/dataProvider'
 import { computePnl } from '../lib/pnl'
-import EmailSignIn from '../components/EmailSignIn'
 
 function pct(v) {
   return `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
@@ -17,10 +16,16 @@ function currentPriceFor(symbol) {
 }
 
 export default function MyTrades() {
-  const { user, loading, signOut } = useAuth()
+  const { user, loading, ensureSession } = useAuth()
   const [trades, setTrades] = useState(null)
   const [error, setError] = useState(null)
   const [closingId, setClosingId] = useState(null)
+
+  useEffect(() => {
+    if (!HAS_SUPABASE || loading || user) return
+    ensureSession().catch((err) => setError(err.message || 'Could not start a session'))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, user])
 
   useEffect(() => {
     if (!user) return
@@ -58,38 +63,22 @@ export default function MyTrades() {
     )
   }
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div>
         <h1>My trades</h1>
-        <p className="muted">Loading…</p>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return (
-      <div>
-        <h1>My trades</h1>
-        <p className="muted">
-          Sign in to see simulated trades you've opened. Open one from any ticker's page under "Simulate a trade."
-        </p>
-        <EmailSignIn />
+        <p className="muted">Setting up…</p>
       </div>
     )
   }
 
   return (
     <div>
-      <div className="detail-header">
-        <h1>My trades</h1>
-        <button className="button-secondary" onClick={signOut}>
-          Sign out
-        </button>
-      </div>
+      <h1>My trades</h1>
       <p className="muted">
         Hypothetical positions you opened yourself — the app never recommended any of these. Prices are as of the
-        last daily sync, not tick-live.
+        last daily sync, not tick-live. These are tied to this browser — there's no login, so a different browser or
+        device won't see them.
       </p>
 
       {error && <p className="muted small">Error: {error}</p>}

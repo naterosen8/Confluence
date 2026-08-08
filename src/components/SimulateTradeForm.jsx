@@ -1,27 +1,41 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { HAS_SUPABASE } from '../lib/supabaseClient'
 import { createTrade } from '../lib/trades'
-import EmailSignIn from './EmailSignIn'
 
 export default function SimulateTradeForm({ symbol, currentPrice }) {
-  const { user, loading } = useAuth()
+  const { user, loading, ensureSession } = useAuth()
+  const [settingUp, setSettingUp] = useState(false)
+  const [setupError, setSetupError] = useState(null)
   const [direction, setDirection] = useState('long')
   const [capital, setCapital] = useState('1000')
   const [leverage, setLeverage] = useState('1')
   const [submitStatus, setSubmitStatus] = useState(null)
 
+  useEffect(() => {
+    if (!HAS_SUPABASE || loading || user) return
+    setSettingUp(true)
+    ensureSession()
+      .catch((err) => setSetupError(err.message || 'Could not start a session'))
+      .finally(() => setSettingUp(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, user])
+
   if (!HAS_SUPABASE) {
     return <p className="muted small">Simulated trades aren't set up yet.</p>
   }
 
-  if (loading) {
-    return <p className="muted small">Loading…</p>
+  if (loading || settingUp) {
+    return <p className="muted small">Setting up…</p>
+  }
+
+  if (setupError) {
+    return <p className="muted small">Error: {setupError}</p>
   }
 
   if (!user) {
-    return <EmailSignIn prompt="Sign in to track a simulated position — no password, just a magic link by email." />
+    return <p className="muted small">Setting up…</p>
   }
 
   async function handleOpenTrade(e) {
