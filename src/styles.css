@@ -490,6 +490,11 @@ table.grid {
   color: #e0715a !important;
 }
 
+.trade-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .trades-table td.pnl-positive {
   color: #4caf7d;
 }

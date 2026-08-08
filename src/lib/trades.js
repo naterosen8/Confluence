@@ -41,3 +41,8 @@ export async function closeTrade(id, { closePrice, liquidated }) {
   if (error) throw error
   return data
 }
+
+export async function deleteTrade(id) {
+  const { error } = await supabase.from('trades').delete().eq('id', id)
+  if (error) throw error
+}

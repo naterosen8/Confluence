@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { HAS_SUPABASE } from '../lib/supabaseClient'
-import { listTrades, closeTrade } from '../lib/trades'
+import { listTrades, closeTrade, deleteTrade } from '../lib/trades'
 import { getSeries } from '../lib/dataProvider'
 import { computePnl } from '../lib/pnl'
 
@@ -20,6 +20,7 @@ export default function MyTrades() {
   const [trades, setTrades] = useState(null)
   const [error, setError] = useState(null)
   const [closingId, setClosingId] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
 
   useEffect(() => {
     if (!HAS_SUPABASE || loading || user) return
@@ -51,6 +52,19 @@ export default function MyTrades() {
       setError(err.message || 'Failed to close trade')
     } finally {
       setClosingId(null)
+    }
+  }
+
+  async function handleDelete(trade) {
+    if (!window.confirm(`Delete this simulated ${trade.direction} on ${trade.symbol}? This can't be undone.`)) return
+    setDeletingId(trade.id)
+    try {
+      await deleteTrade(trade.id)
+      setTrades((prev) => prev.filter((t) => t.id !== trade.id))
+    } catch (err) {
+      setError(err.message || 'Failed to delete trade')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -135,11 +149,20 @@ export default function MyTrades() {
                       {trade.status}
                     </td>
                     <td>
-                      {isOpen && (
-                        <button className="button-secondary" disabled={closingId === trade.id} onClick={() => handleClose(trade)}>
-                          {closingId === trade.id ? 'Closing…' : 'Close'}
+                      <div className="trade-actions">
+                        {isOpen && (
+                          <button className="button-secondary" disabled={closingId === trade.id} onClick={() => handleClose(trade)}>
+                            {closingId === trade.id ? 'Closing…' : 'Close'}
+                          </button>
+                        )}
+                        <button
+                          className="button-secondary"
+                          disabled={deletingId === trade.id}
+                          onClick={() => handleDelete(trade)}
+                        >
+                          {deletingId === trade.id ? 'Deleting…' : 'Delete'}
                         </button>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 )
