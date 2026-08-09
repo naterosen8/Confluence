@@ -28,8 +28,21 @@ if (!API_KEY) {
   process.exit(1)
 }
 
+// ~4 years of daily bars. The confluence score needs 200 bars of warm-up
+// before it produces anything at all, so at the previous 260 only ~23% of the
+// history was scoreable and every base rate on the site rested on ~60 heavily
+// overlapping observations. Going deeper costs no extra API calls — it is the
+// same one request per symbol, just a larger response — and multiplies the
+// evidence behind every published figure by roughly an order of magnitude.
+const OUTPUT_SIZE = 1000
+
+// Twelve Data returns full float noise (483.48001000000004). Rounding to four
+// decimals is lossless at any price these instruments trade at and takes a
+// meaningful bite out of a file every visitor downloads.
+const round4 = (n) => Math.round(n * 1e4) / 1e4
+
 async function fetchBars(symbol) {
-  const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=1day&outputsize=260&apikey=${API_KEY}`
+  const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=1day&outputsize=${OUTPUT_SIZE}&apikey=${API_KEY}`
   // A hung connection here has nothing else guarding it — without a
   // timeout it would stall this whole loop (and the 22 tickers behind it)
   // until the GitHub Actions job's own default 6-hour ceiling, instead of
@@ -42,11 +55,11 @@ async function fetchBars(symbol) {
     .reverse()
     .map((v) => ({
       date: v.datetime,
-      open: parseFloat(v.open),
-      high: parseFloat(v.high),
-      low: parseFloat(v.low),
-      close: parseFloat(v.close),
-      volume: parseFloat(v.volume) || 0,
+      open: round4(parseFloat(v.open)),
+      high: round4(parseFloat(v.high)),
+      low: round4(parseFloat(v.low)),
+      close: round4(parseFloat(v.close)),
+      volume: Math.round(parseFloat(v.volume) || 0),
     }))
 }
 
@@ -80,7 +93,12 @@ async function main() {
     await sleep(7500) // stay under Twelve Data's free-tier 8 req/min
   }
 
-  saveJson(MARKET_DATA_PATH, { generatedAt: new Date().toISOString(), bars: barsBySymbol })
+  // Written compact rather than indented: at this depth the whitespace alone
+  // was a third of the file, and nobody reads this by hand.
+  fs.writeFileSync(
+    MARKET_DATA_PATH,
+    JSON.stringify({ generatedAt: new Date().toISOString(), bars: barsBySymbol }) + '\n'
+  )
 
   const log = loadJson(TRACK_RECORD_PATH, [])
   let resolvedCount = 0
