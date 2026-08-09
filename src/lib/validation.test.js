@@ -246,7 +246,11 @@ d('leaderboard selection bias', () => {
     }
 
     const nullMeans = []
-    for (let trial = 0; trial < 12; trial++) {
+    // 80 trials, not a dozen. A small number of permutations does not
+    // characterise the tail, and an underpowered run here previously gave the
+    // opposite (reassuring) answer purely because the null's maximum had not
+    // been sampled.
+    for (let trial = 0; trial < 80; trial++) {
       const rand = mulberry(1000 + trial)
       const shuffledAll = {}
       for (const s of symbols) shuffledAll[s] = shuffledSeries(bars[s], rand)
@@ -259,20 +263,20 @@ d('leaderboard selection bias', () => {
     }
 
     nullMeans.sort((a, b) => a - b)
-    const nullMedian = nullMeans[Math.floor(nullMeans.length / 2)] ?? 0
-    const nullMax = nullMeans.at(-1) ?? 0
-    const beatsNull = realMean > nullMax
+    const median = nullMeans[Math.floor(nullMeans.length / 2)] ?? 0
+    const atLeastAsExtreme = nullMeans.filter((n) => n >= realMean).length
+    const pValue = (atLeastAsExtreme + 1) / (nullMeans.length + 1)
 
-    console.log('\n--- Leaderboard selection bias (top-5 |edge|) ---')
-    console.log(`  Real top-5 mean |edge|:        ${realMean.toFixed(1)}`)
-    console.log(`  Shuffled-null median:         ${nullMedian.toFixed(1)}`)
-    console.log(`  Shuffled-null worst case:     ${nullMax.toFixed(1)}  (${nullMeans.length} trials)`)
+    console.log('\n--- Leaderboard selection bias (top-5 |edge| vs shuffled null) ---')
+    console.log(`  Real top-5 mean |edge|:  ${realMean.toFixed(1)}`)
+    console.log(`  Shuffled-null median:    ${median.toFixed(1)}`)
+    console.log(`  Empirical p-value:       ${pValue.toFixed(3)}  (${nullMeans.length} permutations)`)
     console.log(
-      beatsNull
-        ? '  => Real leaderboard exceeds anything the null produced.'
-        : '  => Real leaderboard is WITHIN the range pure noise produces. Ranking 22 tickers by\n' +
-            '     extremeness manufactures impressive-looking numbers on its own; the top-5 cards\n' +
-            '     should be read as "most extreme sample", not "strongest evidence".'
+      pValue < 0.05
+        ? '  => The leaderboard exceeds what noise produces.'
+        : '  => NOT distinguishable from noise. Ranking two dozen tickers by extremeness\n' +
+            '     manufactures numbers of this size on its own, so the leaderboard selects the\n' +
+            '     most extreme sample rather than the strongest evidence.'
     )
 
     expect(nullMeans.length).toBeGreaterThan(0)

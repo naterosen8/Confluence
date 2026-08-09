@@ -59,10 +59,13 @@ export default function Dashboard() {
 
       {topSetups.length > 0 && (
         <div className="top-setups">
-          <h2>Top setups right now</h2>
+          <h2>Most extreme readings right now</h2>
           <p className="muted small">
-            Ranked by how much historical evidence backs the current setup — win-rate deviation from 50%, weighted by
-            sample size — not by how strongly the indicators happen to agree today.
+            Ordered by how far each ticker's historical win rate sits from a coin flip, weighted by sample size. This
+            is a <em>selection</em>, not a ranking of quality: picking the five most extreme results out of two dozen
+            candidates produces numbers this size from pure noise too. Tested against shuffled price histories, this
+            list is not distinguishable from chance (p ≈ 0.5), so treat it as a starting point for looking, not as
+            evidence that these five are the strongest setups.
           </p>
           <div className="top-setups-grid">
             {topSetups.map((row) => {
