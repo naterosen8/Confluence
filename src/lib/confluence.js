@@ -109,20 +109,20 @@ export function technicalLayer(bars) {
     if (breakout.volumeConfirmed) {
       score += 2
       reasons.push({
-        direction: 'bullish',
+        direction: 'up',
         text: `Cleared the ${level} swing high on ${breakout.relVolume.toFixed(1)}× average volume`,
       })
     } else if (breakout.volumeAvailable) {
       score += 1
       reasons.push({
-        direction: 'bullish',
+        direction: 'up',
         text: `Cleared the ${level} swing high, but on only ${breakout.relVolume.toFixed(1)}× average volume — participation has not confirmed it`,
       })
     } else {
       // No volume credit either way: the check could not be run.
       score += 1
       reasons.push({
-        direction: 'bullish',
+        direction: 'up',
         text: `Cleared the ${level} swing high — no volume data for this instrument, so participation could not be checked either way`,
       })
     }
@@ -131,7 +131,7 @@ export function technicalLayer(bars) {
   if (breakout?.nearSupport) {
     score += 1
     reasons.push({
-      direction: 'bullish',
+      direction: 'up',
       text: `Sitting ${breakout.distanceToSupportPct.toFixed(1)}% above the $${breakout.support.price.toFixed(2)} swing low — a defined level to fail against`,
     })
   }
@@ -140,18 +140,18 @@ export function technicalLayer(bars) {
     const above = signals.price > sma50
     score += above ? 1 : -1
     reasons.push({
-      direction: above ? 'bullish' : 'bearish',
+      direction: above ? 'up' : 'down',
       text: above ? 'Price above its 50-day average' : 'Price below its 50-day average',
     })
   }
 
-  if (signals.divergence.bearish) {
+  if (signals.divergence.highUnconfirmed) {
     score -= 2
-    reasons.push({ direction: 'bearish', text: 'Bearish RSI divergence — momentum not confirming the highs' })
+    reasons.push({ direction: 'down', text: 'Price set a new high that momentum did not confirm' })
   }
-  if (signals.divergence.bullish) {
+  if (signals.divergence.lowUnconfirmed) {
     score += 2
-    reasons.push({ direction: 'bullish', text: 'Bullish RSI divergence — selling pressure fading into the lows' })
+    reasons.push({ direction: 'up', text: 'Price set a new low that momentum did not confirm' })
   }
 
   return { available: true, score, lean: leanOf(score), reasons, breakout, signals }
@@ -222,7 +222,7 @@ export function fundamentalLayer({ company, price }) {
     const up = trend.revenueYoY > 0
     score += up ? 1 : -1
     reasons.push({
-      direction: up ? 'bullish' : 'bearish',
+      direction: up ? 'up' : 'down',
       text: `Revenue ${up ? 'up' : 'down'} ${Math.abs(trend.revenueYoY).toFixed(1)}% year over year`,
     })
   }
@@ -231,7 +231,7 @@ export function fundamentalLayer({ company, price }) {
     const up = trend.incomeYoY > 0
     score += up ? 1 : -1
     reasons.push({
-      direction: up ? 'bullish' : 'bearish',
+      direction: up ? 'up' : 'down',
       text: `Net income ${up ? 'up' : 'down'} ${Math.abs(trend.incomeYoY).toFixed(1)}% year over year`,
     })
   }
@@ -240,10 +240,10 @@ export function fundamentalLayer({ company, price }) {
     const pct = (valuation.netCash / valuation.marketCap) * 100
     if (pct > 10) {
       score += 1
-      reasons.push({ direction: 'bullish', text: `Net cash is ${pct.toFixed(0)}% of market cap — balance sheet carries the downside` })
+      reasons.push({ direction: 'up', text: `Net cash is ${pct.toFixed(0)}% of market cap — balance sheet carries the downside` })
     } else if (pct < -30) {
       score -= 1
-      reasons.push({ direction: 'bearish', text: `Net debt is ${Math.abs(pct).toFixed(0)}% of market cap — leverage on the business itself` })
+      reasons.push({ direction: 'down', text: `Net debt is ${Math.abs(pct).toFixed(0)}% of market cap — leverage on the business itself` })
     }
   }
 
@@ -287,7 +287,7 @@ export function macroLayer({ tltBars, hygBars, lookback = 60 }) {
     const easing = rates.changePct > 0
     score += easing ? 1 : -1
     reasons.push({
-      direction: easing ? 'bullish' : 'bearish',
+      direction: easing ? 'up' : 'down',
       text: easing
         ? `Long bonds up ${rates.changePct.toFixed(1)}% over ${lookback} sessions — long rates falling, conditions easing`
         : `Long bonds down ${Math.abs(rates.changePct).toFixed(1)}% over ${lookback} sessions — long rates rising, conditions tightening`,
@@ -298,7 +298,7 @@ export function macroLayer({ tltBars, hygBars, lookback = 60 }) {
     const risky = credit.changePct > 0
     score += risky ? 1 : -1
     reasons.push({
-      direction: risky ? 'bullish' : 'bearish',
+      direction: risky ? 'up' : 'down',
       text: risky
         ? `High-yield credit up ${credit.changePct.toFixed(1)}% — spreads tightening, risk appetite present`
         : `High-yield credit down ${Math.abs(credit.changePct).toFixed(1)}% — spreads widening, liquidity retreating`,
@@ -309,11 +309,11 @@ export function macroLayer({ tltBars, hygBars, lookback = 60 }) {
 }
 
 function leanOf(score) {
-  if (score >= 2) return 'bullish'
-  if (score <= -2) return 'bearish'
-  if (score > 0) return 'leaning bullish'
-  if (score < 0) return 'leaning bearish'
-  return 'neutral'
+  if (score >= 2) return 'points up'
+  if (score <= -2) return 'points down'
+  if (score > 0) return 'leans up'
+  if (score < 0) return 'leans down'
+  return 'split'
 }
 
 // --- Combination -----------------------------------------------------------
@@ -336,8 +336,8 @@ export function combineLayers({ technical, fundamental, macro }) {
 
   let alignment = 'mixed'
   if (available.length === 0) alignment = 'unknown'
-  else if (bearish === 0 && bullish === available.length) alignment = 'aligned-bullish'
-  else if (bullish === 0 && bearish === available.length) alignment = 'aligned-bearish'
+  else if (bearish === 0 && bullish === available.length) alignment = 'aligned-up'
+  else if (bullish === 0 && bearish === available.length) alignment = 'aligned-down'
   else if (bullish > 0 && bearish > 0) alignment = 'conflicting'
 
   return {

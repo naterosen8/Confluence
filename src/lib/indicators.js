@@ -248,39 +248,48 @@ export function nearestLevels(bars, price, lookback = 150) {
   return { support, resistance }
 }
 
-// Bearish divergence: price makes a higher swing high, RSI makes a lower one
-// — momentum isn't confirming the new high. Bullish divergence is the mirror
-// case on swing lows. Restricted to the most recent two swings within
-// `lookback` bars so it reflects current structure, not ancient history.
+// Price making a new extreme that momentum does not confirm.
+//
+// Conventionally called "bullish"/"bearish divergence", but those names
+// assert an outcome. What is actually observed is narrower and can be stated
+// exactly: price set a new high (or low), and RSI did not follow it there.
+// Whether that resolves into a reversal is the thing nobody knows, so the
+// fields say what happened rather than what it supposedly predicts.
+//
+//   highUnconfirmed — price made a higher high, RSI made a lower high
+//   lowUnconfirmed  — price made a lower low, RSI made a higher low
+//
+// Restricted to the most recent two swings within `lookback` bars so it
+// reflects current structure, not ancient history.
 export function detectDivergence(bars, lookback = 60) {
   const closes = bars.map((b) => b.close)
   const rsiArr = rsiSeries(closes)
   const { highs, lows } = findSwingPoints(bars, 3)
   const floor = bars.length - lookback
 
-  let bearish = null
+  let highUnconfirmed = null
   const recentHighs = highs.filter((h) => h.index >= floor).slice(-2)
   if (recentHighs.length === 2) {
     const [a, b] = recentHighs
     const rsiA = rsiArr[a.index]
     const rsiB = rsiArr[b.index]
     if (b.price > a.price && rsiA != null && rsiB != null && rsiB < rsiA) {
-      bearish = { priorDate: a.date, priorPrice: a.price, priorRsi: rsiA, recentDate: b.date, recentPrice: b.price, recentRsi: rsiB }
+      highUnconfirmed = { priorDate: a.date, priorPrice: a.price, priorRsi: rsiA, recentDate: b.date, recentPrice: b.price, recentRsi: rsiB }
     }
   }
 
-  let bullish = null
+  let lowUnconfirmed = null
   const recentLows = lows.filter((l) => l.index >= floor).slice(-2)
   if (recentLows.length === 2) {
     const [a, b] = recentLows
     const rsiA = rsiArr[a.index]
     const rsiB = rsiArr[b.index]
     if (b.price < a.price && rsiA != null && rsiB != null && rsiB > rsiA) {
-      bullish = { priorDate: a.date, priorPrice: a.price, priorRsi: rsiA, recentDate: b.date, recentPrice: b.price, recentRsi: rsiB }
+      lowUnconfirmed = { priorDate: a.date, priorPrice: a.price, priorRsi: rsiA, recentDate: b.date, recentPrice: b.price, recentRsi: rsiB }
     }
   }
 
-  return { bullish, bearish }
+  return { highUnconfirmed, lowUnconfirmed }
 }
 
 // Assigns each bar the index of the Mon-Fri calendar week it falls in,
@@ -384,76 +393,83 @@ export function computeSignals(bars) {
   // A bare "+4" invites being read as a confidence level; "+4 = 5 bullish
   // votes minus 1 bearish, here they are" cannot be.
   const factors = []
+  // 'up'/'down' rather than 'bullish'/'bearish': these describe which way a
+  // reading points, and the site no longer uses trading-verdict vocabulary
+  // for anything a reader sees.
   const vote = (direction, weight, term, label) => {
-    if (direction === 'bullish') bullish += weight
+    if (direction === 'up') bullish += weight
     else bearish += weight
     factors.push({ direction, weight, term, label })
   }
 
   if (rsiVal != null) {
     if (rsiVal < 30) {
-      vote('bullish', 1, 'rsi', `RSI ${rsiVal.toFixed(1)} — oversold (below 30)`)
+      vote('up', 1, 'rsi', `RSI ${rsiVal.toFixed(1)} — oversold (below 30)`)
       notes.push('RSI oversold (<30) — recent selling has outpaced buying by a wide margin')
     } else if (rsiVal > 70) {
-      vote('bearish', 1, 'rsi', `RSI ${rsiVal.toFixed(1)} — overbought (above 70)`)
+      vote('down', 1, 'rsi', `RSI ${rsiVal.toFixed(1)} — overbought (above 70)`)
       notes.push('RSI overbought (>70) — recent buying has outpaced selling by a wide margin')
     } else {
-      factors.push({ direction: 'neutral', weight: 0, term: 'rsi', label: `RSI ${rsiVal.toFixed(1)} — neither extreme, no vote` })
+      factors.push({ direction: 'none', weight: 0, term: 'rsi', label: `RSI ${rsiVal.toFixed(1)} — neither extreme, no vote` })
     }
   }
 
   if (macdRes) {
     if (macdRes.histogram > 0) {
-      vote('bullish', 1, 'macd', 'MACD above its signal line')
+      vote('up', 1, 'macd', 'MACD above its signal line')
       notes.push('MACD above signal — short-term momentum (12/26-day EMA spread) is accelerating upward')
     } else {
-      vote('bearish', 1, 'macd', 'MACD below its signal line')
+      vote('down', 1, 'macd', 'MACD below its signal line')
       notes.push('MACD below signal — short-term momentum is accelerating downward')
     }
   }
 
   if (sma50 != null && sma200 != null) {
     if (sma50 > sma200) {
-      vote('bullish', 1, 'trend', '50-day average above the 200-day')
+      vote('up', 1, 'trend', '50-day average above the 200-day')
       notes.push('50-day average above 200-day average — intermediate trend is up')
     } else {
-      vote('bearish', 1, 'trend', '50-day average below the 200-day')
+      vote('down', 1, 'trend', '50-day average below the 200-day')
       notes.push('50-day average below 200-day average — intermediate trend is down')
     }
   }
 
   if (sma50 != null) {
-    if (price > sma50) vote('bullish', 1, 'trend', 'Price above its 50-day average')
-    else vote('bearish', 1, 'trend', 'Price below its 50-day average')
+    if (price > sma50) vote('up', 1, 'trend', 'Price above its 50-day average')
+    else vote('down', 1, 'trend', 'Price below its 50-day average')
   }
 
   const weekly = weeklyTrend(bars)
   if (weekly.trend) {
-    const dailyLean = bullish > bearish ? 'bullish' : bearish > bullish ? 'bearish' : 'neutral'
+    const dailyLean = bullish > bearish ? 'up' : bearish > bullish ? 'down' : 'split'
     if (weekly.trend === 'up') {
-      vote('bullish', 1, 'weeklyTrend', 'Price above its 10-week average')
+      vote('up', 1, 'weeklyTrend', 'Price above its 10-week average')
       notes.push(
-        dailyLean === 'bearish'
+        dailyLean === 'down'
           ? 'Weekly trend is up (price above its 10-week average) — this daily signal is fighting the bigger-picture trend, a weaker setup than it looks'
           : 'Weekly trend is up (price above its 10-week average) — the bigger picture agrees with the daily signal'
       )
     } else {
-      vote('bearish', 1, 'weeklyTrend', 'Price below its 10-week average')
+      vote('down', 1, 'weeklyTrend', 'Price below its 10-week average')
       notes.push(
-        dailyLean === 'bullish'
+        dailyLean === 'up'
           ? 'Weekly trend is down (price below its 10-week average) — this daily signal is fighting the bigger-picture trend, a weaker setup than it looks'
           : 'Weekly trend is down (price below its 10-week average) — the bigger picture agrees with the daily signal'
       )
     }
   }
 
-  if (divergence.bullish) {
-    vote('bullish', 2, 'divergence', 'Bullish RSI divergence (counts double)')
-    notes.push('Bullish RSI divergence — price made a lower low but RSI made a higher low, momentum is fading on the downside')
+  if (divergence.lowUnconfirmed) {
+    vote('up', 2, 'divergence', 'New low not confirmed by momentum (counts double)')
+    notes.push(
+      'Price set a lower low but RSI set a higher low — the new low was not confirmed by momentum, which often precedes a turn but frequently does not'
+    )
   }
-  if (divergence.bearish) {
-    vote('bearish', 2, 'divergence', 'Bearish RSI divergence (counts double)')
-    notes.push('Bearish RSI divergence — price made a higher high but RSI made a lower high, momentum is fading on the upside')
+  if (divergence.highUnconfirmed) {
+    vote('down', 2, 'divergence', 'New high not confirmed by momentum (counts double)')
+    notes.push(
+      'Price set a higher high but RSI set a lower high — the new high was not confirmed by momentum, which often precedes a turn but frequently does not'
+    )
   }
 
   const score = bullish - bearish

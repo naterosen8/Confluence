@@ -133,13 +133,13 @@ describe('macroLayer', () => {
     const r = macroLayer({ tltBars: rising, hygBars: rising })
     expect(r.available).toBe(true)
     expect(r.score).toBe(2)
-    expect(r.lean).toBe('bullish')
+    expect(r.lean).toBe('points up')
   })
 
   it('reads falling bonds and credit as tightening', () => {
     const r = macroLayer({ tltBars: falling, hygBars: falling })
     expect(r.score).toBe(-2)
-    expect(r.lean).toBe('bearish')
+    expect(r.lean).toBe('points down')
   })
 
   it('reports a split between rates and credit as mixed', () => {
@@ -157,7 +157,7 @@ describe('combineLayers', () => {
 
   it('calls it aligned only when every available layer agrees', () => {
     const r = combineLayers({ technical: layer(2), fundamental: layer(1), macro: layer(3) })
-    expect(r.alignment).toBe('aligned-bullish')
+    expect(r.alignment).toBe('aligned-up')
     expect(r.complete).toBe(true)
     expect(r.availableCount).toBe(3)
   })
@@ -173,7 +173,7 @@ describe('combineLayers', () => {
   // simply absent must never be presentable as a three-layer confluence.
   it('never treats a missing layer as agreement', () => {
     const r = combineLayers({ technical: layer(2), fundamental: absent, macro: layer(2) })
-    expect(r.alignment).toBe('aligned-bullish')
+    expect(r.alignment).toBe('aligned-up')
     expect(r.complete).toBe(false)
     expect(r.availableCount).toBe(2)
     expect(r.missing).toEqual(['Fundamental'])

@@ -67,7 +67,7 @@ export default function Dashboard() {
           <div className="top-setups-grid">
             {topSetups.map((row) => {
               const { stat, source } = row.setup
-              const direction = stat.winRate >= 50 ? 'bullish' : 'bearish'
+              const direction = stat.winRate >= 50 ? 'up' : 'down'
               return (
                 <Link key={row.symbol} to={`/ticker/${encodeURIComponent(row.symbol)}`} className="top-setup-card">
                   <div className="top-setup-head">
@@ -80,8 +80,8 @@ export default function Dashboard() {
                       *happened next* historically, not a rating of the setup.
                       Colour alone also left the whole distinction invisible to
                       colourblind readers. */}
-                  <div className={`top-setup-stat top-setup-${direction}`}>
-                    {direction === 'bullish' ? 'Rose' : 'Fell'} {Math.max(stat.winRate, 100 - stat.winRate).toFixed(0)}% of
+                  <div className={`top-setup-stat top-setup-${direction === 'up' ? 'bullish' : 'bearish'}`}>
+                    {direction === 'up' ? 'Rose' : 'Fell'} {Math.max(stat.winRate, 100 - stat.winRate).toFixed(0)}% of
                     the time
                   </div>
                   <div className="muted small">
@@ -114,8 +114,8 @@ export default function Dashboard() {
           {rows.map((row) => {
             const { signals, setup } = row
             const flags = []
-            if (signals.divergence.bullish) flags.push('bullish divergence')
-            if (signals.divergence.bearish) flags.push('bearish divergence')
+            if (signals.divergence.lowUnconfirmed) flags.push('low unconfirmed by momentum')
+            if (signals.divergence.highUnconfirmed) flags.push('high unconfirmed by momentum')
             if (signals.squeeze?.isSqueeze) flags.push('volatility squeeze')
             if (signals.relVolume != null && signals.relVolume >= 1.5) flags.push(`${signals.relVolume.toFixed(1)}x volume`)
 

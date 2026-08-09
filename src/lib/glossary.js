@@ -35,7 +35,7 @@ export const GLOSSARY = {
   confluenceScore: {
     term: 'Confluence score',
     basis: 'current',
-    what: 'How many of the tracked indicators currently point bullish, minus how many point bearish.',
+    what: 'How many of the tracked indicators are currently reading up, minus how many are reading down.',
     how: 'Each of five checks contributes ±1 (RSI at an extreme, MACD vs its signal line, 50-day vs 200-day average, price vs its 50-day average, weekly trend). An RSI divergence adds ±2. The result usually lands between −6 and +6.',
     isNot:
       'Not a probability, a confidence level, or a price target. +4 does not mean "80% likely" or "4 out of 5" — the scale is arbitrary and the indicators overlap heavily, so four agreeing signals are not four independent opinions.',
@@ -51,7 +51,7 @@ export const GLOSSARY = {
   winRate: {
     term: 'Win rate',
     basis: 'measured',
-    what: 'The share of past occurrences where the price was higher 5 sessions later (for a bullish setup) or lower (for a bearish one).',
+    what: 'The share of past occurrences where price moved the way the readings leaned — higher 5 sessions later when they leaned up, lower when they leaned down.',
     how: 'Every qualifying past day is found in the tracked history, and the close 5 sessions later is compared to the close on the day itself.',
     isNot:
       'Not a measure of profitability. A 55% win rate paired with a negative average return is a losing proposition — many small gains and a few large losses. Always read it next to the average return, never alone.',
@@ -110,7 +110,7 @@ export const GLOSSARY = {
     what: 'How far a setup\'s historical win rate sits from a coin flip, scaled by how much evidence supports it.',
     how: 'Win rate minus 50, multiplied by the square root of the sample size. Used only to order the dashboard cards.',
     isNot:
-      'Not an expected return, and not a ranking of which ticker to buy. It measures strength of historical evidence, in either direction — a strongly bearish record ranks just as highly as a bullish one.',
+      'Not an expected return, and not a ranking of which ticker to buy. It measures strength of historical evidence, in either direction — a strong downward record ranks just as highly as a strong upward one.',
   },
   rsi: {
     term: 'RSI (14)',
@@ -124,7 +124,7 @@ export const GLOSSARY = {
     term: 'MACD',
     basis: 'current',
     what: 'Whether short-term momentum is accelerating relative to medium-term momentum.',
-    how: 'The 12-day exponential average minus the 26-day, compared against a 9-day average of itself. Above that signal line counts bullish, below counts bearish.',
+    how: 'The 12-day exponential average minus the 26-day, compared against a 9-day average of itself. Above that signal line counts as reading up, below as reading down.',
     isNot:
       'Not a leading indicator. It is built entirely from past averages and turns after price does, so a crossover confirms a move that has already begun.',
   },

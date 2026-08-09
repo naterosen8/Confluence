@@ -67,3 +67,33 @@ describe('computeSignals emits the band', () => {
     expect(s.lean.key).toBe(leanFor(s.score).key)
   })
 })
+
+describe('no directional trading vocabulary leaks into what a reader sees', () => {
+  // A guard rather than a one-off cleanup: the terms crept back in twice
+  // during this rename, once through a ternary and once through a return
+  // statement, and both times the build stayed green.
+  it('computeSignals emits no bullish/bearish wording in labels or notes', async () => {
+    const { computeSignals } = await import('./indicators')
+    const bars = Array.from({ length: 300 }, (_, i) => {
+      const c = 100 + Math.sin(i / 9) * 14 + i * 0.05
+      return { date: `2024-${String((i % 12) + 1).padStart(2, '0')}-01`, open: c, high: c * 1.02, low: c * 0.98, close: c, volume: 1e6 }
+    })
+    const s = computeSignals(bars)
+    const banned = /bullish|bearish/i
+    for (const f of s.factors) {
+      expect(banned.test(f.label), `factor label: ${f.label}`).toBe(false)
+      expect(['up', 'down', 'none']).toContain(f.direction)
+    }
+    for (const n of s.notes) expect(banned.test(n), `note: ${n}`).toBe(false)
+  })
+
+  it('divergence fields describe the observation, not a predicted outcome', async () => {
+    const { detectDivergence } = await import('./indicators')
+    const bars = Array.from({ length: 120 }, (_, i) => {
+      const c = 100 + Math.sin(i / 5) * 10
+      return { date: `d${i}`, open: c, high: c * 1.01, low: c * 0.99, close: c, volume: 1e6 }
+    })
+    const d = detectDivergence(bars)
+    expect(Object.keys(d).sort()).toEqual(['highUnconfirmed', 'lowUnconfirmed'])
+  })
+})

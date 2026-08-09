@@ -360,7 +360,7 @@ describe('scoreSeries and computeSignals agree on their shared inputs', () => {
     // the badge shows for reasons beyond the documented one.
     const s = computeSignals(BARS)
     const divergenceBonus =
-      (s.divergence.bullish ? 2 : 0) - (s.divergence.bearish ? 2 : 0)
+      (s.divergence.lowUnconfirmed ? 2 : 0) - (s.divergence.highUnconfirmed ? 2 : 0)
     expect(scoreSeries(BARS).at(-1)).toBe(s.score - divergenceBonus)
   })
 
@@ -371,8 +371,8 @@ describe('scoreSeries and computeSignals agree on their shared inputs', () => {
 
   it('the reported factors sum to the reported points', () => {
     const s = computeSignals(BARS)
-    const bull = s.factors.filter((f) => f.direction === 'bullish').reduce((a, f) => a + f.weight, 0)
-    const bear = s.factors.filter((f) => f.direction === 'bearish').reduce((a, f) => a + f.weight, 0)
+    const bull = s.factors.filter((f) => f.direction === 'up').reduce((a, f) => a + f.weight, 0)
+    const bear = s.factors.filter((f) => f.direction === 'down').reduce((a, f) => a + f.weight, 0)
     expect(bull).toBe(s.bullishPoints)
     expect(bear).toBe(s.bearishPoints)
   })

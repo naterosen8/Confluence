@@ -16,11 +16,11 @@ function loadFundamentals() {
 }
 
 const ALIGNMENT = {
-  'aligned-bullish': { label: 'All available layers lean bullish', tone: 'bullish' },
-  'aligned-bearish': { label: 'All available layers lean bearish', tone: 'bearish' },
-  conflicting: { label: 'The layers disagree', tone: 'mixed' },
-  mixed: { label: 'No clear lean', tone: 'mixed' },
-  unknown: { label: 'Nothing to assess yet', tone: 'mixed' },
+  'aligned-up': { label: 'Every available layer points up' },
+  'aligned-down': { label: 'Every available layer points down' },
+  conflicting: { label: 'The layers disagree' },
+  mixed: { label: 'No clear lean' },
+  unknown: { label: 'Nothing to assess yet' },
 }
 
 function Layer({ layer }) {
@@ -35,19 +35,19 @@ function Layer({ layer }) {
       </div>
     )
   }
-  const tone = layer.score > 0 ? 'bullish' : layer.score < 0 ? 'bearish' : 'mixed'
+  const tone = layer.score > 0 ? 'up' : layer.score < 0 ? 'down' : 'mixed'
   return (
     <div className={`confluence-layer confluence-layer-${tone}`}>
       <div className="confluence-layer-head">
         <strong>{layer.label}</strong>
-        <span className={`top-setup-${tone === 'mixed' ? 'bullish' : tone}`} style={{ fontSize: '0.8rem', fontWeight: 700 }}>
+        <span className={`layer-lean layer-lean-${tone}`}>
           {layer.lean}
         </span>
       </div>
       <ul className="confluence-reasons">
         {layer.reasons.map((r, i) => (
           <li key={i} className={`factor-${r.direction}`}>
-            <span className="factor-sign">{r.direction === 'bullish' ? '+' : '−'}</span> {r.text}
+            <span className="factor-sign">{r.direction === 'up' ? '+' : '−'}</span> {r.text}
           </li>
         ))}
       </ul>

@@ -691,22 +691,22 @@ table.grid {
   font-variant-numeric: tabular-nums;
 }
 
-.factor-bullish {
+.factor-up {
   border-left: 3px solid #4caf7d;
 }
-.factor-bullish .factor-sign {
+.factor-up .factor-sign {
   color: #4caf7d;
 }
-.factor-bearish {
+.factor-down {
   border-left: 3px solid #e0715a;
 }
-.factor-bearish .factor-sign {
+.factor-down .factor-sign {
   color: #e0715a;
 }
-.factor-neutral {
+.factor-none {
   border-left: 3px solid var(--border);
 }
-.factor-neutral .factor-sign {
+.factor-none .factor-sign {
   color: var(--muted);
 }
 
@@ -912,10 +912,10 @@ table.grid {
   padding: 14px;
 }
 
-.confluence-layer-bullish {
-  border-left-color: #4caf7d;
+.confluence-layer-up {
+  border-left-color: #5cbf8a;
 }
-.confluence-layer-bearish {
+.confluence-layer-down {
   border-left-color: #e0715a;
 }
 .confluence-layer-mixed {
@@ -950,11 +950,11 @@ table.grid {
   font-weight: 700;
 }
 
-.confluence-reasons .factor-bullish .factor-sign,
-.confluence-reasons li.factor-bullish > .factor-sign {
+.confluence-reasons .factor-up .factor-sign,
+.confluence-reasons li.factor-up > .factor-sign {
   color: #4caf7d;
 }
-.confluence-reasons li.factor-bearish > .factor-sign {
+.confluence-reasons li.factor-down > .factor-sign {
   color: #e0715a;
 }
 
@@ -994,4 +994,18 @@ table.grid {
   font-weight: 500;
   opacity: 0.75;
   font-size: 0.72rem;
+}
+
+.layer-lean {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.layer-lean-up {
+  color: #5cbf8a;
+}
+.layer-lean-down {
+  color: #e0715a;
+}
+.layer-lean-mixed {
+  color: var(--muted);
 }

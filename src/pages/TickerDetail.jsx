@@ -193,24 +193,22 @@ function TickerAnalysis({ symbol, meta }) {
         </div>
       </Section>
 
-      {(signals.divergence.bullish || signals.divergence.bearish) && (
-        <Section title="Divergence">
-          {signals.divergence.bullish && (
+      {(signals.divergence.lowUnconfirmed || signals.divergence.highUnconfirmed) && (
+        <Section title="Price and momentum disagreeing">
+          {signals.divergence.lowUnconfirmed && (
             <p>
-              <strong>Bullish:</strong> price fell from ${signals.divergence.bullish.priorPrice.toFixed(2)} (
-              {signals.divergence.bullish.priorDate}) to a lower low of ${signals.divergence.bullish.recentPrice.toFixed(2)} (
-              {signals.divergence.bullish.recentDate}), but RSI rose from {signals.divergence.bullish.priorRsi.toFixed(1)} to{' '}
-              {signals.divergence.bullish.recentRsi.toFixed(1)} over the same stretch — selling pressure is weakening even as price
-              makes new lows.
+              <strong>New low, unconfirmed:</strong> price fell from ${signals.divergence.lowUnconfirmed.priorPrice.toFixed(2)} (
+              {signals.divergence.lowUnconfirmed.priorDate}) to a lower low of ${signals.divergence.lowUnconfirmed.recentPrice.toFixed(2)} (
+              {signals.divergence.lowUnconfirmed.recentDate}), but RSI rose from {signals.divergence.lowUnconfirmed.priorRsi.toFixed(1)} to{' '}
+              {signals.divergence.lowUnconfirmed.recentRsi.toFixed(1)} over the same stretch — momentum did not follow price to the new low. That often precedes a turn, and often does not.
             </p>
           )}
-          {signals.divergence.bearish && (
+          {signals.divergence.highUnconfirmed && (
             <p>
-              <strong>Bearish:</strong> price rose from ${signals.divergence.bearish.priorPrice.toFixed(2)} (
-              {signals.divergence.bearish.priorDate}) to a higher high of ${signals.divergence.bearish.recentPrice.toFixed(2)} (
-              {signals.divergence.bearish.recentDate}), but RSI fell from {signals.divergence.bearish.priorRsi.toFixed(1)} to{' '}
-              {signals.divergence.bearish.recentRsi.toFixed(1)} over the same stretch — buying pressure is weakening even as price
-              makes new highs.
+              <strong>New high, unconfirmed:</strong> price rose from ${signals.divergence.highUnconfirmed.priorPrice.toFixed(2)} (
+              {signals.divergence.highUnconfirmed.priorDate}) to a higher high of ${signals.divergence.highUnconfirmed.recentPrice.toFixed(2)} (
+              {signals.divergence.highUnconfirmed.recentDate}), but RSI fell from {signals.divergence.highUnconfirmed.priorRsi.toFixed(1)} to{' '}
+              {signals.divergence.highUnconfirmed.recentRsi.toFixed(1)} over the same stretch — momentum did not follow price to the new high. That often precedes a turn, and often does not.
             </p>
           )}
         </Section>

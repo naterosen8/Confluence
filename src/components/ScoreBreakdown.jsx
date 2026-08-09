@@ -21,8 +21,7 @@ export default function ScoreBreakdown({ signals }) {
           </span>
         </Explain>
         <span className="muted small">
-          = {bullishPoints} bullish {bullishPoints === 1 ? 'point' : 'points'} − {bearishPoints} bearish{' '}
-          {bearishPoints === 1 ? 'point' : 'points'}
+          = {bullishPoints} pointing up − {bearishPoints} pointing down
         </span>
       </div>
 
@@ -30,7 +29,7 @@ export default function ScoreBreakdown({ signals }) {
         {counted.map((f, i) => (
           <li key={`${f.term}-${i}`} className={`factor factor-${f.direction}`}>
             <span className="factor-sign">
-              {f.direction === 'bullish' ? '+' : '−'}
+              {f.direction === 'up' ? '+' : '−'}
               {f.weight}
             </span>
             <Explain term={f.term}>
