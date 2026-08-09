@@ -158,12 +158,23 @@ export default function TickerDetail() {
       <Section title={`Confluence score history (next ${scoreBacktest.forwardDays} sessions)`}>
         <p className="muted small">
           Individual events (below) tell you whether one mechanism has mattered on its own. This is the more honest
-          "confluence" question: every day in this ticker's history is scored the same way as the badge at the top of
-          this page (RSI + MACD + trend + weekly alignment), grouped by that score, and compared to what happened
-          next. Today's market is currently <strong>{scoreBacktest.currentRegimeLabel || 'unclassified'}</strong> (based
-          on SPY's own trend) — the "regime-matched" column restricts the sample to days when the broader market was
-          in the same kind of regime as today, which is usually a much smaller, more relevant sample than "all
-          history."
+          "confluence" question: every day in this ticker's history is scored on RSI + MACD + trend + weekly
+          alignment, grouped by that score, and compared to what happened next. Today's market is currently{' '}
+          <strong>{scoreBacktest.currentRegimeLabel || 'unclassified'}</strong> (based on SPY's own trend) — the
+          "regime-matched" column restricts the sample to days when the broader market was in the same kind of regime
+          as today, which is usually a much smaller, more relevant sample than "all history."
+        </p>
+        <p className="muted small">
+          Note: this score deliberately excludes divergence (recomputing swing structure for every day in the
+          history is expensive) — the verdict badge above does include it. When a divergence is flagged, the badge
+          above and the score highlighted as "today" below can disagree by one tier; the divergence writeup further
+          down still applies even though it isn't reflected in this table's numbers.
+        </p>
+        <p className="muted small">
+          Also worth weighing: occurrences of the same score that fall close together in time share overlapping
+          price history (a 5-session forward window started yesterday overlaps most of today's), so a large N here
+          reflects fewer truly independent market episodes than the raw count suggests — read it as directional
+          evidence, not a rigorous statistical sample.
         </p>
         <div className="score-table-wrap">
           <table className="score-table">

@@ -1,5 +1,5 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import trackRecord from '../../data/track-record.json'
 
 function pct(v, digits = 2) {
   if (v == null) return '—'
@@ -14,7 +14,45 @@ function summarize(entries) {
   return { total: decidable.length, winRate: (wins / decidable.length) * 100, avgReturn }
 }
 
+// Fetched at runtime, same as market-data.json — this log only ever grows,
+// so baking it into the JS bundle via a static import would mean an
+// ever-larger download for every visitor, on every page, whether or not
+// they ever open this one.
 export default function TrackRecord() {
+  const [trackRecord, setTrackRecord] = useState(null)
+  const [loadError, setLoadError] = useState(null)
+
+  useEffect(() => {
+    fetch('/track-record.json')
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setTrackRecord)
+      .catch(() => setLoadError('Could not load the track record right now.'))
+  }, [])
+
+  if (loadError) {
+    return (
+      <div>
+        <Link to="/" className="back-link">
+          ← Back to screener
+        </Link>
+        <h1>Track record</h1>
+        <p className="muted small">Error: {loadError}</p>
+      </div>
+    )
+  }
+
+  if (!trackRecord) {
+    return (
+      <div>
+        <Link to="/" className="back-link">
+          ← Back to screener
+        </Link>
+        <h1>Track record</h1>
+        <p className="muted">Loading…</p>
+      </div>
+    )
+  }
+
   const resolved = trackRecord.filter((e) => e.outcome).sort((a, b) => (a.date < b.date ? 1 : -1))
   const pending = trackRecord.filter((e) => !e.outcome)
 

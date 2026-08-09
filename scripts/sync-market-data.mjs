@@ -16,7 +16,11 @@ const API_KEY = process.env.TWELVE_DATA_KEY
 // Lives in public/, not data/, so the built app can fetch it as a plain
 // static asset at runtime instead of it being bundled into the JS.
 const MARKET_DATA_PATH = new URL('../public/market-data.json', import.meta.url)
-const TRACK_RECORD_PATH = new URL('../data/track-record.json', import.meta.url)
+// Also in public/, not data/, for the same reason: this log only ever
+// grows (a new row every non-neutral verdict, every trading day), so a
+// static import would mean an ever-larger JS bundle every visitor has to
+// download and parse before the app renders anything.
+const TRACK_RECORD_PATH = new URL('../public/track-record.json', import.meta.url)
 const FORWARD_SESSIONS = 5
 
 if (!API_KEY) {
@@ -26,7 +30,11 @@ if (!API_KEY) {
 
 async function fetchBars(symbol) {
   const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=1day&outputsize=260&apikey=${API_KEY}`
-  const res = await fetch(url)
+  // A hung connection here has nothing else guarding it — without a
+  // timeout it would stall this whole loop (and the 22 tickers behind it)
+  // until the GitHub Actions job's own default 6-hour ceiling, instead of
+  // failing fast and falling back to yesterday's data for just this symbol.
+  const res = await fetch(url, { signal: AbortSignal.timeout(20_000) })
   const data = await res.json()
   if (data.status === 'error') throw new Error(data.message || 'Twelve Data request failed')
   return data.values

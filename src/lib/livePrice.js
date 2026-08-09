@@ -21,10 +21,16 @@ async function fetchQuote(symbol) {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // Runs forever (until aborted), cycling through every supported symbol with
-// a fixed ~1.5s gap between calls — a full 20-symbol lap takes ~30s, well
-// under Finnhub's free-tier 60 req/min cap. This is a pure display overlay:
-// nothing here feeds the indicator or backtest engines, which stay on
-// Twelve Data's daily bars regardless of whether this loop is running.
+// a fixed gap between calls. Unlike Twelve Data, this key is unavoidably
+// shared client-side — every open tab polls independently against the same
+// 60 req/min account cap, not just this one. At a 2.5s gap a full ~20-symbol
+// lap is ~50s (~24 req/min), leaving headroom for a couple of concurrent
+// tabs before anyone hits the cap; a tighter gap looked fine for a single
+// tab but left almost no margin for a second visitor. This is a pure
+// display overlay: nothing here feeds the indicator or backtest engines,
+// which stay on Twelve Data's daily bars regardless of whether this loop is
+// running, and a rate-limited quote just silently keeps the last price
+// (see the catch below) rather than breaking anything.
 export async function pollLivePrices(symbols, onUpdate, { signal } = {}) {
   if (!HAS_LIVE_PRICE) return
   const supported = symbols.filter(isSupported)
@@ -39,7 +45,7 @@ export async function pollLivePrices(symbols, onUpdate, { signal } = {}) {
       } catch {
         // Silently skip — the price simply stays on whatever it last was.
       }
-      await sleep(1500)
+      await sleep(2500)
     }
   }
 }

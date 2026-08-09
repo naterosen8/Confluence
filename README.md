@@ -15,7 +15,7 @@ This is deliberately **not** a signal service or a "time the market" tool. Indic
 
 Every indicator here — RSI, MACD, backtests, everything — is computed from **daily** closes, so there's nothing to gain from polling continuously. `.github/workflows/sync-market-data.yml` runs `scripts/sync-market-data.mjs` once a day after market close: it fetches fresh bars for every ticker from Twelve Data and commits the result to `public/market-data.json`. The app fetches that file at runtime (`dataProvider.loadMarketData`, called once from `App.jsx` before anything renders) rather than statically importing it — it's ~1MB of real history, and a static import would bake the whole thing into the JS bundle instead of letting the browser load and cache it as its own file. No API key ever ships to the browser, and it costs the same ~22 API requests/day regardless of how many people have the site open, because everyone reads the same snapshot instead of each visitor's browser calling Twelve Data independently.
 
-The same job also updates `data/track-record.json` (see below) from the same fetch, so there's no duplicate API usage between the two features.
+The same job also updates `public/track-record.json` (see below) from the same fetch, so there's no duplicate API usage between the two features.
 
 Without a synced snapshot yet (fresh clone, or before the first workflow run), the app falls back to deterministic demo data (a seeded random walk per symbol) so it's fully explorable out of the box. The mechanics — divergence detection, base rates, volatility context — are real; the numbers they're computed from aren't, until real data is behind them. The app flags this per-ticker whenever that symbol is running on demo data.
 
@@ -42,11 +42,11 @@ Detail pages lead with whichever event most recently triggered and surface its b
 
 ## Track record
 
-`data/track-record.json` is a public, append-only log of every non-neutral verdict the app has ever shown, resolved 5 trading sessions later against the actual close — hits and misses both, nothing curated out. Written by the same daily sync job. See it at `/track-record`.
+`public/track-record.json` is a public, append-only log of every non-neutral verdict the app has ever shown, resolved 5 trading sessions later against the actual close — hits and misses both, nothing curated out. Written by the same daily sync job. See it at `/track-record`.
 
 ## Live price overlay (optional)
 
-`VITE_FINNHUB_KEY` (browser-side, Vercel env var) enables a ~30s-refresh price overlay from Finnhub's free tier, shown as a pulsing "live" dot next to the price wherever it appears. Purely cosmetic — it never feeds the indicator or backtest engine, which stay on the daily-synced Twelve Data snapshot regardless. Stock/ETF symbols only; crypto pairs fall back to the snapshot price silently. Chosen over a WebSocket feed because Finnhub's free tier caps one API key at a single concurrent connection, which rules out every visitor's browser connecting directly — a shared relay would be real new infrastructure this app doesn't need yet for a value-add that's purely visual.
+`VITE_FINNHUB_KEY` (browser-side, Vercel env var) enables a ~50s-refresh price overlay from Finnhub's free tier, shown as a pulsing "live" dot next to the price wherever it appears. Purely cosmetic — it never feeds the indicator or backtest engine, which stay on the daily-synced Twelve Data snapshot regardless. Stock/ETF symbols only; crypto pairs fall back to the snapshot price silently. Chosen over a WebSocket feed because Finnhub's free tier caps one API key at a single concurrent connection, which rules out every visitor's browser connecting directly — a shared relay would be real new infrastructure this app doesn't need yet for a value-add that's purely visual. The key is unavoidably shared client-side (unlike the Twelve Data key, which never leaves the sync job), so every open tab draws from the same 60 req/min account cap — the poll interval is tuned to leave headroom for a few concurrent visitors, not just one.
 
 ## Simulated trades (optional)
 
