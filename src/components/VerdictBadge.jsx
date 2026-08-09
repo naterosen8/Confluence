@@ -1,18 +1,22 @@
-const COLORS = {
-  'Strong Bullish': '#0f9d58',
-  Bullish: '#4caf7d',
-  Neutral: '#8b8f98',
-  Bearish: '#e0715a',
-  // Lightened from #d63b3b, which fell below the WCAG AA 4.5:1 body-text
-  // threshold against the panel background at this badge's small size.
-  'Strong Bearish': '#e05252',
-}
+import { leanByKey, LEAN_COLORS } from '../lib/lean'
 
-export default function VerdictBadge({ verdict }) {
-  const color = COLORS[verdict] || COLORS.Neutral
+// Shows what the indicators are doing, not what price is expected to do, and
+// carries the raw tally so the label is never the only thing on offer — the
+// difference between 5-0 and 4-1 is real information that a single word hides.
+export default function VerdictBadge({ verdict, bullishPoints, bearishPoints }) {
+  const lean = leanByKey(verdict)
+  if (!lean) return null
+  const color = LEAN_COLORS[lean.key]
+  const hasTally = Number.isFinite(bullishPoints) && Number.isFinite(bearishPoints)
+
   return (
-    <span className="badge" style={{ backgroundColor: `${color}22`, color, borderColor: `${color}55` }}>
-      {verdict}
+    <span
+      className="badge badge-lean"
+      style={{ backgroundColor: `${color}1f`, color, borderColor: `${color}55` }}
+      title={lean.blurb}
+    >
+      {lean.short}
+      {hasTally && <span className="badge-tally">{bullishPoints}–{bearishPoints}</span>}
     </span>
   )
 }

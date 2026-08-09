@@ -111,7 +111,7 @@ export default function Methodology() {
         <ul className="plain-list">
           <li>
             <strong>The verdict badge and the historical record often disagree.</strong> The badge reads today's
-            indicators. The base rate says what happened after similar setups before. A "Strong Bullish" badge sitting
+            indicators. The base rate says what happened after similar setups before. An "Aligned ↑" badge sitting
             above a 30% historical win rate is not a bug — it is the two measures telling you different things, which
             is why they are shown together.
           </li>

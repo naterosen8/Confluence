@@ -86,7 +86,7 @@ function TickerAnalysis({ symbol, meta }) {
             this exact setup sits directly under it — including when that
             record disagrees with the badge, which is often. */}
         <div className="detail-verdict">
-          <VerdictBadge verdict={signals.verdict} />
+          <VerdictBadge verdict={signals.verdict} bullishPoints={signals.bullishPoints} bearishPoints={signals.bearishPoints} />
           <span className="muted small detail-verdict-note">
             <Explain term="verdict" />{' '}
             {setup.stat

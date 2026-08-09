@@ -83,7 +83,7 @@ export default function LeverageStudy({ bars, currentScore }) {
   return (
     <div className="leverage-study">
       <p className="muted small">
-        Every past day this ticker showed a non-neutral confluence score, replayed as a hypothetical position held{' '}
+        Every past day this ticker’s indicator readings leaned one way rather than splitting, replayed as a hypothetical position held{' '}
         {FORWARD_DAYS} sessions — long when the score was bullish, short when it was bearish, taken from what the score
         actually said that day. Every occurrence is included; none are filtered to the ones that worked.
       </p>
@@ -152,7 +152,7 @@ export default function LeverageStudy({ bars, currentScore }) {
               study={likeToday}
               capital={capitalNum}
             />
-            <ScenarioRow label="Every non-neutral signal" study={allSignals} capital={capitalNum} />
+            <ScenarioRow label="Every day the readings leaned" study={allSignals} capital={capitalNum} />
           </tbody>
         </table>
       </div>

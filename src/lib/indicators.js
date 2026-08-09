@@ -1,3 +1,5 @@
+import { leanFor } from './lean'
+
 export function sma(values, period) {
   if (values.length < period) return null
   const slice = values.slice(-period)
@@ -455,11 +457,11 @@ export function computeSignals(bars) {
   }
 
   const score = bullish - bearish
-  let verdict = 'Neutral'
-  if (score >= 3) verdict = 'Strong Bullish'
-  else if (score >= 1) verdict = 'Bullish'
-  else if (score <= -3) verdict = 'Strong Bearish'
-  else if (score <= -1) verdict = 'Bearish'
+  // `verdict` now carries the stable band key rather than a directional
+  // word. Anything persisted (the track record) stores this key, so the
+  // wording can be revised without invalidating logged history.
+  const lean = leanFor(score)
+  const verdict = lean.key
 
   return {
     price,
@@ -475,6 +477,7 @@ export function computeSignals(bars) {
     weekly,
     score,
     verdict,
+    lean,
     notes,
     factors,
     bullishPoints: bullish,

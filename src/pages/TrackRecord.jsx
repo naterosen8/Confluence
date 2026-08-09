@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FORWARD_DAYS } from '../lib/backtest'
+import { leanByKey, leanDirection } from '../lib/lean'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 function pct(v, digits = 2) {
@@ -60,8 +61,10 @@ export default function TrackRecord() {
   const pending = trackRecord.filter((e) => !e.outcome)
 
   const overall = summarize(resolved)
-  const bullish = summarize(resolved.filter((e) => e.verdict.includes('Bullish')))
-  const bearish = summarize(resolved.filter((e) => e.verdict.includes('Bearish')))
+  // Scored by band direction, which resolves both the current keys and the
+  // pre-rename labels still present in the logged history.
+  const bullish = summarize(resolved.filter((e) => leanDirection(e.verdict) === 'up'))
+  const bearish = summarize(resolved.filter((e) => leanDirection(e.verdict) === 'down'))
 
   return (
     <div>
@@ -71,7 +74,7 @@ export default function TrackRecord() {
 
       <h1>Track record</h1>
       <p className="muted">
-        Every non-neutral verdict this app has ever shown, logged automatically the day it fired, resolved{' '}
+        Every day the readings leaned one way rather than splitting, logged automatically as it happened and resolved{' '}
         {FORWARD_DAYS} trading sessions later against the actual close — misses included. Nothing here is curated or
         removed after the fact; the raw log is a committed file in the repo.
       </p>
@@ -92,7 +95,7 @@ export default function TrackRecord() {
           ) : (
             <>
               No calls logged yet. This log is written by a daily job — check back after it has run on a session where
-              some ticker showed a non-neutral verdict.
+              some ticker’s readings leaned one way.
             </>
           )}
         </div>
@@ -102,8 +105,8 @@ export default function TrackRecord() {
             <Stat label="Resolved calls" value={overall.total} />
             <Stat label="Overall win rate" value={`${overall.winRate.toFixed(0)}%`} />
             <Stat label="Overall avg. return" value={pct(overall.avgReturn)} />
-            <Stat label="Bullish calls win rate" value={bullish ? `${bullish.winRate.toFixed(0)}% (N=${bullish.total})` : '—'} />
-            <Stat label="Bearish calls win rate" value={bearish ? `${bearish.winRate.toFixed(0)}% (N=${bearish.total})` : '—'} />
+            <Stat label="Upward-leaning calls" value={bullish ? `${bullish.winRate.toFixed(0)}% (N=${bullish.total})` : '—'} />
+            <Stat label="Downward-leaning calls" value={bearish ? `${bearish.winRate.toFixed(0)}% (N=${bearish.total})` : '—'} />
             <Stat label="Pending resolution" value={pending.length} />
           </div>
 
@@ -129,7 +132,7 @@ export default function TrackRecord() {
                       <td>
                         <strong>{e.symbol}</strong>
                       </td>
-                      <td>{e.verdict}</td>
+                      <td>{leanByKey(e.verdict)?.short ?? e.verdict}</td>
                       <td>${e.price.toFixed(2)}</td>
                       <td>{e.outcome.resolvedDate}</td>
                       <td>${e.outcome.exitPrice.toFixed(2)}</td>

@@ -62,7 +62,7 @@ export default function Dashboard() {
           <h2>Top setups right now</h2>
           <p className="muted small">
             Ranked by how much historical evidence backs the current setup — win-rate deviation from 50%, weighted by
-            sample size — not just by how bullish or bearish the badge looks.
+            sample size — not by how strongly the indicators happen to agree today.
           </p>
           <div className="top-setups-grid">
             {topSetups.map((row) => {
@@ -72,7 +72,7 @@ export default function Dashboard() {
                 <Link key={row.symbol} to={`/ticker/${encodeURIComponent(row.symbol)}`} className="top-setup-card">
                   <div className="top-setup-head">
                     <strong>{row.symbol}</strong>
-                    <VerdictBadge verdict={row.signals.verdict} />
+                    <VerdictBadge verdict={row.signals.verdict} bullishPoints={row.signals.bullishPoints} bearishPoints={row.signals.bearishPoints} />
                   </div>
                   {/* Spelling out the direction matters here: a card reading
                       "0% win rate" next to a "Bullish" badge looks like a
@@ -140,7 +140,7 @@ export default function Dashboard() {
                   {setup.stat ? `${setup.stat.winRate.toFixed(0)}% (N=${setup.stat.sampleSize})` : '—'}
                 </td>
                 <td>
-                  <VerdictBadge verdict={signals.verdict} />
+                  <VerdictBadge verdict={signals.verdict} bullishPoints={signals.bullishPoints} bearishPoints={signals.bearishPoints} />
                 </td>
               </tr>
             )

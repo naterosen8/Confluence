@@ -981,3 +981,17 @@ table.grid {
 .bucket-bar-neg {
   background: #e0715a;
 }
+
+.badge-lean {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.badge-tally {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  opacity: 0.75;
+  font-size: 0.72rem;
+}

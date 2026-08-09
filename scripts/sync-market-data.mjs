@@ -11,6 +11,7 @@
 import fs from 'fs'
 import { computeSignals } from '../src/lib/indicators.js'
 import { TICKERS } from '../src/lib/tickers.js'
+import { leanDirection } from '../src/lib/lean.js'
 
 const API_KEY = process.env.TWELVE_DATA_KEY
 // Lives in public/, not data/, so the built app can fetch it as a plain
@@ -112,13 +113,14 @@ async function main() {
     if (targetIndex >= bars.length) continue
     const exitPrice = bars[targetIndex].close
     const returnPct = ((exitPrice - entry.price) / entry.price) * 100
-    const isBullishCall = entry.verdict.includes('Bullish')
-    const isBearishCall = entry.verdict.includes('Bearish')
+    // Resolves both the current band keys and the pre-rename labels that
+    // older entries in this log still carry.
+    const dir = leanDirection(entry.verdict)
     entry.outcome = {
       resolvedDate: bars[targetIndex].date,
       exitPrice,
       returnPct,
-      correct: isBullishCall ? returnPct > 0 : isBearishCall ? returnPct < 0 : null,
+      correct: dir === 'up' ? returnPct > 0 : dir === 'down' ? returnPct < 0 : null,
     }
     resolvedCount++
   }
@@ -130,7 +132,7 @@ async function main() {
     if (!bars) continue
     if (log.some((e) => e.symbol === t.symbol && e.date === today)) continue
     const signals = computeSignals(bars)
-    if (signals.verdict === 'Neutral') continue
+    if (signals.verdict === 'split') continue
     log.push({ date: today, symbol: t.symbol, verdict: signals.verdict, score: signals.score, price: signals.price })
     loggedCount++
   }

@@ -41,12 +41,12 @@ export const GLOSSARY = {
       'Not a probability, a confidence level, or a price target. +4 does not mean "80% likely" or "4 out of 5" — the scale is arbitrary and the indicators overlap heavily, so four agreeing signals are not four independent opinions.',
   },
   verdict: {
-    term: 'Verdict badge',
+    term: 'Agreement badge',
     basis: 'current',
-    what: 'A plain-language band for the confluence score: Strong Bullish at +3 or above, Bullish at +1 to +2, Neutral at 0, and the mirror image on the bearish side.',
-    how: 'A direct relabelling of the score. No extra information is added.',
+    what: 'How much the tracked indicators currently agree with each other, and which way they point: aligned at ±3 or beyond, leaning at ±1 to ±2, split at 0. The numbers beside it are the raw tally of positive and negative readings.',
+    how: 'A band over the confluence score, shown with the underlying vote count so the difference between 5-0 and 4-1 stays visible.',
     isNot:
-      'Not a recommendation, and not informed by whether this setup has actually worked on this ticker before. That is a separate number — the historical base rate shown beside it, which frequently disagrees.',
+      'Not a forecast, and no longer worded as one. It used to read "Strong Bullish" and similar, which asserted a direction the site\'s own measurement does not support — the relationship between this score and what follows is close enough to zero to be useless. "Split" also does not mean quiet: it means the indicators are actively disagreeing.',
   },
   winRate: {
     term: 'Win rate',
@@ -186,7 +186,7 @@ export const GLOSSARY = {
   trackRecord: {
     term: 'Track record',
     basis: 'measured',
-    what: 'Every non-neutral verdict the app has ever displayed, logged the day it fired and scored 5 sessions later.',
+    what: 'Every day the app showed a ticker’s readings leaning one way rather than splitting, logged as it happened and scored 5 sessions later.',
     how: 'Written automatically by the daily job to a committed file. Nothing is removed after the fact, and misses are included.',
     isNot:
       'Not a performance record of a strategy. Calls overlap, are unweighted and unsized, and a "hit" only means price moved the way the verdict leaned — by any amount, however small.',

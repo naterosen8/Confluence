@@ -1,4 +1,5 @@
 import { scalePoints } from './scalePoints'
+import { leanByKey, LEAN_COLORS } from './lean'
 
 const COLORS = {
   bg: '#0b0f14',
@@ -9,13 +10,7 @@ const COLORS = {
   accent: '#0d9488',
 }
 
-const VERDICT_COLORS = {
-  'Strong Bullish': '#0f9d58',
-  Bullish: '#4caf7d',
-  Neutral: '#8b8f98',
-  Bearish: '#e0715a',
-  'Strong Bearish': '#e05252',
-}
+const VERDICT_COLORS = LEAN_COLORS
 
 const SIZE = 1080
 
@@ -127,9 +122,10 @@ export function drawShareCard(ctx, { symbol, name, price, verdict, closes, statL
   ctx.fillText(`$${price.toFixed(2)}`, 70, 460)
 
   // Verdict badge
-  const verdictColor = VERDICT_COLORS[verdict] || VERDICT_COLORS.Neutral
+  const band = leanByKey(verdict)
+  const verdictColor = (band && VERDICT_COLORS[band.key]) || VERDICT_COLORS.split
   ctx.font = FONT(700, 32)
-  const badgeText = verdict
+  const badgeText = band ? band.label : 'Readings split'
   const badgePadX = 26
   const textWidth = ctx.measureText(badgeText).width
   const badgeW = textWidth + badgePadX * 2
@@ -212,7 +208,7 @@ export function buildCaption({ symbol, verdict, statLine, hasStat }) {
     ? 'RSI, MACD, trend, and volatility — backtested against real history, not vibes. Link in bio.'
     : 'RSI, MACD, trend, and volatility, with the historical base rate shown whenever there is enough of one. Link in bio.'
   return [
-    `$${symbol} is showing a ${verdict} confluence signal on Confluence right now.`,
+    `$${symbol}: ${(leanByKey(verdict)?.label ?? 'readings split').toLowerCase()} on Confluence right now — a description of how the indicators currently agree, not a forecast.`,
     '',
     lede,
     '',
