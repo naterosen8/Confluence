@@ -14,7 +14,7 @@ const VERDICT_COLORS = {
   Bullish: '#4caf7d',
   Neutral: '#8b8f98',
   Bearish: '#e0715a',
-  'Strong Bearish': '#d63b3b',
+  'Strong Bearish': '#e05252',
 }
 
 const SIZE = 1080
@@ -43,6 +43,21 @@ function truncateToWidth(ctx, str, maxWidth) {
 }
 
 const FONT = (weight, size) => `${weight} ${size}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
+
+// Sets the largest font size at or below `startSize` that keeps `str` inside
+// `maxWidth`. Canvas text doesn't wrap or shrink on its own — it just runs
+// off the edge — so a long symbol (crypto pairs like BTC/USD, or anything
+// longer than a 4-letter ticker) was being drawn straight past the card
+// border and out of the image.
+function fitFont(ctx, str, maxWidth, weight, startSize, minSize) {
+  let size = startSize
+  ctx.font = FONT(weight, size)
+  while (size > minSize && ctx.measureText(str).width > maxWidth) {
+    size -= 2
+    ctx.font = FONT(weight, size)
+  }
+  return size
+}
 
 // Draws the full card onto a 1080x1080 canvas 2D context. Pure function —
 // no DOM/React dependency — so it's easy to reuse from a download button or
@@ -97,8 +112,9 @@ export function drawShareCard(ctx, { symbol, name, price, verdict, closes, statL
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
   ctx.fillStyle = COLORS.text
-  ctx.font = FONT(800, 128)
-  ctx.fillText(symbol, 68, 300)
+  const symbolMaxWidth = SIZE - 68 - 70
+  fitFont(ctx, symbol, symbolMaxWidth, 800, 128, 56)
+  ctx.fillText(truncateToWidth(ctx, symbol, symbolMaxWidth), 68, 300)
 
   ctx.fillStyle = COLORS.muted
   ctx.font = FONT(500, 36)
@@ -189,12 +205,18 @@ export function buildCaption({ symbol, verdict, statLine, hasStat }) {
   const lede = hasStat
     ? statLine
     : "Not enough tracked history yet to back-test this exact setup — check back as more data accumulates."
+  // The closing line used to claim "backtested against real history"
+  // unconditionally, directly contradicting the line above it whenever this
+  // setup had no usable sample — in a caption built for public posting.
+  const closer = hasStat
+    ? 'RSI, MACD, trend, and volatility — backtested against real history, not vibes. Link in bio.'
+    : 'RSI, MACD, trend, and volatility, with the historical base rate shown whenever there is enough of one. Link in bio.'
   return [
     `$${symbol} is showing a ${verdict} confluence signal on Confluence right now.`,
     '',
     lede,
     '',
-    'RSI, MACD, trend, and volatility — backtested against real history, not vibes. Link in bio.',
+    closer,
     '',
     'Not financial advice — educational screening tool only.',
   ].join('\n')

@@ -10,6 +10,8 @@ import VerdictBadge from '../components/VerdictBadge'
 import LivePrice from '../components/LivePrice'
 import ShareCard from '../components/ShareCard'
 import SimulateTradeForm from '../components/SimulateTradeForm'
+import NotFound from './NotFound'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 function pct(v, digits = 2) {
   if (v == null) return '—'
@@ -19,6 +21,26 @@ function pct(v, digits = 2) {
 export default function TickerDetail() {
   const { symbol } = useParams()
   const meta = TICKERS.find((t) => t.symbol === symbol)
+
+  // Bail out before computing anything. getSeries() falls back to a demo
+  // random walk for symbols it doesn't know, which for an untracked ticker
+  // meant rendering a full verdict, base-rate tables and a shareable card
+  // captioned "backtested against real history" — for a symbol this app has
+  // never fetched. An honest dead end is the only correct output here.
+  if (!meta) {
+    return (
+      <NotFound
+        title={`${symbol} isn't tracked here`}
+        message={`Confluence analyzes a fixed, curated list of ${TICKERS.length} symbols so every one of them has real synced price history behind it. ${symbol} isn't on that list, so there's nothing genuine to show.`}
+      />
+    )
+  }
+
+  return <TickerAnalysis symbol={symbol} meta={meta} />
+}
+
+function TickerAnalysis({ symbol, meta }) {
+  useDocumentTitle(`${symbol} — ${meta.name}`)
   const bars = getSeries(symbol)
   const closes = bars.map((b) => b.close)
   const spyBars = getSeries('SPY')
@@ -45,9 +67,20 @@ export default function TickerDetail() {
       <div className="detail-header">
         <div>
           <h1>{symbol}</h1>
-          <p className="muted">{meta?.name || 'Unknown ticker'}</p>
+          <p className="muted">{meta.name}</p>
         </div>
-        <VerdictBadge verdict={signals.verdict} />
+        {/* The badge is only what the indicators read right now. Shown alone
+            it invites being taken as a forecast, so the historical record for
+            this exact setup sits directly under it — including when that
+            record disagrees with the badge, which is often. */}
+        <div className="detail-verdict">
+          <VerdictBadge verdict={signals.verdict} />
+          <span className="muted small detail-verdict-note">
+            {setup.stat
+              ? `Historically ${setup.stat.winRate.toFixed(0)}% won over ${setup.stat.sampleSize} similar setups`
+              : 'No comparable history yet for this setup'}
+          </span>
+        </div>
       </div>
 
       <div className="detail-chart">
@@ -233,7 +266,7 @@ export default function TickerDetail() {
         </p>
         <ShareCard
           symbol={symbol}
-          name={meta?.name || ''}
+          name={meta.name}
           price={signals.price}
           verdict={signals.verdict}
           closes={closes.slice(-90)}

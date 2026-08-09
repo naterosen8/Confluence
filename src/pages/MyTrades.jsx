@@ -5,6 +5,7 @@ import { HAS_SUPABASE } from '../lib/supabaseClient'
 import { listTrades, closeTrade, deleteTrade } from '../lib/trades'
 import { getSeries } from '../lib/dataProvider'
 import { evaluatePosition } from '../lib/pnl'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 function pct(v) {
   return `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
@@ -22,6 +23,7 @@ function evaluate(trade) {
 }
 
 export default function MyTrades() {
+  useDocumentTitle('My trades')
   const { user, loading, error: sessionError } = useEnsureSession()
   const [trades, setTrades] = useState(null)
   const [error, setError] = useState(null)

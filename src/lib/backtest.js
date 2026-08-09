@@ -1,5 +1,10 @@
 import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries } from './indicators'
 
+// How many sessions forward every base rate in this file looks. Exported so
+// the UI can name the window ("over the next 5 sessions") without a third
+// copy of the number drifting out of sync with the engine.
+export const FORWARD_DAYS = 5
+
 function summarize(occurrences) {
   if (occurrences.length === 0) return { sampleSize: 0 }
   const returns = occurrences.map((o) => o.return)
@@ -60,7 +65,7 @@ export const SIGNAL_LABELS = {
 // This is the base rate — the thing a human scanning a chart by eye can't
 // compute in their head: "this exact setup has happened N times before, and
 // here's the distribution of outcomes," instead of just "this is happening now."
-export function backtestTicker(bars, { forwardDays = 5 } = {}) {
+export function backtestTicker(bars, { forwardDays = FORWARD_DAYS } = {}) {
   const closes = bars.map((b) => b.close)
   const { bullish, bearish } = findMacdCrosses(closes)
   const { exitOversold, enterOverbought } = findRsiEvents(closes)
@@ -124,7 +129,7 @@ const REGIME_LABELS = { up: 'uptrending', down: 'downtrending', choppy: 'choppy/
 // afterward — split into "every time this score occurred" and "every time
 // this score occurred in a market regime like today's." That second, smaller
 // number is the more honest one to weigh a current setup against.
-export function backtestByScore(bars, spyBars, { forwardDays = 5 } = {}) {
+export function backtestByScore(bars, spyBars, { forwardDays = FORWARD_DAYS } = {}) {
   const closes = bars.map((b) => b.close)
   const scores = scoreSeries(bars)
   const regimeMap = regimeSeries(spyBars)

@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import TickerDetail from './pages/TickerDetail'
 import TrackRecord from './pages/TrackRecord'
 import MyTrades from './pages/MyTrades'
+import NotFound from './pages/NotFound'
 import ErrorBoundary from './components/ErrorBoundary'
 import { AuthProvider } from './context/AuthContext'
 import { loadMarketData } from './lib/dataProvider'
@@ -18,6 +19,7 @@ function RoutedContent() {
         <Route path="/ticker/:symbol" element={<TickerDetail />} />
         <Route path="/track-record" element={<TrackRecord />} />
         <Route path="/my-trades" element={<MyTrades />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </ErrorBoundary>
   )

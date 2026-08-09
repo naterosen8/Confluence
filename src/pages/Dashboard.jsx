@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
 import { getSeries, HAS_LIVE_DATA, DATA_GENERATED_AT } from '../lib/dataProvider'
 import { computeSignals } from '../lib/indicators'
-import { bestAvailableStat } from '../lib/backtest'
+import { bestAvailableStat, FORWARD_DAYS } from '../lib/backtest'
 import { pollLivePrices, HAS_LIVE_PRICE } from '../lib/livePrice'
 import Sparkline from '../components/Sparkline'
 import VerdictBadge from '../components/VerdictBadge'
@@ -73,12 +73,20 @@ export default function Dashboard() {
                     <strong>{row.symbol}</strong>
                     <VerdictBadge verdict={row.signals.verdict} />
                   </div>
+                  {/* Spelling out the direction matters here: a card reading
+                      "0% win rate" next to a "Bullish" badge looks like a
+                      contradiction until you know the win rate is what
+                      *happened next* historically, not a rating of the setup.
+                      Colour alone also left the whole distinction invisible to
+                      colourblind readers. */}
                   <div className={`top-setup-stat top-setup-${direction}`}>
-                    {stat.winRate.toFixed(0)}% win rate, {stat.avgReturn >= 0 ? '+' : ''}
-                    {stat.avgReturn.toFixed(2)}% avg
+                    {direction === 'bullish' ? 'Rose' : 'Fell'} {Math.max(stat.winRate, 100 - stat.winRate).toFixed(0)}% of
+                    the time
                   </div>
                   <div className="muted small">
-                    N={stat.sampleSize} ({source === 'regime-matched' ? 'this regime' : 'all history'})
+                    {stat.avgReturn >= 0 ? '+' : ''}
+                    {stat.avgReturn.toFixed(2)}% avg over the next {FORWARD_DAYS} sessions · N={stat.sampleSize} (
+                    {source === 'regime-matched' ? 'this regime' : 'all history'})
                   </div>
                 </Link>
               )

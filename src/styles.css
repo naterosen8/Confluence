@@ -13,6 +13,15 @@
   box-sizing: border-box;
 }
 
+/* The browser default focus ring resolves to near-black against this dark
+   background — technically present, effectively invisible, which leaves
+   keyboard navigation untrackable. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -531,4 +540,79 @@ table.grid {
   font-size: 0.8rem;
   max-width: 1100px;
   margin: 0 auto;
+}
+
+.detail-verdict {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  text-align: right;
+}
+
+.detail-verdict-note {
+  max-width: 240px;
+  line-height: 1.35;
+}
+
+.not-found {
+  max-width: 560px;
+  margin: 48px auto;
+  text-align: center;
+}
+
+.not-found p {
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.not-found-cta {
+  display: inline-block;
+  text-decoration: none;
+}
+
+/* The tagline and full-width nav labels are the first things to break on a
+   narrow screen — they wrapped onto four lines each and pushed the actual
+   page content most of a viewport down. */
+@media (max-width: 640px) {
+  .site-header {
+    padding: 14px 16px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tagline {
+    display: none;
+  }
+
+  .site-nav {
+    gap: 14px;
+  }
+
+  .site-nav a {
+    white-space: nowrap;
+  }
+
+  main {
+    padding: 16px;
+  }
+
+  .site-footer {
+    padding: 16px;
+  }
+
+  .detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .detail-verdict {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .detail-verdict-note {
+    max-width: none;
+  }
 }

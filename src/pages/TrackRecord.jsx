@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { FORWARD_DAYS } from '../lib/backtest'
+import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 function pct(v, digits = 2) {
   if (v == null) return '—'
@@ -19,6 +21,7 @@ function summarize(entries) {
 // ever-larger download for every visitor, on every page, whether or not
 // they ever open this one.
 export default function TrackRecord() {
+  useDocumentTitle('Track record')
   const [trackRecord, setTrackRecord] = useState(null)
   const [loadError, setLoadError] = useState(null)
 
@@ -68,15 +71,30 @@ export default function TrackRecord() {
 
       <h1>Track record</h1>
       <p className="muted">
-        Every non-neutral verdict this app has ever shown, logged automatically the day it fired, resolved 5 trading
-        sessions later against the actual close — misses included. Nothing here is curated or removed after the
-        fact; the raw log is a committed file in the repo.
+        Every non-neutral verdict this app has ever shown, logged automatically the day it fired, resolved{' '}
+        {FORWARD_DAYS} trading sessions later against the actual close — misses included. Nothing here is curated or
+        removed after the fact; the raw log is a committed file in the repo.
       </p>
 
       {!overall ? (
+        /* Without the pending count this read as "nothing here / broken" even
+           when the job was running fine and already tracking calls — the
+           tracking just hadn't matured 5 sessions yet. */
         <div className="callout callout-highlight">
-          No resolved calls yet. This log is written by a daily job — check back after a few trading sessions have
-          passed since the app started tracking.
+          {pending.length > 0 ? (
+            <>
+              <strong>
+                {pending.length} call{pending.length === 1 ? '' : 's'} logged and awaiting resolution.
+              </strong>{' '}
+              Each one resolves {FORWARD_DAYS} trading sessions after it fired, so the first results appear about a week
+              after tracking starts. Nothing is scored yet.
+            </>
+          ) : (
+            <>
+              No calls logged yet. This log is written by a daily job — check back after it has run on a session where
+              some ticker showed a non-neutral verdict.
+            </>
+          )}
         </div>
       ) : (
         <>

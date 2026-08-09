@@ -3,7 +3,9 @@ const COLORS = {
   Bullish: '#4caf7d',
   Neutral: '#8b8f98',
   Bearish: '#e0715a',
-  'Strong Bearish': '#d63b3b',
+  // Lightened from #d63b3b, which fell below the WCAG AA 4.5:1 body-text
+  // threshold against the panel background at this badge's small size.
+  'Strong Bearish': '#e05252',
 }
 
 export default function VerdictBadge({ verdict }) {
