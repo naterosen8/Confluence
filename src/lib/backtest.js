@@ -94,6 +94,28 @@ export function regimeSeries(spyBars) {
   return map
 }
 
+// SPY only trades Mon-Fri, but crypto bars include weekends — an exact-date
+// lookup into regimeMap silently misses every Saturday/Sunday crypto bar and
+// leaves them regime-unmatched forever. This instead finds the latest SPY
+// trading day at or before the target date, so a Saturday close still gets
+// Friday's regime. `regimeDates` must be sorted ascending (Map insertion
+// order from regimeSeries already guarantees this).
+function regimeAt(regimeDates, regimeMap, date) {
+  let lo = 0
+  let hi = regimeDates.length - 1
+  let match = -1
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1
+    if (regimeDates[mid] <= date) {
+      match = mid
+      lo = mid + 1
+    } else {
+      hi = mid - 1
+    }
+  }
+  return match === -1 ? null : regimeMap.get(regimeDates[match])
+}
+
 const REGIME_LABELS = { up: 'uptrending', down: 'downtrending', choppy: 'choppy/range-bound' }
 
 // The core of the "multi-condition" upgrade: instead of four independent
@@ -106,13 +128,14 @@ export function backtestByScore(bars, spyBars, { forwardDays = 5 } = {}) {
   const closes = bars.map((b) => b.close)
   const scores = scoreSeries(bars)
   const regimeMap = regimeSeries(spyBars)
-  const currentRegime = regimeMap.get(bars[bars.length - 1].date) ?? null
+  const regimeDates = [...regimeMap.keys()]
+  const currentRegime = regimeAt(regimeDates, regimeMap, bars[bars.length - 1].date)
 
   const buckets = new Map()
   for (let i = 0; i < scores.length - forwardDays; i++) {
     if (scores[i] == null) continue
     const ret = (closes[i + forwardDays] - closes[i]) / closes[i]
-    const regime = regimeMap.get(bars[i].date) ?? null
+    const regime = regimeAt(regimeDates, regimeMap, bars[i].date)
     if (!buckets.has(scores[i])) buckets.set(scores[i], { all: [], regimeMatched: [] })
     const bucket = buckets.get(scores[i])
     bucket.all.push({ return: ret })

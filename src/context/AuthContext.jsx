@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { supabase, HAS_SUPABASE } from '../lib/supabaseClient'
 
 const AuthContext = createContext({ user: null, loading: false, ensureSession: async () => null })
@@ -25,18 +25,35 @@ export function AuthProvider({ children }) {
   // an email attached, only that auth.uid() matches. The tradeoff, and it's
   // a real one, is that this identity lives in this browser only — there's
   // no credential to sign back in with from another device.
-  async function ensureSession() {
+  const ensureSession = useCallback(async () => {
     if (!HAS_SUPABASE) throw new Error('Simulated trades are not configured yet.')
     const { data } = await supabase.auth.getSession()
     if (data.session) return data.session
     const { data: signInData, error } = await supabase.auth.signInAnonymously()
     if (error) throw error
     return signInData.session
-  }
+  }, [])
 
   return <AuthContext.Provider value={{ user, loading, ensureSession }}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {
   return useContext(AuthContext)
+}
+
+// Components that need a session just call this instead of each
+// duplicating "call ensureSession once loading settles and there's no
+// user yet." Deliberately lazy — only components that actually render this
+// hook trigger account creation, so visitors who never touch the simulator
+// never get an anonymous account.
+export function useEnsureSession() {
+  const { user, loading, ensureSession } = useAuth()
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    if (!HAS_SUPABASE || loading || user) return
+    ensureSession().catch((err) => setError(err.message || 'Could not start a session'))
+  }, [loading, user, ensureSession])
+
+  return { user, loading, error }
 }

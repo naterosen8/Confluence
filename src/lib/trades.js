@@ -27,13 +27,13 @@ export async function createTrade({ userId, symbol, direction, capital, leverage
   return data
 }
 
-export async function closeTrade(id, { closePrice, liquidated }) {
+export async function closeTrade(id, { closePrice, liquidated, closeDate }) {
   const { data, error } = await supabase
     .from('trades')
     .update({
       status: liquidated ? 'liquidated' : 'closed',
       close_price: closePrice,
-      close_date: new Date().toISOString(),
+      close_date: closeDate || new Date().toISOString(),
     })
     .eq('id', id)
     .select()

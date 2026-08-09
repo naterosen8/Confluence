@@ -1,3 +1,5 @@
+import { scalePoints } from './scalePoints'
+
 const COLORS = {
   bg: '#0b0f14',
   panel: '#121821',
@@ -134,11 +136,7 @@ export function drawShareCard(ctx, { symbol, name, price, verdict, closes, statL
   const chartW = SIZE - 140
   const chartH = 190
   if (closes && closes.length > 1) {
-    const min = Math.min(...closes)
-    const max = Math.max(...closes)
-    const range = max - min || 1
-    const step = chartW / (closes.length - 1)
-    const points = closes.map((v, i) => [chartX + i * step, chartY + chartH - ((v - min) / range) * chartH])
+    const points = scalePoints(closes, chartW, chartH).map(([x, y]) => [chartX + x, chartY + y])
 
     ctx.beginPath()
     ctx.moveTo(points[0][0], chartY + chartH)

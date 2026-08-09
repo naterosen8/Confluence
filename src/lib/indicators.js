@@ -175,7 +175,10 @@ export function bollinger(closes, period = 20, mult = 2) {
 export function bollingerSqueeze(closes, period = 20, mult = 2, lookback = 100) {
   const series = []
   for (let i = period - 1; i < closes.length; i++) {
-    const b = bollinger(closes.slice(0, i + 1), period, mult)
+    // bollinger() only ever looks at the trailing `period` closes anyway, so
+    // slicing the whole growing prefix here was pure O(n^2) waste — pass it
+    // just the fixed-size window it needs.
+    const b = bollinger(closes.slice(i + 1 - period, i + 1), period, mult)
     series.push(b ? b.bandwidth : null)
   }
   const valid = series.filter((v) => v != null)
@@ -258,6 +261,26 @@ export function detectDivergence(bars, lookback = 60) {
   return { bullish, bearish }
 }
 
+// Assigns each bar the index of the Mon-Fri calendar week it falls in,
+// using the exact same bucketing rule as resampleWeekly (a new week opens
+// on a Monday, but only once the current bucket already has a bar in it).
+// Computed once so per-day weekly-trend lookups below don't each re-walk
+// the whole prefix.
+function weekIndices(bars) {
+  const indices = new Array(bars.length)
+  let week = 0
+  let bucketStarted = false
+  for (let i = 0; i < bars.length; i++) {
+    const dow = new Date(bars[i].date + 'T00:00:00Z').getUTCDay()
+    if (dow === 1 && bucketStarted) {
+      week++
+    }
+    indices[i] = week
+    bucketStarted = true
+  }
+  return indices
+}
+
 // The confluence score computed for every historical day, not just today.
 // This is what makes the backtest a real statement about "confluence" as a
 // combined condition, rather than four separate single-signal base rates
@@ -271,6 +294,17 @@ export function scoreSeries(bars) {
   const sma50Arr = smaSeries(closes, 50)
   const sma200Arr = smaSeries(closes, 200)
   const scores = new Array(bars.length).fill(null)
+
+  // weeklyTrend(bars.slice(0, i + 1)) used to be called per day, each call
+  // re-resampling the entire prefix into weekly buckets — O(n) work n times
+  // over. A day's weekly trend only needs the *finalized* close of each
+  // prior week (fixed, computable once over the full history) plus today's
+  // own close standing in for the still-forming current week — exactly what
+  // weeklyTrend would have used as the last, partial "weekly close" anyway.
+  const weekIdx = weekIndices(bars)
+  const weekFinalClose = []
+  for (let i = 0; i < bars.length; i++) weekFinalClose[weekIdx[i]] = closes[i]
+  const weeklyPeriod = 10
 
   for (let i = 0; i < bars.length; i++) {
     if (sma200Arr[i] == null) continue
@@ -290,9 +324,17 @@ export function scoreSeries(bars) {
       if (closes[i] > sma50Arr[i]) bullish++
       else bearish++
     }
-    const weekly = weeklyTrend(bars.slice(0, i + 1))
-    if (weekly.trend === 'up') bullish++
-    else if (weekly.trend === 'down') bearish++
+
+    const w = weekIdx[i]
+    const priorCount = Math.min(w, weeklyPeriod - 1)
+    let weeklySum = closes[i]
+    for (let k = w - priorCount; k < w; k++) weeklySum += weekFinalClose[k]
+    const weeklyCount = priorCount + 1
+    if (weeklyCount >= weeklyPeriod) {
+      const weeklySma = weeklySum / weeklyPeriod
+      if (closes[i] > weeklySma) bullish++
+      else bearish++
+    }
 
     scores[i] = bullish - bearish
   }

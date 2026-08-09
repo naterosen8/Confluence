@@ -15,3 +15,23 @@ export function computePnl({ direction, entryPrice, currentPrice, capital, lever
     liquidated,
   }
 }
+
+// A single current-price check misses this: a highly-leveraged position can
+// cross -100% mid-trade and then recover before anyone looks, which would
+// otherwise get recorded as a win. This walks the real daily closes from
+// entry forward and stops at the first day the position would have been
+// wiped out — that day's price is the honest outcome, not whatever the
+// price happens to be whenever the user next opens the app.
+export function evaluatePosition({ bars, entryDate, entryPrice, direction, capital, leverage }) {
+  const path = bars.filter((b) => b.date >= entryDate)
+  for (const bar of path) {
+    const result = computePnl({ direction, entryPrice, currentPrice: bar.close, capital, leverage })
+    if (result.liquidated) {
+      return { ...result, asOfDate: bar.date, asOfPrice: bar.close }
+    }
+  }
+  const last = path[path.length - 1]
+  const asOfDate = last ? last.date : entryDate
+  const asOfPrice = last ? last.close : entryPrice
+  return { ...computePnl({ direction, entryPrice, currentPrice: asOfPrice, capital, leverage }), asOfDate, asOfPrice }
+}
