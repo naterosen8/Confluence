@@ -110,7 +110,7 @@ function sumAsOf(entryLists, date) {
 }
 
 export const CONCEPTS = {
-  assets: ['Assets'],
+  assets: ['Assets', 'AssetsNet'],
   liabilities: ['Liabilities'],
   equity: [
     'StockholdersEquity',
