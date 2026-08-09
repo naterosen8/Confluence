@@ -302,3 +302,31 @@ d('how much evidence actually exists', () => {
     expect(worst).toBeGreaterThan(0)
   })
 })
+
+d('track record entries are stamped so they can actually resolve', () => {
+  const LOG_PATH = path.resolve(process.cwd(), 'public/track-record.json')
+  const log = fs.existsSync(LOG_PATH) ? JSON.parse(fs.readFileSync(LOG_PATH, 'utf8')) : []
+
+  // An entry is resolved by finding its starting bar via an exact date match.
+  // Two ways that silently fails, both of which happened:
+  //   - stamped with the job's run date, which on a weekend matches no bar at
+  //     all, leaving the entry pending forever
+  //   - stamped with a trading date but priced from the *previous* bar, which
+  //     resolves against the wrong window
+  // Both are invisible until someone reconciles the log against the bars.
+  it('every entry points at a real bar whose close is the logged price', () => {
+    const broken = []
+    for (const e of log) {
+      const series = bars[e.symbol]
+      if (!series) continue
+      const bar = series.find((b) => b.date === e.date)
+      if (!bar) {
+        broken.push(`${e.symbol} ${e.date}: no bar on that date (can never resolve)`)
+      } else if (Math.abs(bar.close - e.price) > 1e-3) {
+        broken.push(`${e.symbol} ${e.date}: logged price ${e.price} but that bar closed ${bar.close}`)
+      }
+    }
+    if (broken.length) console.log('\nMis-stamped track-record entries:\n  ' + broken.join('\n  '))
+    expect(broken).toEqual([])
+  })
+})
