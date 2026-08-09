@@ -98,3 +98,23 @@ export function getSeries(symbol) {
 export function hasRealData(symbol) {
   return Boolean(marketData.bars?.[symbol]?.length)
 }
+
+// How old the snapshot is, in calendar days. The sync can fail silently — it
+// has, three times — and the failure mode is not an error page but yesterday's
+// prices presented as today's, which is worse. Anything the user is asked to
+// read as current should be able to say when it stopped being current.
+//
+// Tolerant of weekends and holidays by design: a Monday-morning visitor is
+// legitimately looking at Friday's close, so the threshold is generous and
+// only fires when the gap is longer than any normal market closure.
+export function snapshotAgeDays(now = Date.now()) {
+  if (!DATA_GENERATED_AT) return null
+  return (now - Date.parse(DATA_GENERATED_AT)) / 86400000
+}
+
+export const STALE_AFTER_DAYS = 4
+
+export function isSnapshotStale(now = Date.now()) {
+  const age = snapshotAgeDays(now)
+  return age != null && age > STALE_AFTER_DAYS
+}

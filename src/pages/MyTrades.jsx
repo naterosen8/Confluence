@@ -3,15 +3,21 @@ import { Link } from 'react-router-dom'
 import { useEnsureSession } from '../context/AuthContext'
 import { HAS_SUPABASE } from '../lib/supabaseClient'
 import { listTrades, closeTrade, deleteTrade } from '../lib/trades'
-import { getSeries } from '../lib/dataProvider'
-import { evaluatePosition } from '../lib/pnl'
+import { getSeries, hasRealData } from '../lib/dataProvider'
+import { evaluatePosition, computePnl } from '../lib/pnl'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 function pct(v) {
   return `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
 }
 
+// Returns null when the symbol has no real synced history. getSeries() falls
+// back to a demo random walk for anything it does not know, so without this
+// guard a genuine recorded position would be marked to invented prices — and
+// could even be auto-settled as liquidated against them. Same failure the
+// ticker pages had; a real trade deserves it even less.
 function evaluate(trade) {
+  if (!hasRealData(trade.symbol)) return null
   return evaluatePosition({
     bars: getSeries(trade.symbol),
     entryDate: trade.entry_date.slice(0, 10),
@@ -41,7 +47,7 @@ export default function MyTrades() {
           loaded.map(async (trade) => {
             if (trade.status !== 'open') return trade
             const result = evaluate(trade)
-            if (!result.liquidated) return trade
+            if (!result || !result.liquidated) return trade
             try {
               return await closeTrade(trade.id, {
                 closePrice: result.asOfPrice,
@@ -62,6 +68,10 @@ export default function MyTrades() {
     setClosingId(trade.id)
     try {
       const result = evaluate(trade)
+      if (!result) {
+        setError(`No synced price history for ${trade.symbol}, so this position can't be settled honestly.`)
+        return
+      }
       const updated = await closeTrade(trade.id, {
         closePrice: result.asOfPrice,
         liquidated: result.liquidated,
@@ -159,6 +169,30 @@ export default function MyTrades() {
                   <tbody>
                     {openTrades.map((trade) => {
                       const result = evaluate(trade)
+                      if (!result) {
+                        return (
+                          <tr key={trade.id}>
+                            <td>
+                              <strong>{trade.symbol}</strong>
+                            </td>
+                            <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
+                            <td>${trade.entry_price.toFixed(2)}</td>
+                            <td colSpan={4} className="muted small">
+                              No synced price history for this symbol — it can't be marked to market, so no figure is
+                              shown rather than one from placeholder data.
+                            </td>
+                            <td>
+                              <button
+                                className="button-secondary"
+                                disabled={deletingId === trade.id}
+                                onClick={() => handleDelete(trade)}
+                              >
+                                {deletingId === trade.id ? 'Deleting…' : 'Delete'}
+                              </button>
+                            </td>
+                          </tr>
+                        )
+                      }
                       return (
                         <tr key={trade.id}>
                           <td>
@@ -217,12 +251,18 @@ export default function MyTrades() {
                   </thead>
                   <tbody>
                     {pastTrades.map((trade) => {
-                      const dirMult = trade.direction === 'long' ? 1 : -1
-                      const pnlPct = Math.max(
-                        -1,
-                        dirMult * trade.leverage * ((trade.close_price - trade.entry_price) / trade.entry_price)
-                      )
-                      const pnlDollars = trade.capital * pnlPct
+                      // Shared position math rather than a second inline copy.
+                      // Two copies of this already drifted apart once in this
+                      // codebase and disagreed about whether a position had
+                      // been wiped out.
+                      const settled = computePnl({
+                        direction: trade.direction,
+                        entryPrice: trade.entry_price,
+                        currentPrice: trade.close_price,
+                        capital: trade.capital,
+                        leverage: trade.leverage,
+                      })
+                      const pnlDollars = settled.pnlDollars
                       return (
                         <tr key={trade.id}>
                           <td>
@@ -236,7 +276,7 @@ export default function MyTrades() {
                           <td>${trade.capital.toFixed(0)}</td>
                           <td>{trade.leverage}x</td>
                           <td className={pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
-                            {pct(pnlPct * 100)} ({pnlDollars >= 0 ? '+' : ''}${pnlDollars.toFixed(2)})
+                            {pct(settled.pnlPct)} ({pnlDollars >= 0 ? '+' : ''}${pnlDollars.toFixed(2)})
                           </td>
                           <td className={trade.status === 'liquidated' ? 'pnl-negative' : 'muted small'} style={{ textTransform: 'capitalize' }}>
                             {trade.status}

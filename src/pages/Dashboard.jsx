@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
-import { getSeries, HAS_LIVE_DATA, DATA_GENERATED_AT } from '../lib/dataProvider'
+import { getSeries, HAS_LIVE_DATA, DATA_GENERATED_AT, isSnapshotStale, snapshotAgeDays } from '../lib/dataProvider'
 import { computeSignals } from '../lib/indicators'
 import { bestAvailableStat, FORWARD_DAYS } from '../lib/backtest'
 import { pollLivePrices, HAS_LIVE_PRICE } from '../lib/livePrice'
@@ -48,6 +48,14 @@ export default function Dashboard() {
 
   return (
     <div>
+      {isSnapshotStale() && (
+        <div className="callout impact-note">
+          <strong>This data is {Math.floor(snapshotAgeDays())} days old.</strong> The daily sync has not completed
+          since then, so every price, indicator and base rate on this page describes that date rather than today. It
+          is shown rather than hidden, but it should not be read as current.
+        </div>
+      )}
+
       <div className="toolbar">
         <span className="muted">
           {HAS_LIVE_DATA

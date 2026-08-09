@@ -69,7 +69,17 @@ async function main() {
       const facts = await getJson(FACTS_URL(cik))
       const parsed = parseCompanyFacts(facts)
       if (!parsed || !parsed.quarters.length) {
-        console.error(`No usable balance sheet for ${t.symbol}.`)
+        // Say which concepts the filer DOES tag. "No usable balance sheet" on
+        // its own is unactionable — META has failed this way for several runs
+        // with no way to tell why. The cause is almost always a concept name
+        // missing from a fallback chain, so printing the candidates turns a
+        // recurring mystery into a one-line fix on the next run.
+        const available = Object.keys(facts?.facts?.['us-gaap'] ?? {})
+        const candidates = available.filter((k) => /^(Assets|Liabilities|StockholdersEquity|Revenue|NetIncome)/i.test(k))
+        console.error(
+          `No usable balance sheet for ${t.symbol}. ${available.length} us-gaap concepts present; ` +
+            `candidates: ${candidates.slice(0, 12).join(', ') || '(none matched)'}`
+        )
         failed++
       } else {
         // Keep the prior entry on a bad parse rather than replacing good data

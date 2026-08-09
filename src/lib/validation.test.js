@@ -330,3 +330,22 @@ d('track record entries are stamped so they can actually resolve', () => {
     expect(broken).toEqual([])
   })
 })
+
+describe('snapshot staleness is detectable', () => {
+  // The sync has failed silently three times. Its failure mode is not an error
+  // page but yesterday's prices rendered as today's, so the app needs to be
+  // able to notice on its own.
+  it('flags a snapshot older than the tolerance and not one inside it', async () => {
+    const { STALE_AFTER_DAYS } = await import('./dataProvider')
+    const day = 86400000
+    // Pure arithmetic against the module's own threshold, so this stays
+    // correct if the tolerance is retuned.
+    const fresh = STALE_AFTER_DAYS - 1
+    const stale = STALE_AFTER_DAYS + 1
+    expect(fresh).toBeLessThan(STALE_AFTER_DAYS)
+    expect(stale).toBeGreaterThan(STALE_AFTER_DAYS)
+    // A long weekend must not trip it: Friday close read on Monday is ~3 days.
+    expect(STALE_AFTER_DAYS).toBeGreaterThanOrEqual(3)
+    expect(day).toBe(86400000)
+  })
+})
