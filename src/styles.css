@@ -542,6 +542,32 @@ table.grid {
   margin: 0 auto;
 }
 
+.leverage-study {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.leverage-study .simulate-row {
+  max-width: 480px;
+}
+
+.leverage-study input[type='number'] {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.leverage-study .score-table td:first-child,
+.leverage-study .score-table th:first-child {
+  white-space: normal;
+  min-width: 150px;
+}
+
 .detail-verdict {
   display: flex;
   flex-direction: column;

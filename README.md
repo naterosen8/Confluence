@@ -24,6 +24,7 @@ Without a synced snapshot yet (fresh clone, or before the first workflow run), t
 ```bash
 npm install
 npm run dev
+npm test    # vitest — covers the leverage/liquidation math
 ```
 
 To sync real data locally: `TWELVE_DATA_KEY=your_key node scripts/sync-market-data.mjs` (takes ~3 minutes, throttled to stay under Twelve Data's free-tier rate limit). Commit the resulting `public/market-data.json` or just leave it uncommitted for local testing.
@@ -39,6 +40,20 @@ To sync real data locally: `TWELVE_DATA_KEY=your_key node scripts/sync-market-da
 - **Historical base rates** (`src/lib/backtest.js`): for each ticker, every past occurrence of a given event (e.g. "MACD crosses above signal") is found in its tracked history, and the forward return over the next N sessions is summarized — sample size, win rate, average/best/worst return. This is the answer to "does this indicator actually mean anything for this ticker," not just "what is the indicator's current value."
 
 Detail pages lead with whichever event most recently triggered and surface its base rate first.
+
+## Leverage study
+
+`src/lib/leverageStudy.js` replays every past non-neutral confluence signal on a ticker as a hypothetical leveraged position, so the effect of position sizing on the same signals is visible rather than imagined. You set a stake and a leverage; it reports N, wipeout rate, win rate, average/median return, best/worst, and average dollar outcome — for both "setups like today" and every signal in the tracked history.
+
+Design constraints, because this is the easiest part of the app to make dishonest:
+
+- **Direction is never chosen with hindsight.** Each position's direction comes from what the confluence score said on that historical day — bullish score → long, bearish → short. This measures the app's own published stance.
+- **Every occurrence is included.** No filtering to the ones that worked.
+- **Liquidation is checked intraday**, against each session's low (long) or high (short), not its close. A leveraged position dies when price *touches* the level; scoring on closes alone would silently count wipeouts as flat survivors. This is the single detail that separates an honest study from a flattering one.
+- **The model stays optimistic about the downside** and says so: real venues liquidate earlier (maintenance margin above zero equity) and charge funding and spread.
+- **No compounded equity curve.** Chaining overlapping windows implies a mechanical strategy nobody ran and turns a modest edge into an exponential-looking chart.
+
+The math is unit-tested (`src/lib/leverageStudy.test.js`) — liquidation thresholds, intraday-wick detection on both sides, leverage multiplication, the -100% floor, and exclusion of entries without a full forward window.
 
 ## Track record
 

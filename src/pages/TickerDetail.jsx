@@ -9,6 +9,7 @@ import Sparkline from '../components/Sparkline'
 import VerdictBadge from '../components/VerdictBadge'
 import LivePrice from '../components/LivePrice'
 import ShareCard from '../components/ShareCard'
+import LeverageStudy from '../components/LeverageStudy'
 import SimulateTradeForm from '../components/SimulateTradeForm'
 import NotFound from './NotFound'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -245,6 +246,10 @@ function TickerAnalysis({ symbol, meta }) {
             </tbody>
           </table>
         </div>
+      </Section>
+
+      <Section title="What leverage would have done to these signals">
+        <LeverageStudy bars={bars} currentScore={scoreBacktest.currentScore} />
       </Section>
 
       <Section title={`Individual-signal base rates (next ${backtest.forwardDays} sessions)`}>
