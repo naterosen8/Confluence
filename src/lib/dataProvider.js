@@ -1,14 +1,40 @@
-import marketData from '../../data/market-data.json'
+// Fetched at runtime (see loadMarketData) rather than statically imported —
+// this file is ~1MB of real OHLCV history, and a static import would bake
+// the whole thing directly into the JS bundle, blocking parse/execution for
+// every visitor before the app can render anything. As a plain public/
+// asset it's fetched once, in parallel with everything else, and cached by
+// the browser like any other static file.
+let marketData = { generatedAt: null, bars: {} }
+let loadPromise = null
 
-// True once a real snapshot has been synced (see scripts/sync-market-data.mjs)
-// — not tied to any browser-side API key, because there isn't one anymore.
+// True once a real snapshot has loaded (see scripts/sync-market-data.mjs) —
+// not tied to any browser-side API key, because there isn't one anymore.
 // Every indicator here is daily-bar based, so there's nothing to gain from
 // polling continuously from the client: the snapshot updates once a day,
 // server-side, and every visitor reads the same file. No API key ships to
 // the browser, and usage doesn't scale with how many people have the site
 // open — it's a fixed ~22 requests/day regardless of traffic.
-export const HAS_LIVE_DATA = Object.keys(marketData.bars || {}).length > 0
-export const DATA_GENERATED_AT = marketData.generatedAt
+// These are live bindings (ES modules, not CommonJS) — importers see the
+// updated value automatically once loadMarketData() resolves and the app
+// re-renders, no extra plumbing needed.
+export let HAS_LIVE_DATA = false
+export let DATA_GENERATED_AT = null
+
+// Called once from App.jsx before anything else renders. Safe to call more
+// than once — every caller shares the same in-flight/completed fetch.
+export function loadMarketData() {
+  if (!loadPromise) {
+    loadPromise = fetch('/market-data.json')
+      .then((res) => (res.ok ? res.json() : { generatedAt: null, bars: {} }))
+      .catch(() => ({ generatedAt: null, bars: {} }))
+      .then((data) => {
+        marketData = data
+        HAS_LIVE_DATA = Object.keys(marketData.bars || {}).length > 0
+        DATA_GENERATED_AT = marketData.generatedAt
+      })
+  }
+  return loadPromise
+}
 
 // Deterministic PRNG so each symbol's demo history is stable across reloads.
 function hashCode(str) {
@@ -60,8 +86,9 @@ function generateMockBars(symbol, length = 260) {
 const seriesStore = {}
 
 // Real synced data for a symbol is returned as-is (frozen for the session —
-// it only changes when the next daily sync ships a new build). Falls back
-// to a demo random walk for any symbol the snapshot doesn't have.
+// it only changes when the next daily sync runs). Falls back to a demo
+// random walk for any symbol the snapshot doesn't have, or before
+// loadMarketData() has resolved.
 export function getSeries(symbol) {
   if (marketData.bars?.[symbol]?.length) return marketData.bars[symbol]
   if (!seriesStore[symbol]) seriesStore[symbol] = generateMockBars(symbol)

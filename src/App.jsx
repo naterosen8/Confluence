@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import Dashboard from './pages/Dashboard'
@@ -6,6 +7,7 @@ import TrackRecord from './pages/TrackRecord'
 import MyTrades from './pages/MyTrades'
 import ErrorBoundary from './components/ErrorBoundary'
 import { AuthProvider } from './context/AuthContext'
+import { loadMarketData } from './lib/dataProvider'
 
 function RoutedContent() {
   const location = useLocation()
@@ -22,6 +24,12 @@ function RoutedContent() {
 }
 
 export default function App() {
+  const [dataReady, setDataReady] = useState(false)
+
+  useEffect(() => {
+    loadMarketData().finally(() => setDataReady(true))
+  }, [])
+
   return (
     <AuthProvider>
       <BrowserRouter>
@@ -36,9 +44,7 @@ export default function App() {
           </nav>
         </header>
 
-        <main>
-          <RoutedContent />
-        </main>
+        <main>{dataReady ? <RoutedContent /> : <p className="muted" style={{ padding: '24px 0' }}>Loading…</p>}</main>
 
         <footer className="site-footer">
           Indicators are lagging by construction and everyone else sees the same numbers. This is a screening tool

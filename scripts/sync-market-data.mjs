@@ -13,7 +13,9 @@ import { computeSignals } from '../src/lib/indicators.js'
 import { TICKERS } from '../src/lib/tickers.js'
 
 const API_KEY = process.env.TWELVE_DATA_KEY
-const MARKET_DATA_PATH = new URL('../data/market-data.json', import.meta.url)
+// Lives in public/, not data/, so the built app can fetch it as a plain
+// static asset at runtime instead of it being bundled into the JS.
+const MARKET_DATA_PATH = new URL('../public/market-data.json', import.meta.url)
 const TRACK_RECORD_PATH = new URL('../data/track-record.json', import.meta.url)
 const FORWARD_SESSIONS = 5
 
