@@ -92,6 +92,13 @@
   },
   {
     "date": "2026-08-07",
+    "symbol": "TLT",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 82.76
+  },
+  {
+    "date": "2026-08-07",
     "symbol": "TSLA",
     "verdict": "Bearish",
     "score": -2,
