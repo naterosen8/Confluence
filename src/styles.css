@@ -542,6 +542,243 @@ table.grid {
   margin: 0 auto;
 }
 
+/* ---- inline explainers ---- */
+.explain-wrap {
+  position: relative;
+}
+
+.explain-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 5px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.explain-toggle:hover,
+.explain-toggle-open {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.explain-toggle-inline-demo {
+  cursor: default;
+}
+
+.explain-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+  text-align: left;
+  max-width: 460px;
+}
+
+.explain-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.explain-row {
+  display: block;
+}
+
+.explain-isnot {
+  color: #e8b98a;
+}
+
+.explain-basis {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.explain-basis-current {
+  color: #6fb3d8;
+  border-color: #6fb3d855;
+  background: #6fb3d81f;
+}
+.explain-basis-measured {
+  color: #4caf7d;
+  border-color: #4caf7d55;
+  background: #4caf7d1f;
+}
+.explain-basis-hypothetical {
+  color: #c08fd6;
+  border-color: #c08fd655;
+  background: #c08fd61f;
+}
+.explain-basis-accounting {
+  color: #d8b45f;
+  border-color: #d8b45f55;
+  background: #d8b45f1f;
+}
+
+/* ---- score breakdown ---- */
+.score-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.score-sum {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.score-sum-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+}
+
+.factor-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 620px;
+}
+
+.factor {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.factor-sign {
+  flex: 0 0 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.factor-bullish {
+  border-left: 3px solid #4caf7d;
+}
+.factor-bullish .factor-sign {
+  color: #4caf7d;
+}
+.factor-bearish {
+  border-left: 3px solid #e0715a;
+}
+.factor-bearish .factor-sign {
+  color: #e0715a;
+}
+.factor-neutral {
+  border-left: 3px solid var(--border);
+}
+.factor-neutral .factor-sign {
+  color: var(--muted);
+}
+
+.detail-notes {
+  margin-top: 6px;
+}
+
+.detail-notes summary {
+  cursor: pointer;
+}
+
+.detail-notes ul {
+  margin-top: 8px;
+}
+
+/* ---- methodology ---- */
+.basis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.basis-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.basis-card p {
+  margin: 8px 0 0;
+  line-height: 1.45;
+}
+
+.glossary-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.glossary-entry {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.glossary-entry h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.glossary-entry p {
+  margin: 0 0 8px;
+  line-height: 1.45;
+}
+
+.glossary-entry p:last-child {
+  margin-bottom: 0;
+}
+
+.plain-list {
+  padding-left: 20px;
+  margin: 0;
+  max-width: 820px;
+}
+
+.plain-list li {
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
 .balance-sheet {
   display: flex;
   flex-direction: column;

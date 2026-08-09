@@ -11,6 +11,8 @@ import LivePrice from '../components/LivePrice'
 import ShareCard from '../components/ShareCard'
 import LeverageStudy from '../components/LeverageStudy'
 import BalanceSheetValue from '../components/BalanceSheetValue'
+import ScoreBreakdown from '../components/ScoreBreakdown'
+import Explain from '../components/Explain'
 import SimulateTradeForm from '../components/SimulateTradeForm'
 import NotFound from './NotFound'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -78,6 +80,7 @@ function TickerAnalysis({ symbol, meta }) {
         <div className="detail-verdict">
           <VerdictBadge verdict={signals.verdict} />
           <span className="muted small detail-verdict-note">
+            <Explain term="verdict" />{' '}
             {setup.stat
               ? `Historically ${setup.stat.winRate.toFixed(0)}% won over ${setup.stat.sampleSize} similar setups`
               : 'No comparable history yet for this setup'}
@@ -109,14 +112,16 @@ function TickerAnalysis({ symbol, meta }) {
       )}
 
       <Section title="What's driving this">
-        {signals.notes.length ? (
-          <ul>
-            {signals.notes.map((n) => (
-              <li key={n}>{n}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="muted">No indicator is showing a strong lean right now.</p>
+        <ScoreBreakdown signals={signals} />
+        {signals.notes.length > 0 && (
+          <details className="detail-notes">
+            <summary className="muted small">Read each signal in full</summary>
+            <ul>
+              {signals.notes.map((n) => (
+                <li key={n}>{n}</li>
+              ))}
+            </ul>
+          </details>
         )}
       </Section>
 
@@ -124,7 +129,7 @@ function TickerAnalysis({ symbol, meta }) {
         <div className="stat-grid">
           <Stat label="Price" value={<LivePrice basePrice={signals.price} liveQuote={liveQuote} />} />
           <Stat
-            label="Volatility (ATR percentile)"
+            label={<Explain term="atrPercentile">Volatility (ATR percentile)</Explain>}
             value={signals.atrPercentile != null ? `${signals.atrPercentile.toFixed(0)}th` : 'not enough data'}
             note={
               signals.atrPercentile == null
@@ -137,7 +142,7 @@ function TickerAnalysis({ symbol, meta }) {
             }
           />
           <Stat
-            label="Relative volume"
+            label={<Explain term="relativeVolume">Relative volume</Explain>}
             value={signals.relVolume != null ? `${signals.relVolume.toFixed(2)}x avg` : 'not enough data'}
             note={
               signals.relVolume == null
@@ -150,17 +155,17 @@ function TickerAnalysis({ symbol, meta }) {
             }
           />
           <Stat
-            label="Nearest resistance"
+            label={<Explain term="supportResistance">Nearest resistance</Explain>}
             value={signals.levels.resistance ? `$${signals.levels.resistance.price.toFixed(2)}` : 'none nearby'}
             note={signals.levels.resistance ? `Prior swing high on ${signals.levels.resistance.date}` : null}
           />
           <Stat
-            label="Nearest support"
+            label={<Explain term="supportResistance">Nearest support</Explain>}
             value={signals.levels.support ? `$${signals.levels.support.price.toFixed(2)}` : 'none nearby'}
             note={signals.levels.support ? `Prior swing low on ${signals.levels.support.date}` : null}
           />
           <Stat
-            label="Bollinger squeeze"
+            label={<Explain term="bollingerSqueeze">Bollinger squeeze</Explain>}
             value={signals.squeeze ? (signals.squeeze.isSqueeze ? 'Yes' : 'No') : 'not enough data'}
             note={signals.squeeze ? `Band width is at the ${signals.squeeze.percentile.toFixed(0)}th percentile of its recent range` : null}
           />
@@ -215,16 +220,16 @@ function TickerAnalysis({ symbol, meta }) {
           <table className="score-table">
             <thead>
               <tr>
-                <th>Score</th>
+                <th><Explain term="confluenceScore">Score</Explain></th>
                 <th colSpan={3}>All history</th>
                 <th colSpan={3}>Regime-matched ({scoreBacktest.currentRegimeLabel || '—'})</th>
               </tr>
               <tr className="score-table-subhead">
                 <th></th>
-                <th>N</th>
-                <th>Win %</th>
-                <th>Avg return</th>
-                <th>N</th>
+                <th><Explain term="sampleSize">N</Explain></th>
+                <th><Explain term="winRate">Win %</Explain></th>
+                <th><Explain term="avgReturn">Avg return</Explain></th>
+                <th><Explain term="regimeMatched">N</Explain></th>
                 <th>Win %</th>
                 <th>Avg return</th>
               </tr>
@@ -316,15 +321,15 @@ function BacktestCard({ label, result, active }) {
       ) : (
         <>
           <div className="backtest-row">
-            <span className="muted small">Sample size</span>
+            <span className="muted small"><Explain term="sampleSize">Sample size</Explain></span>
             <span>{result.sampleSize} occurrence{result.sampleSize > 1 ? 's' : ''}</span>
           </div>
           <div className="backtest-row">
-            <span className="muted small">Win rate</span>
+            <span className="muted small"><Explain term="winRate">Win rate</Explain></span>
             <span>{result.winRate.toFixed(0)}%</span>
           </div>
           <div className="backtest-row">
-            <span className="muted small">Avg. return</span>
+            <span className="muted small"><Explain term="avgReturn">Avg. return</Explain></span>
             <span>{pct(result.avgReturn)}</span>
           </div>
           <div className="backtest-row">

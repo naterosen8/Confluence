@@ -6,6 +6,7 @@ import TickerDetail from './pages/TickerDetail'
 import TrackRecord from './pages/TrackRecord'
 import MyTrades from './pages/MyTrades'
 import NotFound from './pages/NotFound'
+import Methodology from './pages/Methodology'
 import ErrorBoundary from './components/ErrorBoundary'
 import { AuthProvider } from './context/AuthContext'
 import { loadMarketData } from './lib/dataProvider'
@@ -19,6 +20,7 @@ function RoutedContent() {
         <Route path="/ticker/:symbol" element={<TickerDetail />} />
         <Route path="/track-record" element={<TrackRecord />} />
         <Route path="/my-trades" element={<MyTrades />} />
+        <Route path="/methodology" element={<Methodology />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ErrorBoundary>
@@ -43,6 +45,7 @@ export default function App() {
           <nav className="site-nav">
             <Link to="/my-trades">My trades</Link>
             <Link to="/track-record">Track record</Link>
+            <Link to="/methodology">How to read this</Link>
           </nav>
         </header>
 

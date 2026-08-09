@@ -357,54 +357,66 @@ export function computeSignals(bars) {
   let bullish = 0
   let bearish = 0
   const notes = []
+  // The same votes the score is built from, kept structured so the UI can
+  // show the arithmetic instead of presenting the total as an oracle number.
+  // A bare "+4" invites being read as a confidence level; "+4 = 5 bullish
+  // votes minus 1 bearish, here they are" cannot be.
+  const factors = []
+  const vote = (direction, weight, term, label) => {
+    if (direction === 'bullish') bullish += weight
+    else bearish += weight
+    factors.push({ direction, weight, term, label })
+  }
 
   if (rsiVal != null) {
     if (rsiVal < 30) {
-      bullish++
+      vote('bullish', 1, 'rsi', `RSI ${rsiVal.toFixed(1)} — oversold (below 30)`)
       notes.push('RSI oversold (<30) — recent selling has outpaced buying by a wide margin')
     } else if (rsiVal > 70) {
-      bearish++
+      vote('bearish', 1, 'rsi', `RSI ${rsiVal.toFixed(1)} — overbought (above 70)`)
       notes.push('RSI overbought (>70) — recent buying has outpaced selling by a wide margin')
+    } else {
+      factors.push({ direction: 'neutral', weight: 0, term: 'rsi', label: `RSI ${rsiVal.toFixed(1)} — neither extreme, no vote` })
     }
   }
 
   if (macdRes) {
     if (macdRes.histogram > 0) {
-      bullish++
+      vote('bullish', 1, 'macd', 'MACD above its signal line')
       notes.push('MACD above signal — short-term momentum (12/26-day EMA spread) is accelerating upward')
     } else {
-      bearish++
+      vote('bearish', 1, 'macd', 'MACD below its signal line')
       notes.push('MACD below signal — short-term momentum is accelerating downward')
     }
   }
 
   if (sma50 != null && sma200 != null) {
     if (sma50 > sma200) {
-      bullish++
+      vote('bullish', 1, 'trend', '50-day average above the 200-day')
       notes.push('50-day average above 200-day average — intermediate trend is up')
     } else {
-      bearish++
+      vote('bearish', 1, 'trend', '50-day average below the 200-day')
       notes.push('50-day average below 200-day average — intermediate trend is down')
     }
   }
 
   if (sma50 != null) {
-    if (price > sma50) bullish++
-    else bearish++
+    if (price > sma50) vote('bullish', 1, 'trend', 'Price above its 50-day average')
+    else vote('bearish', 1, 'trend', 'Price below its 50-day average')
   }
 
   const weekly = weeklyTrend(bars)
   if (weekly.trend) {
     const dailyLean = bullish > bearish ? 'bullish' : bearish > bullish ? 'bearish' : 'neutral'
     if (weekly.trend === 'up') {
-      bullish++
+      vote('bullish', 1, 'weeklyTrend', 'Price above its 10-week average')
       notes.push(
         dailyLean === 'bearish'
           ? 'Weekly trend is up (price above its 10-week average) — this daily signal is fighting the bigger-picture trend, a weaker setup than it looks'
           : 'Weekly trend is up (price above its 10-week average) — the bigger picture agrees with the daily signal'
       )
     } else {
-      bearish++
+      vote('bearish', 1, 'weeklyTrend', 'Price below its 10-week average')
       notes.push(
         dailyLean === 'bullish'
           ? 'Weekly trend is down (price below its 10-week average) — this daily signal is fighting the bigger-picture trend, a weaker setup than it looks'
@@ -414,11 +426,11 @@ export function computeSignals(bars) {
   }
 
   if (divergence.bullish) {
-    bullish += 2
+    vote('bullish', 2, 'divergence', 'Bullish RSI divergence (counts double)')
     notes.push('Bullish RSI divergence — price made a lower low but RSI made a higher low, momentum is fading on the downside')
   }
   if (divergence.bearish) {
-    bearish += 2
+    vote('bearish', 2, 'divergence', 'Bearish RSI divergence (counts double)')
     notes.push('Bearish RSI divergence — price made a higher high but RSI made a lower high, momentum is fading on the upside')
   }
 
@@ -444,5 +456,8 @@ export function computeSignals(bars) {
     score,
     verdict,
     notes,
+    factors,
+    bullishPoints: bullish,
+    bearishPoints: bearish,
   }
 }

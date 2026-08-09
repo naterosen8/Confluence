@@ -7,6 +7,7 @@ import { bestAvailableStat, FORWARD_DAYS } from '../lib/backtest'
 import { pollLivePrices, HAS_LIVE_PRICE } from '../lib/livePrice'
 import Sparkline from '../components/Sparkline'
 import VerdictBadge from '../components/VerdictBadge'
+import Explain from '../components/Explain'
 import LivePrice from '../components/LivePrice'
 
 function formatSyncTime(iso) {
@@ -102,11 +103,11 @@ export default function Dashboard() {
             <th>Symbol</th>
             <th>Price</th>
             <th>Trend</th>
-            <th>RSI(14)</th>
-            <th>MACD</th>
+            <th><Explain term="rsi">RSI(14)</Explain></th>
+            <th><Explain term="macd">MACD</Explain></th>
             <th>Flags</th>
-            <th>Edge</th>
-            <th>Confluence</th>
+            <th><Explain term="edge">Edge</Explain></th>
+            <th><Explain term="confluenceScore">Confluence</Explain></th>
           </tr>
         </thead>
         <tbody>
