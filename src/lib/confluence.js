@@ -165,22 +165,44 @@ export function technicalLayer(bars) {
 // entire point of having this layer.
 export function earningsTrend(quarters) {
   if (!quarters || quarters.length < 5) return null
-  const withRevenue = quarters.filter((q) => q.revenue != null)
-  const withIncome = quarters.filter((q) => q.netIncome != null)
 
-  // Year-over-year rather than sequential: quarterly results are seasonal,
-  // and comparing Q4 to Q3 mostly measures the calendar.
-  const yoy = (arr, key) => {
-    if (arr.length < 5) return null
-    const latest = arr[arr.length - 1]
-    const yearAgo = arr[arr.length - 5]
-    if (!yearAgo || yearAgo[key] == null || yearAgo[key] === 0) return null
-    return ((latest[key] - yearAgo[key]) / Math.abs(yearAgo[key])) * 100
+  // Year-over-year rather than sequential: quarterly results are seasonal, and
+  // comparing Q4 to Q3 mostly measures the calendar.
+  //
+  // Matched by DATE, not by array position. Quarterly income figures have real
+  // gaps — a fiscal-year-end quarter is usually only reported inside the
+  // annual total, so filers routinely show 6 of 8 quarters. Taking "four
+  // entries back" from a compacted array then silently compares against five
+  // or six quarters ago, which is not a year-over-year comparison at all and
+  // is impossible to spot in the output.
+  const yoy = (key) => {
+    const withValue = quarters.filter((q) => q[key] != null)
+    if (withValue.length < 2) return null
+    const latest = withValue[withValue.length - 1]
+    const target = Date.parse(latest.asOf) - 365 * 86400000
+
+    let best = null
+    let bestGap = Infinity
+    for (const q of withValue.slice(0, -1)) {
+      const gap = Math.abs(Date.parse(q.asOf) - target)
+      if (gap < bestGap) {
+        bestGap = gap
+        best = q
+      }
+    }
+    // Only accept a genuine year-ago comparison; anything further out is a
+    // different question and is reported as unavailable instead.
+    if (!best || bestGap > 45 * 86400000 || best[key] === 0) return null
+    return { pct: ((latest[key] - best[key]) / Math.abs(best[key])) * 100, from: best.asOf, to: latest.asOf }
   }
 
+  const rev = yoy('revenue')
+  const inc = yoy('netIncome')
   return {
-    revenueYoY: yoy(withRevenue, 'revenue'),
-    incomeYoY: yoy(withIncome, 'netIncome'),
+    revenueYoY: rev ? rev.pct : null,
+    revenuePeriod: rev ? `${rev.from} → ${rev.to}` : null,
+    incomeYoY: inc ? inc.pct : null,
+    incomePeriod: inc ? `${inc.from} → ${inc.to}` : null,
     latestAsOf: quarters[quarters.length - 1].asOf,
   }
 }

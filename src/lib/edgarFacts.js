@@ -131,6 +131,10 @@ export const INCOME_CONCEPTS = {
     'RevenueFromContractWithCustomerIncludingAssessedTax',
     'Revenues',
     'SalesRevenueNet',
+    // Banks report revenue net of interest expense; without this the whole
+    // financials sector comes back with no revenue at all.
+    'RevenuesNetOfInterestExpense',
+    'InterestAndDividendIncomeOperating',
   ],
   netIncome: ['NetIncomeLoss', 'ProfitLoss'],
 }

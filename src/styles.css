@@ -961,3 +961,23 @@ table.grid {
 .impact-note {
   border-left-color: #d8b45f;
 }
+
+.signal-check {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bucket-bar {
+  display: inline-block;
+  height: 9px;
+  border-radius: 3px;
+  min-width: 2px;
+}
+
+.bucket-bar-pos {
+  background: #4caf7d;
+}
+.bucket-bar-neg {
+  background: #e0715a;
+}

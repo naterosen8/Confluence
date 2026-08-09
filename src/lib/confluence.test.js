@@ -209,3 +209,50 @@ describe('volume availability is distinct from volume failure', () => {
     expect(detectBreakout(withVolume).volumeAvailable).toBe(true)
   })
 })
+
+describe('earningsTrend aligns year-over-year by date, not array position', () => {
+  const q = (asOf, revenue, netIncome) => ({ asOf, revenue, netIncome })
+
+  it('skips gaps correctly instead of comparing against the wrong quarter', () => {
+    // Real filings have gaps: fiscal-year-end quarters usually report revenue
+    // only inside the annual total. Position-based indexing would compare the
+    // latest quarter against five or six quarters back and call it YoY.
+    const quarters = [
+      q('2024-09-30', 100, 10),
+      q('2024-12-31', null, null), // FY-end gap
+      q('2025-03-31', 110, 11),
+      q('2025-06-30', 120, 12),
+      q('2025-09-30', 130, 13),
+    ]
+    const t = earningsTrend(quarters)
+    // 2025-09-30 vs 2024-09-30 = +30%, not against 2025-03-31.
+    expect(t.revenueYoY).toBeCloseTo(30, 6)
+    expect(t.revenuePeriod).toBe('2024-09-30 → 2025-09-30')
+  })
+
+  it('reports unavailable rather than comparing across the wrong span', () => {
+    const quarters = [
+      q('2022-09-30', 100, 10),
+      q('2025-03-31', 110, 11),
+      q('2025-06-30', 120, 12),
+      q('2025-09-30', 130, 13),
+      q('2025-12-31', 140, 14),
+    ]
+    // Nothing sits within 45 days of one year before 2025-12-31.
+    expect(earningsTrend(quarters).revenueYoY).toBeNull()
+  })
+
+  it('handles a metric present while the other is entirely missing', () => {
+    const quarters = [
+      q('2024-12-31', null, 10),
+      q('2025-03-31', null, 11),
+      q('2025-06-30', null, 12),
+      q('2025-09-30', null, 13),
+      q('2025-12-31', null, 14),
+    ]
+    const t = earningsTrend(quarters)
+    expect(t.revenueYoY).toBeNull()
+    // 2025-12-31 vs 2024-12-31 = +40%
+    expect(t.incomeYoY).toBeCloseTo(40, 6)
+  })
+})

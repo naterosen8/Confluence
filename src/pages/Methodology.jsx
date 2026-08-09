@@ -3,6 +3,7 @@ import { BASIS, glossaryByBasis } from '../lib/glossary'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { FORWARD_DAYS } from '../lib/backtest'
 import { CONFLUENCE_NAME } from '../lib/confluence'
+import SignalCheck from '../components/SignalCheck'
 
 const ORDER = ['current', 'measured', 'hypothetical', 'accounting']
 
@@ -41,6 +42,15 @@ export default function Methodology() {
         <p className="small explain-isnot">
           <em>What it is not:</em> {CONFLUENCE_NAME.caveat}
         </p>
+      </section>
+
+      <section className="detail-section">
+        <h2>Does the score actually work? (the app's own self-check)</h2>
+        <p className="muted small">
+          Computed live from the same snapshot the rest of the site uses, so it cannot drift out of date and will
+          change on its own if the relationship changes. Published whatever it says.
+        </p>
+        <SignalCheck />
       </section>
 
       <section className="detail-section">

@@ -91,6 +91,13 @@ function TickerAnalysis({ symbol, meta }) {
         </div>
       </div>
 
+      <div className="callout impact-note">
+        Read the badge as how much the indicators currently agree with each other, not as a direction to expect. On
+        the data this site has, a higher confluence score has been followed by <em>lower</em> returns over the next
+        {' '}{scoreBacktest.forwardDays} sessions — see the{' '}
+        <Link to="/methodology">self-check on the methodology page</Link>.
+      </div>
+
       <div className="detail-chart">
         <Sparkline values={closes.slice(-90)} width={480} height={120} />
       </div>
