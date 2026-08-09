@@ -116,3 +116,32 @@ export const DIRECTION_COPY = {
     detail: 'This check needs a longer synced history before it can say anything.',
   },
 }
+
+// Cached across the session: the check scans every tracked ticker, and the
+// snapshot does not change while the page is open. Memoised here rather than
+// in a component so the ticker pages and the methodology page are guaranteed
+// to be describing the same computation.
+let cached
+export function cachedScoreDirectionCheck(barsBySymbol, symbols) {
+  if (cached === undefined) cached = scoreDirectionCheck(barsBySymbol, symbols)
+  return cached
+}
+
+// Short form for the banner shown above every ticker chart. Derived from the
+// measurement rather than written by hand: a hardcoded sentence saying the
+// score is inverted would quietly become false the moment the relationship
+// changed, which is exactly the failure this whole check exists to prevent.
+export function directionBanner(result) {
+  if (!result) return null
+  const n = result.forwardDays
+  switch (result.direction) {
+    case 'inverted':
+      return `On the data this site has, a higher confluence score has been followed by lower returns over the next ${n} sessions — the opposite of what the badge wording suggests.`
+    case 'aligned':
+      return `On the data this site has, a higher confluence score has been followed by higher returns over the next ${n} sessions. That is one window's measurement, not a property of markets.`
+    case 'indistinguishable':
+      return `On the data this site has, the confluence score shows no reliable relationship to returns over the next ${n} sessions.`
+    default:
+      return null
+  }
+}

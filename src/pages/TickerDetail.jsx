@@ -17,6 +17,7 @@ import Explain from '../components/Explain'
 import SimulateTradeForm from '../components/SimulateTradeForm'
 import NotFound from './NotFound'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import { cachedScoreDirectionCheck, directionBanner } from '../lib/signalValidation'
 
 function pct(v, digits = 2) {
   if (v == null) return '—'
@@ -54,6 +55,12 @@ function TickerAnalysis({ symbol, meta }) {
   const scoreBacktest = useMemo(() => backtestByScore(bars, spyBars), [bars, spyBars])
   const setup = useMemo(() => bestAvailableStat(bars, spyBars), [bars, spyBars])
   const trigger = useMemo(() => mostRecentEvent(bars), [bars])
+  // Derived from the live self-check, never hardcoded — see directionBanner.
+  const banner = useMemo(() => {
+    const bySymbol = {}
+    for (const t of TICKERS) bySymbol[t.symbol] = getSeries(t.symbol)
+    return directionBanner(cachedScoreDirectionCheck(bySymbol, TICKERS.map((t) => t.symbol)))
+  }, [])
   const [liveQuote, setLiveQuote] = useState(null)
 
   useEffect(() => {
@@ -91,12 +98,12 @@ function TickerAnalysis({ symbol, meta }) {
         </div>
       </div>
 
-      <div className="callout impact-note">
-        Read the badge as how much the indicators currently agree with each other, not as a direction to expect. On
-        the data this site has, a higher confluence score has been followed by <em>lower</em> returns over the next
-        {' '}{scoreBacktest.forwardDays} sessions — see the{' '}
-        <Link to="/methodology">self-check on the methodology page</Link>.
-      </div>
+      {banner && (
+        <div className="callout impact-note">
+          Read the badge as how much the indicators currently agree with each other, not as a direction to expect.{' '}
+          {banner} See the <Link to="/methodology">self-check</Link> for the measurement and its caveats.
+        </div>
+      )}
 
       <div className="detail-chart">
         <Sparkline values={closes.slice(-90)} width={480} height={120} />

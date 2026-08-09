@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { TICKERS } from '../lib/tickers'
 import { getSeries } from '../lib/dataProvider'
-import { scoreDirectionCheck, DIRECTION_COPY } from '../lib/signalValidation'
+import { cachedScoreDirectionCheck, DIRECTION_COPY } from '../lib/signalValidation'
 
 // Publishes the app's own self-check. If the score does not predict what its
 // label implies, that belongs on the site rather than in a private notebook.
@@ -9,7 +9,7 @@ export default function SignalCheck() {
   const result = useMemo(() => {
     const bySymbol = {}
     for (const t of TICKERS) bySymbol[t.symbol] = getSeries(t.symbol)
-    return scoreDirectionCheck(bySymbol, TICKERS.map((t) => t.symbol))
+    return cachedScoreDirectionCheck(bySymbol, TICKERS.map((t) => t.symbol))
   }, [])
 
   if (!result) return <p className="muted small">{DIRECTION_COPY.unknown.detail}</p>
