@@ -15,6 +15,17 @@ export function smaSeries(values, period) {
   return result
 }
 
+// Day-of-week for a bar date, tolerant of the date carrying a time component.
+// The provider currently returns plain YYYY-MM-DD, but appending 'T00:00:00Z'
+// to a value that already has a time yields an Invalid Date whose getUTCDay()
+// is NaN — every Monday check would quietly fail, no week boundary would ever
+// open, and the whole series would collapse into one weekly bar. That failure
+// is silent and would corrupt weekly-trend scoring everywhere, so it is worth
+// the one-line defence.
+export function utcDayOfWeek(date) {
+  return new Date(`${String(date).slice(0, 10)}T00:00:00Z`).getUTCDay()
+}
+
 // Aggregates daily bars into weekly (Mon-Fri) bars. Resampled from the same
 // daily series rather than fetched separately — keeps demo and live modes
 // consistent and costs zero extra API calls against the free-tier limit.
@@ -22,7 +33,7 @@ export function resampleWeekly(bars) {
   const weeks = []
   let bucket = []
   for (const bar of bars) {
-    const dow = new Date(bar.date + 'T00:00:00Z').getUTCDay()
+    const dow = utcDayOfWeek(bar.date)
     if (dow === 1 && bucket.length) {
       weeks.push(bucket)
       bucket = []
@@ -169,7 +180,16 @@ export function bollinger(closes, period = 20, mult = 2) {
   const upper = middle + mult * sd
   const lower = middle - mult * sd
   const price = closes[closes.length - 1]
-  return { middle, upper, lower, percentB: (price - lower) / (upper - lower), bandwidth: (upper - lower) / middle }
+  const width = upper - lower
+  return {
+    middle,
+    upper,
+    lower,
+    // A perfectly flat window gives zero-width bands; 0/0 is NaN, so report
+    // the midpoint instead of propagating a poisoned number.
+    percentB: width === 0 ? 0.5 : (price - lower) / width,
+    bandwidth: middle === 0 ? 0 : width / middle,
+  }
 }
 
 export function bollingerSqueeze(closes, period = 20, mult = 2, lookback = 100) {
@@ -271,7 +291,7 @@ function weekIndices(bars) {
   let week = 0
   let bucketStarted = false
   for (let i = 0; i < bars.length; i++) {
-    const dow = new Date(bars[i].date + 'T00:00:00Z').getUTCDay()
+    const dow = utcDayOfWeek(bars[i].date)
     if (dow === 1 && bucketStarted) {
       week++
     }

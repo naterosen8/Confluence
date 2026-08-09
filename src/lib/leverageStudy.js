@@ -1,19 +1,13 @@
 import { scoreSeries } from './indicators'
 import { FORWARD_DAYS } from './backtest'
+// Single definition, shared with the trade simulator, so the two features
+// cannot disagree about whether the same position survived. At Nx a 1/N
+// adverse move is fatal: 10x dies on 10%, 25x on 4%. The number people
+// underestimate is not the upside, it is how little movement takes you to
+// zero.
+import { liquidationPrice } from './pnl'
 
-// The price at which a leveraged position loses its entire stake. At Lx, a
-// 1/L adverse move wipes you out: 10x dies on a 10% move against you, 25x on
-// 4%. This is the whole reason the feature exists — the number people
-// underestimate is not the upside, it's how little movement it takes to go
-// to zero.
-//
-// Real venues liquidate *earlier* than this, at a maintenance margin above
-// zero equity, and charge funding on top. This model is therefore optimistic
-// on the downside: reality wipes out at least as often, not less.
-export function liquidationPrice(entryPrice, direction, leverage) {
-  if (leverage <= 1) return direction === 'long' ? 0 : Infinity
-  return direction === 'long' ? entryPrice * (1 - 1 / leverage) : entryPrice * (1 + 1 / leverage)
-}
+export { liquidationPrice }
 
 // Walks one hypothetical position forward bar by bar. Critically this checks
 // each bar's intraday low (long) or high (short) rather than its close: a
