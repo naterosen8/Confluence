@@ -542,6 +542,17 @@ table.grid {
   margin: 0 auto;
 }
 
+.balance-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.balance-sheet .stat-grid {
+  margin-top: 16px;
+  margin-bottom: 12px;
+}
+
 .leverage-study {
   display: flex;
   flex-direction: column;

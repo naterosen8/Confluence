@@ -10,6 +10,7 @@ import VerdictBadge from '../components/VerdictBadge'
 import LivePrice from '../components/LivePrice'
 import ShareCard from '../components/ShareCard'
 import LeverageStudy from '../components/LeverageStudy'
+import BalanceSheetValue from '../components/BalanceSheetValue'
 import SimulateTradeForm from '../components/SimulateTradeForm'
 import NotFound from './NotFound'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -246,6 +247,10 @@ function TickerAnalysis({ symbol, meta }) {
             </tbody>
           </table>
         </div>
+      </Section>
+
+      <Section title="Balance sheet vs market cap">
+        <BalanceSheetValue symbol={symbol} kind={meta.kind} price={signals.price} bars={bars} />
       </Section>
 
       <Section title="What leverage would have done to these signals">

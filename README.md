@@ -55,6 +55,22 @@ Design constraints, because this is the easiest part of the app to make dishones
 
 The math is unit-tested (`src/lib/leverageStudy.test.js`) — liquidation thresholds, intraday-wick detection on both sides, leverage multiplication, the -100% floor, and exclusion of entries without a full forward window.
 
+## Balance sheet vs market cap (mNAV)
+
+`src/lib/mnav.js` compares what the market is paying for a company against what its balance sheet says the equity is worth: market cap, book equity, price/book and the dollar gap, net cash, enterprise value, and Graham's net current asset value — plus where the current P/B sits within its own reported history.
+
+Data comes from **SEC EDGAR's XBRL `companyfacts` API** (`scripts/sync-fundamentals.mjs`), which is the primary source, free, and needs no API key — keeping the app on the same "no paid tier, no client-side secrets" footing as the price sync. CIKs are resolved from SEC's own ticker map rather than hardcoded, because a transposed digit would silently return a different company's balance sheet. Written to `public/fundamentals.json` and fetched at runtime, so it never enters the JS bundle.
+
+What it will not do:
+
+- **It never rates the security.** Every classification ships with the counter-argument attached: a low price-to-book is at least as often the market correctly marking down assets it expects to be impaired as it is a mispricing.
+- **It states where the ratio is meaningless.** Book value omits internally-developed software, brands, patents and research, so asset-light businesses routinely trade at many times book without that being evidence of overpricing. The measure is far more informative for banks, insurers and holding companies.
+- **It is gated by instrument type.** ETFs (NAV is definitionally the holdings) and spot crypto pairs (no issuer, no filings) show an explanation instead of a number. See `kind` in `src/lib/tickers.js`.
+- **It shows nothing rather than an estimate** when a company has not been synced yet.
+- **Negative book equity is reported as such**, not as a nonsense ratio — sustained buybacks push book equity below zero at plenty of profitable companies.
+
+Historical P/B uses the book value actually reported for each quarter against the price on that date; using today's book value with past prices would just replot the price chart. Both modules are unit tested (`mnav.test.js`, `edgarFacts.test.js`), including XBRL restatement handling and the accounting-identity fallback when a filer does not tag `Liabilities`.
+
 ## Track record
 
 `public/track-record.json` is a public, append-only log of every non-neutral verdict the app has ever shown, resolved 5 trading sessions later against the actual close — hits and misses both, nothing curated out. Written by the same daily sync job. See it at `/track-record`.
