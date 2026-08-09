@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FORWARD_DAYS } from '../lib/backtest'
 import { leanByKey, leanDirection } from '../lib/lean'
+import { distinguishableFromChance } from '../lib/stats'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 
 function pct(v, digits = 2) {
@@ -14,7 +15,28 @@ function summarize(entries) {
   if (!decidable.length) return null
   const wins = decidable.filter((e) => e.outcome.correct).length
   const avgReturn = decidable.reduce((a, e) => a + e.outcome.returnPct, 0) / decidable.length
-  return { total: decidable.length, winRate: (wins / decidable.length) * 100, avgReturn }
+  const ci = distinguishableFromChance(wins, decidable.length)
+  return {
+    total: decidable.length,
+    winRate: (wins / decidable.length) * 100,
+    avgReturn,
+    low: ci ? ci.lower * 100 : null,
+    high: ci ? ci.upper * 100 : null,
+  }
+}
+
+// A hit rate is meaningless without the rate it has to beat. Over a rising
+// market, "price went up" is true more often than not no matter what the call
+// said — so a 54% hit rate on upward-leaning calls against a 54% drift rate is
+// exactly zero skill, while looking like a passing grade. This computes the
+// drift over the same resolved windows so the two can be shown together.
+function baselineOf(resolved, direction) {
+  const decidable = resolved.filter((e) => e.outcome && e.outcome.correct !== null)
+  if (!decidable.length) return null
+  const moved = decidable.filter((e) =>
+    direction === 'up' ? e.outcome.returnPct > 0 : e.outcome.returnPct < 0
+  ).length
+  return (moved / decidable.length) * 100
 }
 
 // Fetched at runtime, same as market-data.json — this log only ever grows,
@@ -65,6 +87,8 @@ export default function TrackRecord() {
   // pre-rename labels still present in the logged history.
   const bullish = summarize(resolved.filter((e) => leanDirection(e.verdict) === 'up'))
   const bearish = summarize(resolved.filter((e) => leanDirection(e.verdict) === 'down'))
+  const upBaseline = baselineOf(resolved, 'up')
+  const downBaseline = baselineOf(resolved, 'down')
 
   return (
     <div>
@@ -103,11 +127,43 @@ export default function TrackRecord() {
         <>
           <div className="stat-grid">
             <Stat label="Resolved calls" value={overall.total} />
-            <Stat label="Overall win rate" value={`${overall.winRate.toFixed(0)}%`} />
-            <Stat label="Overall avg. return" value={pct(overall.avgReturn)} />
-            <Stat label="Upward-leaning calls" value={bullish ? `${bullish.winRate.toFixed(0)}% (N=${bullish.total})` : '—'} />
-            <Stat label="Downward-leaning calls" value={bearish ? `${bearish.winRate.toFixed(0)}% (N=${bearish.total})` : '—'} />
+            <Stat
+              label="Overall hit rate"
+              value={`${overall.winRate.toFixed(0)}%`}
+              note={overall.low != null ? `95% range ${overall.low.toFixed(0)}–${overall.high.toFixed(0)}%` : null}
+            />
+            <Stat label="Mean return per call" value={pct(overall.avgReturn)} />
+            <Stat
+              label="Upward-leaning calls"
+              value={bullish ? `${bullish.winRate.toFixed(0)}% (N=${bullish.total})` : '—'}
+              note={
+                bullish && upBaseline != null
+                  ? `Price rose in ${upBaseline.toFixed(0)}% of these windows regardless — edge ${
+                      bullish.winRate - upBaseline >= 0 ? '+' : ''
+                    }${(bullish.winRate - upBaseline).toFixed(1)} pts`
+                  : null
+              }
+            />
+            <Stat
+              label="Downward-leaning calls"
+              value={bearish ? `${bearish.winRate.toFixed(0)}% (N=${bearish.total})` : '—'}
+              note={
+                bearish && downBaseline != null
+                  ? `Price fell in ${downBaseline.toFixed(0)}% of these windows regardless — edge ${
+                      bearish.winRate - downBaseline >= 0 ? '+' : ''
+                    }${(bearish.winRate - downBaseline).toFixed(1)} pts`
+                  : null
+              }
+            />
             <Stat label="Pending resolution" value={pending.length} />
+          </div>
+
+          <div className="callout impact-note">
+            <strong>Read the hit rate against the drift, not against 50%.</strong> Over a period when prices rose in
+            most five-session windows, an upward-leaning call is right most of the time without any skill being
+            involved. The only number that means anything here is the gap between the hit rate and the baseline shown
+            beside it — and on a sample this size that gap needs to be large before it is distinguishable from chance
+            at all.
           </div>
 
           <Section title="Resolved calls">
@@ -161,11 +217,12 @@ function Section({ title, children }) {
   )
 }
 
-function Stat({ label, value }) {
+function Stat({ label, value, note }) {
   return (
     <div className="stat">
       <span className="muted small">{label}</span>
       <span className="stat-value">{value}</span>
+      {note && <span className="stat-note">{note}</span>}
     </div>
   )
 }

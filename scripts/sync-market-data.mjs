@@ -125,11 +125,19 @@ async function main() {
     resolvedCount++
   }
 
-  const today = new Date().toISOString().slice(0, 10)
   let loggedCount = 0
   for (const t of TICKERS) {
     const bars = barsBySymbol[t.symbol]
     if (!bars) continue
+    // Stamp the entry with the date of the bar the signal was computed from,
+    // NOT the date the job happened to run.
+    //
+    // Resolution finds an entry's starting bar by matching this date against
+    // the price series. A run on a weekend or a holiday — or any run before
+    // the session's bar exists — stamped a date that appears in no bar, so
+    // the entry could never be found and would sit "pending" permanently. A
+    // manual trigger on a Sunday had already produced 15 such entries.
+    const today = bars[bars.length - 1].date
     if (log.some((e) => e.symbol === t.symbol && e.date === today)) continue
     const signals = computeSignals(bars)
     if (signals.verdict === 'split') continue
@@ -141,7 +149,7 @@ async function main() {
   saveJson(TRACK_RECORD_PATH, log)
 
   console.log(
-    `Synced ${fetchedCount} ticker(s), ${failedCount} failure(s) (kept prior data). Resolved ${resolvedCount} prior call(s), logged ${loggedCount} new call(s) for ${today}.`
+    `Synced ${fetchedCount} ticker(s), ${failedCount} failure(s) (kept prior data). Resolved ${resolvedCount} prior call(s), logged ${loggedCount} new call(s).`
   )
 }
 
