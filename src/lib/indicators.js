@@ -1,4 +1,4 @@
-import { leanFor } from './lean'
+import { leanFor } from './lean.js'
 
 export function sma(values, period) {
   if (values.length < period) return null
