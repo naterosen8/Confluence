@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { BASIS, glossaryByBasis } from '../lib/glossary'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { FORWARD_DAYS } from '../lib/backtest'
+import { CONFLUENCE_NAME } from '../lib/confluence'
 
 const ORDER = ['current', 'measured', 'hypothetical', 'accounting']
 
@@ -21,6 +22,44 @@ export default function Methodology() {
         does not mean. The same definitions appear inline next to the numbers themselves, behind the{' '}
         <span className="explain-toggle explain-toggle-inline-demo">?</span> marks.
       </p>
+
+      <section className="detail-section">
+        <h2>Why it is called Confluence</h2>
+        <p>
+          <strong>Confluence</strong> — {CONFLUENCE_NAME.what}
+        </p>
+        <p className="muted small">{CONFLUENCE_NAME.why}</p>
+        <p className="muted small">
+          There is a trap in the name worth being explicit about. Stacking several indicators that all read the same
+          price series is not confluence — trend, MACD and price-versus-average agree with each other almost by
+          construction, so combining them produces a larger number rather than more evidence. That is why the site
+          separates three streams that can genuinely disagree: <strong>technical</strong> (what price and volume are
+          doing), <strong>fundamental</strong> (whether the business underneath is improving), and{' '}
+          <strong>macro</strong> (the price of money and the appetite for risk). Each is scored on its own, and a
+          layer with no data is reported as missing rather than counted as neutral.
+        </p>
+        <p className="small explain-isnot">
+          <em>What it is not:</em> {CONFLUENCE_NAME.caveat}
+        </p>
+      </section>
+
+      <section className="detail-section">
+        <h2>How confident any of this is</h2>
+        <p className="muted small">
+          Every win rate on the site carries a 95% confidence interval, and the site says plainly when that interval
+          spans 50% — because a sample that cannot be distinguished from a coin flip should not be presented as an
+          edge, however far its headline percentage sits from 50. There is no model here, and could not be one, that
+          knows where a price is going. What the numbers can support is a description of what has happened before
+          under similar conditions, with the uncertainty attached.
+        </p>
+        <p className="muted small">
+          Two further limits are structural rather than fixable. Occurrences close together in time share overlapping
+          forward windows, so the evidence is always thinner than the raw count suggests. And every backtest assumes
+          you transact at the printed price — an order large relative to what actually trades moves the market against
+          itself while it fills, so both the entry and the equity marked against it are worse in reality than in any
+          simulation. The leverage study flags position sizes where that stops being a rounding error.
+        </p>
+      </section>
 
       <section className="detail-section">
         <h2>Four different kinds of number</h2>

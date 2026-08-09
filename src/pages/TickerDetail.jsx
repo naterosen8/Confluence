@@ -12,6 +12,7 @@ import ShareCard from '../components/ShareCard'
 import LeverageStudy from '../components/LeverageStudy'
 import BalanceSheetValue from '../components/BalanceSheetValue'
 import ScoreBreakdown from '../components/ScoreBreakdown'
+import ConfluencePanel from '../components/ConfluencePanel'
 import Explain from '../components/Explain'
 import SimulateTradeForm from '../components/SimulateTradeForm'
 import NotFound from './NotFound'
@@ -82,7 +83,9 @@ function TickerAnalysis({ symbol, meta }) {
           <span className="muted small detail-verdict-note">
             <Explain term="verdict" />{' '}
             {setup.stat
-              ? `Historically ${setup.stat.winRate.toFixed(0)}% won over ${setup.stat.sampleSize} similar setups`
+              ? setup.stat.distinguishable
+                ? `Historically ${setup.stat.winRate.toFixed(0)}% won over ${setup.stat.sampleSize} similar setups`
+                : `Historically ${setup.stat.winRate.toFixed(0)}% over ${setup.stat.sampleSize} setups — not distinguishable from chance`
               : 'No comparable history yet for this setup'}
           </span>
         </div>
@@ -111,7 +114,11 @@ function TickerAnalysis({ symbol, meta }) {
         </div>
       )}
 
-      <Section title="What's driving this">
+      <Section title="Confluence: technical, fundamental, macro">
+        <ConfluencePanel symbol={symbol} kind={meta.kind} bars={bars} price={signals.price} />
+      </Section>
+
+      <Section title="What's driving this (technical detail)">
         <ScoreBreakdown signals={signals} />
         {signals.notes.length > 0 && (
           <details className="detail-notes">
@@ -328,6 +335,17 @@ function BacktestCard({ label, result, active }) {
             <span className="muted small"><Explain term="winRate">Win rate</Explain></span>
             <span>{result.winRate.toFixed(0)}%</span>
           </div>
+          {result.winRateLow != null && (
+            <div className="backtest-row">
+              <span className="muted small">
+                <Explain term="confidenceInterval">95% range</Explain>
+              </span>
+              <span className={result.distinguishable ? '' : 'muted small'}>
+                {result.winRateLow.toFixed(0)}–{result.winRateHigh.toFixed(0)}%
+                {!result.distinguishable && ' · spans 50%'}
+              </span>
+            </div>
+          )}
           <div className="backtest-row">
             <span className="muted small"><Explain term="avgReturn">Avg. return</Explain></span>
             <span>{pct(result.avgReturn)}</span>

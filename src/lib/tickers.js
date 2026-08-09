@@ -22,6 +22,11 @@ export const TICKERS = [
   { symbol: 'CVX', name: 'Chevron', group: 'Energy', kind: 'stock' },
   { symbol: 'JNJ', name: 'Johnson & Johnson', group: 'Healthcare', kind: 'stock' },
   { symbol: 'UNH', name: 'UnitedHealth', group: 'Healthcare', kind: 'stock' },
+  // Macro proxies. Not screened as trade ideas — they are the inputs to the
+  // macro layer: TLT prices long rates, HYG prices credit appetite. Marked
+  // `macro` so they stay out of the leaderboard while still being synced.
+  { symbol: 'TLT', name: '20+ Year Treasury Bond ETF', group: 'Macro', kind: 'macro' },
+  { symbol: 'HYG', name: 'High Yield Corporate Bond ETF', group: 'Macro', kind: 'macro' },
   { symbol: 'BTC/USD', name: 'Bitcoin', group: 'Crypto', kind: 'crypto' },
   { symbol: 'ETH/USD', name: 'Ethereum', group: 'Crypto', kind: 'crypto' },
 ]

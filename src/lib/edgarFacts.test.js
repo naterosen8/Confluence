@@ -91,6 +91,41 @@ describe('parseCompanyFacts', () => {
     expect(r.quarters.at(-1).shares).toBe(1234)
   })
 
+  it('takes quarterly income figures and rejects the annual ones filed alongside them', () => {
+    // A 10-K carries a 12-month revenue figure under the same tag as the
+    // quarterly ones. Mixing them would compare a year against a quarter and
+    // silently corrupt every year-over-year trend.
+    const f = facts()
+    f.facts['us-gaap'].Revenues = usd([
+      { start: '2024-01-01', end: '2024-03-31', val: 500, form: '10-Q', filed: '2024-04-20' },
+      { start: '2023-04-01', end: '2024-03-31', val: 2000, form: '10-K', filed: '2024-04-20' }, // trailing year
+    ])
+    f.facts['us-gaap'].NetIncomeLoss = usd([
+      { start: '2024-01-01', end: '2024-03-31', val: 50, form: '10-Q', filed: '2024-04-20' },
+    ])
+    const q = parseCompanyFacts(f).quarters.at(-1)
+    expect(q.revenue).toBe(500)
+    expect(q.netIncome).toBe(50)
+  })
+
+  it('leaves income null when only annual figures exist', () => {
+    const f = facts()
+    f.facts['us-gaap'].Revenues = usd([
+      { start: '2023-04-01', end: '2024-03-31', val: 2000, form: '10-K', filed: '2024-04-20' },
+    ])
+    expect(parseCompanyFacts(f).quarters.at(-1).revenue).toBeNull()
+  })
+
+  it('does not borrow an adjacent quarter\'s revenue for a period that has none', () => {
+    const f = facts()
+    f.facts['us-gaap'].Revenues = usd([
+      { start: '2023-10-01', end: '2023-12-31', val: 400, form: '10-Q', filed: '2024-01-20' },
+    ])
+    const qs = parseCompanyFacts(f).quarters
+    expect(qs.find((q) => q.asOf === '2023-12-31').revenue).toBe(400)
+    expect(qs.find((q) => q.asOf === '2024-03-31').revenue).toBeNull()
+  })
+
   it('returns null rather than a hollow object when the filing has no balance sheet', () => {
     expect(parseCompanyFacts({ facts: { 'us-gaap': {} } })).toBeNull()
     expect(parseCompanyFacts({})).toBeNull()

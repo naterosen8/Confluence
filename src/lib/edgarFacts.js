@@ -23,6 +23,39 @@ function latestByPeriodEnd(entries = []) {
   return [...byEnd.values()].sort((a, b) => (a.end < b.end ? -1 : a.end > b.end ? 1 : 0))
 }
 
+// Income-statement facts are *duration* facts carrying both start and end,
+// unlike balance sheet items which are instants. A 10-K reports a 12-month
+// figure alongside quarterly ones under the same tag, so without filtering by
+// duration a year of revenue gets compared against a quarter of it and the
+// year-over-year trend becomes nonsense. Keep only ~3-month periods.
+function durationDays(e) {
+  if (!e.start || !e.end) return null
+  return (Date.parse(e.end) - Date.parse(e.start)) / 86400000
+}
+
+function latestQuarterlyByPeriodEnd(entries = []) {
+  const byEnd = new Map()
+  for (const e of entries) {
+    if (!e || typeof e.val !== 'number' || !e.end) continue
+    if (e.form && !/^10-[KQ]/.test(e.form)) continue
+    const d = durationDays(e)
+    if (d == null || d < 75 || d > 115) continue
+    const prev = byEnd.get(e.end)
+    if (!prev || (e.filed || '') > (prev.filed || '')) byEnd.set(e.end, e)
+  }
+  return [...byEnd.values()].sort((a, b) => (a.end < b.end ? -1 : a.end > b.end ? 1 : 0))
+}
+
+function firstAvailableQuarterly(facts, tags, unit = 'USD') {
+  for (const tag of tags) {
+    const units = facts?.['us-gaap']?.[tag]?.units
+    if (!units) continue
+    const entries = latestQuarterlyByPeriodEnd(units[unit] || [])
+    if (entries.length) return entries
+  }
+  return []
+}
+
 function conceptEntries(facts, namespace, tag, unit) {
   const units = facts?.[namespace]?.[tag]?.units
   if (!units) return []
@@ -91,6 +124,17 @@ export const CONCEPTS = {
   shortTermDebt: ['LongTermDebtCurrent', 'DebtCurrent'],
 }
 
+// Income-statement concepts, for the "is the business improving?" layer.
+export const INCOME_CONCEPTS = {
+  revenue: [
+    'RevenueFromContractWithCustomerExcludingAssessedTax',
+    'RevenueFromContractWithCustomerIncludingAssessedTax',
+    'Revenues',
+    'SalesRevenueNet',
+  ],
+  netIncome: ['NetIncomeLoss', 'ProfitLoss'],
+}
+
 export function parseCompanyFacts(json, { maxQuarters = 12 } = {}) {
   const facts = json?.facts
   if (!facts) return null
@@ -116,6 +160,13 @@ export function parseCompanyFacts(json, { maxQuarters = 12 } = {}) {
   ]
   const sharesFallback = firstAvailable(facts, 'us-gaap', ['CommonStockSharesOutstanding', 'CommonStockSharesIssued'], 'shares')
 
+  const revenue = firstAvailableQuarterly(facts, INCOME_CONCEPTS.revenue)
+  const netIncome = firstAvailableQuarterly(facts, INCOME_CONCEPTS.netIncome)
+  // Exact-date lookup here, not as-of: a quarter's revenue belongs to that
+  // quarter, and silently borrowing an adjacent period's figure would corrupt
+  // the year-over-year comparison this data exists to support.
+  const exact = (entries, date) => entries.find((e) => e.end === date)?.val ?? null
+
   const periods = assets.slice(-maxQuarters)
   const quarters = periods.map((a) => {
     const asOf = a.end
@@ -134,6 +185,8 @@ export function parseCompanyFacts(json, { maxQuarters = 12 } = {}) {
       cash: sumAsOf([cash, shortTermInvestments], asOf),
       debt: sumAsOf([longTermDebt, shortTermDebt], asOf),
       shares: valueAsOf(shares, asOf) ?? valueAsOf(sharesFallback, asOf) ?? nearestValue(shares, asOf) ?? nearestValue(sharesFallback, asOf),
+      revenue: exact(revenue, asOf),
+      netIncome: exact(netIncome, asOf),
     }
   })
 

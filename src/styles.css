@@ -890,3 +890,74 @@ table.grid {
     max-width: none;
   }
 }
+
+/* ---- three-layer confluence ---- */
+.confluence-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.confluence-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.confluence-layer {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.confluence-layer-bullish {
+  border-left-color: #4caf7d;
+}
+.confluence-layer-bearish {
+  border-left-color: #e0715a;
+}
+.confluence-layer-mixed {
+  border-left-color: var(--muted);
+}
+.confluence-layer-missing {
+  border-left-style: dashed;
+  opacity: 0.75;
+}
+
+.confluence-layer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.confluence-reasons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.confluence-reasons .factor-sign {
+  flex: none;
+  font-weight: 700;
+}
+
+.confluence-reasons .factor-bullish .factor-sign,
+.confluence-reasons li.factor-bullish > .factor-sign {
+  color: #4caf7d;
+}
+.confluence-reasons li.factor-bearish > .factor-sign {
+  color: #e0715a;
+}
+
+.impact-note {
+  border-left-color: #d8b45f;
+}

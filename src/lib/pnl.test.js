@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computePnl, evaluatePosition } from './pnl'
+import { computePnl, evaluatePosition, marketImpactEstimate } from './pnl'
 import { simulatePosition } from './leverageStudy'
 
 const bar = (date, close, low = close, high = close) => ({ date, open: close, high, low, close, volume: 1 })
@@ -101,5 +101,44 @@ describe('evaluatePosition', () => {
       leverage: 20,
     })
     expect(r.liquidated).toBe(false)
+  })
+})
+
+describe('marketImpactEstimate', () => {
+  // $10M of dollar volume a day, ~2% daily moves.
+  const bars = Array.from({ length: 30 }, (_, i) => ({
+    date: `d${i}`,
+    open: 100,
+    high: 102,
+    low: 98,
+    close: 100 * (1 + (i % 2 ? 0.02 : -0.02)),
+    volume: 100_000,
+  }))
+
+  it('scales participation linearly with position size', () => {
+    const small = marketImpactEstimate({ bars, notional: 10_000 })
+    const large = marketImpactEstimate({ bars, notional: 100_000 })
+    expect(large.participationPct).toBeCloseTo(small.participationPct * 10, 6)
+  })
+
+  it('grows impact with the square root of participation, not linearly', () => {
+    const a = marketImpactEstimate({ bars, notional: 100_000 })
+    const b = marketImpactEstimate({ bars, notional: 400_000 })
+    // 4x the size -> 2x the impact under a square-root model.
+    expect(b.impactPct / a.impactPct).toBeCloseTo(2, 6)
+  })
+
+  it('flags the point where the printed-price assumption stops holding', () => {
+    const tiny = marketImpactEstimate({ bars, notional: 1_000 })
+    const big = marketImpactEstimate({ bars, notional: 2_000_000 })
+    expect(tiny.material).toBe(false)
+    expect(big.material).toBe(true)
+    expect(big.severe).toBe(true)
+  })
+
+  it('returns null rather than a fabricated number without volume data', () => {
+    expect(marketImpactEstimate({ bars: [], notional: 1000 })).toBeNull()
+    expect(marketImpactEstimate({ bars, notional: 0 })).toBeNull()
+    expect(marketImpactEstimate({ bars: bars.map((b) => ({ ...b, volume: 0 })), notional: 1000 })).toBeNull()
   })
 })

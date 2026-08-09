@@ -68,7 +68,7 @@ export default function BalanceSheetValue({ symbol, kind, price, bars }) {
   const history = useMemo(() => priceToBookHistory({ quarters: company?.quarters, bars }), [company, bars])
   const range = useMemo(() => summarizeHistory(history, valuation?.priceToBook), [history, valuation])
 
-  if (kind === 'etf') {
+  if (kind === 'etf' || kind === 'macro') {
     return (
       <p className="muted small">
         Not applicable to an ETF. A fund's net asset value is simply the market value of what it holds, so comparing it

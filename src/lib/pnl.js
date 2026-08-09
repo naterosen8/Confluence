@@ -16,6 +16,55 @@ export function computePnl({ direction, entryPrice, currentPrice, capital, lever
   }
 }
 
+// Every backtest and simulation on this site assumes you can transact at the
+// printed price. That assumption quietly fails as position size grows: an
+// order large relative to what actually trades moves the price against itself
+// while it fills, so the fill is worse than the quote and the "equity" the
+// position is supposedly worth was never obtainable at that mark.
+//
+// Uses the square-root impact model, the standard empirical approximation:
+//
+//     impact ≈ c · σ_daily · sqrt(participation rate)
+//
+// with c ≈ 1. Deliberately rough — real impact depends on the order schedule,
+// venue, spread and who else is trading. The purpose is not a precise cost
+// estimate but to make visible the point at which "at the printed price"
+// stops being a reasonable assumption at all.
+export function marketImpactEstimate({ bars, notional, lookback = 20 }) {
+  if (!bars?.length || !notional || notional <= 0) return null
+  const recent = bars.slice(-lookback)
+  const dollarVolumes = recent.map((b) => b.close * (b.volume || 0)).filter((v) => v > 0)
+  if (!dollarVolumes.length) return null
+
+  const sorted = [...dollarVolumes].sort((a, b) => a - b)
+  const medianDollarVolume = sorted[Math.floor(sorted.length / 2)]
+
+  // Daily volatility from close-to-close returns over the same window.
+  const returns = []
+  for (let i = 1; i < recent.length; i++) {
+    if (recent[i - 1].close > 0) returns.push((recent[i].close - recent[i - 1].close) / recent[i - 1].close)
+  }
+  const mean = returns.length ? returns.reduce((a, b) => a + b, 0) / returns.length : 0
+  const dailyVol = returns.length > 1
+    ? Math.sqrt(returns.reduce((a, r) => a + (r - mean) ** 2, 0) / (returns.length - 1))
+    : 0
+
+  const participation = notional / medianDollarVolume
+  const impactPct = dailyVol * Math.sqrt(participation) * 100
+
+  return {
+    notional,
+    medianDollarVolume,
+    participationPct: participation * 100,
+    dailyVolPct: dailyVol * 100,
+    impactPct,
+    // Below roughly 1% of a day's volume, impact is normally lost in the
+    // spread; above 10% the printed-price assumption is not defensible.
+    material: participation >= 0.01,
+    severe: participation >= 0.1,
+  }
+}
+
 // The price at which a leveraged position loses its entire stake: at Nx, a
 // 1/N move against it is fatal. Defined here, in the position-math module,
 // and imported by the historical leverage study so both features settle the

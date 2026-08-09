@@ -41,6 +41,30 @@ To sync real data locally: `TWELVE_DATA_KEY=your_key node scripts/sync-market-da
 
 Detail pages lead with whichever event most recently triggered and surface its base rate first.
 
+## The name
+
+**Confluence** — the point where separate streams meet.
+
+One indicator is mostly noise; agreement between *independent* kinds of evidence carries more weight. The trap the name invites, and which this app previously fell into, is that stacking several indicators reading the same price series is not confluence at all — trend, MACD and price-versus-average agree almost by construction, so combining them yields a bigger number rather than more evidence.
+
+`src/lib/confluence.js` therefore scores three streams that can genuinely disagree:
+
+- **Technical** — breakout (price clearing a defended level, with volume confirming), participation, position against structural support.
+- **Fundamental** — is the business improving? Year-over-year revenue and net income from SEC filings, plus what the balance sheet supports.
+- **Macro** — the price of money and the appetite for risk, read from TLT (long rates) and HYG (credit spreads), two instruments the app already syncs.
+
+Each layer is scored separately and never blended into one number. **A layer with no data is reported as missing, never as neutral** — two layers agreeing while the third is absent is not a three-layer confluence, and the UI says so explicitly.
+
+## Confidence, and its limits
+
+There is no model here that knows where a price is going, and there could not be one. What the data supports is a description of what happened before under similar conditions, *with the uncertainty attached*:
+
+- Every win rate carries a **95% Wilson confidence interval**, and the site says plainly when that interval spans 50% — a sample that cannot be distinguished from a coin flip is not presented as an edge, however far its headline percentage sits from 50. A "60% win rate" over 10 occurrences ranges roughly 31–83%; it means nothing on its own.
+- **Overlapping forward windows** are counted: occurrences close together in time are not independent observations, and the independent count is usually far below the raw N.
+- **Market impact** is estimated. Every backtest assumes you transact at the printed price, which fails as size grows — a large order moves the market against itself while it fills, so the entry, the exit and the equity marked against them are all worse than modelled. The leverage study flags the position sizes where that stops being a rounding error, using a square-root impact model against median daily dollar volume.
+
+None of this makes the app a financial model, and nothing in it is advice. It is an educational simulator using fake money.
+
 ## Leverage study
 
 `src/lib/leverageStudy.js` replays every past non-neutral confluence signal on a ticker as a hypothetical leveraged position, so the effect of position sizing on the same signals is visible rather than imagined. You set a stake and a leverage; it reports N, wipeout rate, win rate, average/median return, best/worst, and average dollar outcome — for both "setups like today" and every signal in the tracked history.

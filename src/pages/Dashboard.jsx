@@ -40,7 +40,7 @@ export default function Dashboard() {
   const topSetups = useMemo(
     () =>
       [...rows]
-        .filter((r) => r.setup.stat)
+        .filter((r) => r.setup.stat && r.kind !== 'macro')
         .sort((a, b) => Math.abs(b.setup.edge) - Math.abs(a.setup.edge))
         .slice(0, 5),
     [rows]

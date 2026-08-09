@@ -72,6 +72,22 @@ export const GLOSSARY = {
     isNot:
       'Not N independent trials. Occurrences close together in time share overlapping forward windows — a signal yesterday and one today cover almost the same five days — so the true number of independent episodes is far smaller than the count suggests. Treat anything under about 15 as a hint, not a statistic.',
   },
+  confidenceInterval: {
+    term: '95% range (confidence interval)',
+    basis: 'measured',
+    what: 'The band of true win rates consistent with the handful of occurrences observed.',
+    how: 'Wilson score interval at 95%, chosen over the textbook formula because that one misbehaves badly at small samples and rates near 0 or 100%.',
+    isNot:
+      'Not a range of expected outcomes for the next trade. It describes uncertainty about the historical rate itself. If the band spans 50%, the sample cannot distinguish this setup from a coin flip — however far the headline percentage sits from 50.',
+  },
+  independentSample: {
+    term: 'Independent occurrences',
+    basis: 'measured',
+    what: 'How many of the counted occurrences are genuinely separate episodes rather than overlapping ones.',
+    how: 'Walks the occurrences in order and counts only those beginning after the previous one\'s forward window has closed.',
+    isNot:
+      'Not a correction that makes the statistics valid. It is a floor on how much independent evidence exists, and it is usually far below the raw N.',
+  },
   regime: {
     term: 'Market regime',
     basis: 'measured',

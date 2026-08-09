@@ -1,4 +1,5 @@
 import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries } from './indicators'
+import { distinguishableFromChance, independentCount } from './stats'
 
 // How many sessions forward every base rate in this file looks. Exported so
 // the UI can name the window ("over the next 5 sessions") without a third
@@ -9,9 +10,20 @@ function summarize(occurrences) {
   if (occurrences.length === 0) return { sampleSize: 0 }
   const returns = occurrences.map((o) => o.return)
   const wins = returns.filter((r) => r > 0).length
+  // A win rate without its uncertainty is the single most misleading number
+  // this app can print: 60% over 10 occurrences and 60% over 400 are entirely
+  // different claims, and only one of them is distinguishable from a coin
+  // flip. Every summary now carries the interval and that verdict.
+  const ci = distinguishableFromChance(wins, occurrences.length)
+  // Overlapping forward windows mean the raw count overstates the evidence.
+  const indices = occurrences.map((o) => o.index).filter((i) => i != null)
   return {
     sampleSize: occurrences.length,
+    independentSample: indices.length ? independentCount(indices, FORWARD_DAYS) : null,
     winRate: (wins / occurrences.length) * 100,
+    winRateLow: ci ? ci.lower * 100 : null,
+    winRateHigh: ci ? ci.upper * 100 : null,
+    distinguishable: ci ? ci.distinguishable : false,
     avgReturn: (returns.reduce((a, b) => a + b, 0) / returns.length) * 100,
     bestReturn: Math.max(...returns) * 100,
     worstReturn: Math.min(...returns) * 100,
@@ -143,8 +155,8 @@ export function backtestByScore(bars, spyBars, { forwardDays = FORWARD_DAYS } = 
     const regime = regimeAt(regimeDates, regimeMap, bars[i].date)
     if (!buckets.has(scores[i])) buckets.set(scores[i], { all: [], regimeMatched: [] })
     const bucket = buckets.get(scores[i])
-    bucket.all.push({ return: ret })
-    if (regime && currentRegime && regime === currentRegime) bucket.regimeMatched.push({ return: ret })
+    bucket.all.push({ return: ret, index: i })
+    if (regime && currentRegime && regime === currentRegime) bucket.regimeMatched.push({ return: ret, index: i })
   }
 
   const rows = [...buckets.entries()]

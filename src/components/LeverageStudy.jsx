@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { leverageStudy } from '../lib/leverageStudy'
+import { marketImpactEstimate } from '../lib/pnl'
 import { FORWARD_DAYS } from '../lib/backtest'
 
 function pct(v, digits = 1) {
@@ -69,6 +70,14 @@ export default function LeverageStudy({ bars, currentScore }) {
   )
 
   const headline = allSignals.sampleSize ? allSignals : null
+
+  // Every figure above assumes the position fills at the printed price. That
+  // assumption degrades as size grows, and leverage multiplies the size that
+  // actually reaches the market — so it is checked against notional, not stake.
+  const impact = useMemo(
+    () => marketImpactEstimate({ bars, notional: capitalNum * leverageNum }),
+    [bars, capitalNum, leverageNum]
+  )
   const breakEvenMove = (100 / leverageNum).toFixed(1)
 
   return (
@@ -155,6 +164,19 @@ export default function LeverageStudy({ bars, currentScore }) {
         charge funding and spread on top. It also assumes every signal was taken mechanically, with no slippage and no
         judgement applied.
       </p>
+      {impact && impact.material && (
+        <div className="callout impact-note">
+          A ${capitalNum.toFixed(0)} stake at {leverageNum}x puts{' '}
+          <strong>${(impact.notional / 1000).toFixed(0)}k</strong> into the market — about{' '}
+          <strong>{impact.participationPct.toFixed(1)}%</strong> of this ticker's median daily dollar volume.
+          {impact.severe
+            ? ' At that size the printed price is not a price you could actually transact at: the order moves the market against itself while it fills, so the entry, the exit and the equity marked against them are all worse than modelled.'
+            : ' At that size, a rough square-root impact model puts the give-up at roughly ' +
+              impact.impactPct.toFixed(2) +
+              '% per side — small, but no longer nothing, and every figure above ignores it.'}
+        </div>
+      )}
+
       <p className="muted small">
         Deliberately not shown: a compounded "stake it every time" equity curve. These windows overlap in time, so
         chaining them implies a strategy nobody ran and turns a modest edge into an exponential-looking chart.
