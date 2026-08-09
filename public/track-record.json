@@ -110,5 +110,124 @@
     "verdict": "Bullish",
     "score": 2,
     "price": 152.94501
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "AMD",
+    "verdict": "Bearish",
+    "score": -2,
+    "price": 483.35999
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "AMZN",
+    "verdict": "Strong Bullish",
+    "score": 4,
+    "price": 274.48001
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "BTC/USD",
+    "verdict": "Bullish",
+    "score": 2,
+    "price": 65226.46
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "CRM",
+    "verdict": "Bullish",
+    "score": 2,
+    "price": 192.74001
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "CVX",
+    "verdict": "Bullish",
+    "score": 2,
+    "price": 186.56
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "DIA",
+    "verdict": "Strong Bullish",
+    "score": 4,
+    "price": 539.62
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "ETH/USD",
+    "verdict": "Bearish",
+    "score": -2,
+    "price": 1923.79
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "IWM",
+    "verdict": "Strong Bullish",
+    "score": 4,
+    "price": 301.56
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "META",
+    "verdict": "Strong Bearish",
+    "score": -4,
+    "price": 592.099976
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "MSFT",
+    "verdict": "Bullish",
+    "score": 1,
+    "price": 499.98999
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "NVDA",
+    "verdict": "Bullish",
+    "score": 2,
+    "price": 223.96001
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "QQQ",
+    "verdict": "Strong Bullish",
+    "score": 4,
+    "price": 723.030029
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "SPY",
+    "verdict": "Strong Bullish",
+    "score": 4,
+    "price": 773.26001
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "TLT",
+    "verdict": "Bearish",
+    "score": -2,
+    "price": 82.76
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "TSLA",
+    "verdict": "Bearish",
+    "score": -2,
+    "price": 328.57999
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "UNH",
+    "verdict": "Bearish",
+    "score": -2,
+    "price": 407.079987
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "XOM",
+    "verdict": "Bullish",
+    "score": 2,
+    "price": 153.039993
   }
 ]
