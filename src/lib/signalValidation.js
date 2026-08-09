@@ -71,10 +71,23 @@ export function scoreDirectionCheck(barsBySymbol, symbols) {
     }))
     .sort((a, b) => b.score - a.score)
 
-  // "Aligned" means higher scores were followed by higher returns, which is
-  // what the badge's wording implies. Anything else is worth saying out loud.
+  // Significance and magnitude are different questions, and conflating them
+  // is how a trivial effect gets reported as a finding. With ~800 scored
+  // sessions across two dozen tickers, a correlation of 0.05 is comfortably
+  // "statistically significant" while explaining about a quarter of one
+  // percent of the variance — far too small to act on and far smaller than
+  // costs. So an effect must clear a magnitude floor before it is described
+  // as a direction at all.
+  //
+  // This threshold matters: on a single twelve-month window this same check
+  // measured -0.27 and read as a decisive inversion. Four years of data cut
+  // it to -0.06. The short window was the artefact, and without a magnitude
+  // floor the site would have kept reporting the artefact as a fact.
+  const MEANINGFUL_CORR = 0.1
   const direction = !stats
     ? 'unknown'
+    : Math.abs(stats.mean) < MEANINGFUL_CORR
+    ? 'negligible'
     : stats.upper < 0
     ? 'inverted'
     : stats.lower > 0
@@ -96,6 +109,11 @@ export function scoreDirectionCheck(barsBySymbol, symbols) {
 }
 
 export const DIRECTION_COPY = {
+  negligible: {
+    headline: 'The confluence score has no usable relationship to what happens next.',
+    detail:
+      'Across the tracked history the measured link between the score and the following sessions is close enough to zero to be worthless for anticipating direction — small enough that ordinary trading costs would dwarf it, whichever way it points. The score is a fair description of how much the indicators currently agree with each other. It is not a forecast, and this measurement is the reason the site does not present it as one.',
+  },
   inverted: {
     headline: 'On the tracked data, a higher confluence score has been followed by LOWER returns.',
     detail:
@@ -135,6 +153,8 @@ export function directionBanner(result) {
   if (!result) return null
   const n = result.forwardDays
   switch (result.direction) {
+    case 'negligible':
+      return `Measured against this site's own history, the score has no usable relationship to returns over the next ${n} sessions — it describes indicator agreement, not expected direction.`
     case 'inverted':
       return `On the data this site has, a higher confluence score has been followed by lower returns over the next ${n} sessions — the opposite of what the badge wording suggests.`
     case 'aligned':

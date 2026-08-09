@@ -152,3 +152,14 @@ describe('meanWithInterval', () => {
     expect(meanWithInterval([1])).toBeNull()
   })
 })
+
+describe('effect size is not the same question as significance', () => {
+  it('a large sample makes a trivial effect statistically detectable', () => {
+    // The trap the signal check has to avoid: with enough observations, a
+    // correlation far too small to act on still excludes zero.
+    const tiny = Array.from({ length: 400 }, (_, i) => (i % 2 ? 0.06 : 0.05))
+    const r = meanWithInterval(tiny)
+    expect(r.distinguishableFromZero).toBe(true) // significant
+    expect(Math.abs(r.mean)).toBeLessThan(0.1) // and yet negligible
+  })
+})
