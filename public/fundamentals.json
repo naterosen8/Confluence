@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-09T15:40:05.087Z",
+  "generatedAt": "2026-08-10T23:22:25.216Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -2302,20 +2302,6 @@
       "entityName": "UnitedHealth Group Incorporated",
       "quarters": [
         {
-          "asOf": "2023-06-30",
-          "form": "10-Q",
-          "assets": 280164000000,
-          "liabilities": 188008000000,
-          "equity": 33020000000,
-          "currentAssets": 89869000000,
-          "currentLiabilities": 112981000000,
-          "cash": 46279000000,
-          "debt": 62888000000,
-          "shares": 931032030,
-          "revenue": 92903000000,
-          "netIncome": 5474000000
-        },
-        {
           "asOf": "2023-09-30",
           "form": "10-Q",
           "assets": 282063000000,
@@ -2468,6 +2454,20 @@
           "shares": 907675839,
           "revenue": 111721000000,
           "netIncome": 6280000000
+        },
+        {
+          "asOf": "2026-06-30",
+          "form": "10-Q",
+          "assets": 309727000000,
+          "liabilities": 203778000000,
+          "equity": 33020000000,
+          "currentAssets": 86860000000,
+          "currentLiabilities": 111820000000,
+          "cash": 31468000000,
+          "debt": 73121000000,
+          "shares": 908144404,
+          "revenue": 112032000000,
+          "netIncome": 5484000000
         }
       ]
     }
