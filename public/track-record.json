@@ -130,7 +130,7 @@
     "symbol": "BTC/USD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 63978.8
+    "price": 63970.01
   },
   {
     "date": "2026-08-10",
@@ -200,7 +200,7 @@
     "symbol": "QQQ",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 720.805
+    "price": 720.87
   },
   {
     "date": "2026-08-10",
@@ -214,7 +214,7 @@
     "symbol": "TLT",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 82.045
+    "price": 82.06
   },
   {
     "date": "2026-08-10",

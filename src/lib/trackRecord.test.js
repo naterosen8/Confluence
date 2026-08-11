@@ -1,48 +1,117 @@
 import { describe, it, expect } from 'vitest'
-import { entryBarIndex, utcToday } from './trackRecord.js'
+import { lastSettledIndex, utcToday, repairUnresolved } from './trackRecord.js'
 
 const bars = [
+  { date: '2026-08-06', close: 99 },
   { date: '2026-08-07', close: 100 },
   { date: '2026-08-08', close: 101 },
   { date: '2026-08-09', close: 102 },
 ]
 
-describe('entryBarIndex', () => {
-  it('uses the last bar for equities even when it is dated today', () => {
-    // The US session has closed by the time the job runs, so today's bar is
-    // final. Stepping back here would delay every equity entry by a day for
-    // no reason.
-    expect(entryBarIndex({ bars, kind: 'stock', today: '2026-08-09' })).toBe(2)
-    expect(entryBarIndex({ bars, kind: 'etf', today: '2026-08-09' })).toBe(2)
-    expect(entryBarIndex({ bars, kind: 'macro', today: '2026-08-09' })).toBe(2)
-  })
-
-  it('steps back for a crypto bar dated today, which is still forming', () => {
-    // This is the case that logged BTC/USD at 65234.61 on a bar that settled
-    // at 64901.59 — a provisional close, and a verdict computed from a
-    // partial session.
-    expect(entryBarIndex({ bars, kind: 'crypto', today: '2026-08-09' })).toBe(1)
-  })
-
-  it('uses the last crypto bar once it is no longer today', () => {
-    expect(entryBarIndex({ bars, kind: 'crypto', today: '2026-08-10' })).toBe(2)
+describe('lastSettledIndex', () => {
+  it('never points at the last bar, which the provider is still revising', () => {
+    expect(lastSettledIndex(bars)).toBe(2)
+    expect(bars[lastSettledIndex(bars)].date).toBe('2026-08-08')
   })
 
   it('reports nothing usable rather than an out-of-range index', () => {
-    expect(entryBarIndex({ bars: [], kind: 'stock', today: '2026-08-09' })).toBe(-1)
-    expect(entryBarIndex({ bars: undefined, kind: 'stock', today: '2026-08-09' })).toBe(-1)
-    // A single crypto bar dated today leaves no completed bar behind it.
-    expect(entryBarIndex({ bars: [bars[2]], kind: 'crypto', today: '2026-08-09' })).toBe(-1)
+    expect(lastSettledIndex([])).toBe(-1)
+    expect(lastSettledIndex(undefined)).toBe(-1)
+    // One bar means one provisional bar and nothing settled behind it.
+    expect(lastSettledIndex([bars[0]])).toBe(-1)
   })
 })
 
 describe('utcToday', () => {
   it('is the UTC calendar day, not the local one', () => {
     // 21:30 UTC is when the job runs; in US timezones that is still the
-    // previous local day, and using the local date would stamp entries a day
-    // behind the bars they came from.
+    // previous local day.
     expect(utcToday(new Date('2026-08-09T21:30:00Z'))).toBe('2026-08-09')
     expect(utcToday(new Date('2026-08-09T23:59:59Z'))).toBe('2026-08-09')
     expect(utcToday(new Date('2026-08-10T00:00:00Z'))).toBe('2026-08-10')
+  })
+})
+
+describe('repairUnresolved', () => {
+  const barsBySymbol = { AAPL: bars }
+  const rescore = () => ({ verdict: 'leaning-up', score: 2 })
+
+  it('corrects an unresolved price to the settled close', () => {
+    const log = [{ symbol: 'AAPL', date: '2026-08-07', verdict: 'aligned-up', score: 3, price: 100.4 }]
+    const out = repairUnresolved({ log, barsBySymbol, rescore })
+    expect(out.log[0].price).toBe(100)
+    expect(out.repaired).toEqual([
+      { symbol: 'AAPL', date: '2026-08-07', from: 100.4, to: 100, verdictFrom: 'aligned-up' },
+    ])
+  })
+
+  it('never touches an entry whose outcome is already settled', () => {
+    // Correcting the entry price after the return was computed would rewrite
+    // a measured result — the one thing this log exists not to do.
+    const log = [
+      {
+        symbol: 'AAPL',
+        date: '2026-08-07',
+        verdict: 'aligned-up',
+        score: 3,
+        price: 100.4,
+        outcome: { resolvedDate: '2026-08-09', exitPrice: 102, returnPct: 1.6, correct: true },
+      },
+    ]
+    const out = repairUnresolved({ log, barsBySymbol, rescore })
+    expect(out.repaired).toEqual([])
+    expect(out.log[0].price).toBe(100.4)
+  })
+
+  it('leaves an already-agreeing entry alone', () => {
+    const log = [{ symbol: 'AAPL', date: '2026-08-07', verdict: 'aligned-up', score: 3, price: 100 }]
+    const out = repairUnresolved({ log, barsBySymbol, rescore })
+    expect(out.repaired).toEqual([])
+    expect(out.log[0].verdict).toBe('aligned-up')
+  })
+
+  it('matches by symbol and date, never by price', () => {
+    // A previous repair matched on price and mapped an August 2026 entry onto
+    // a November 2022 bar, collapsing the log from 33 entries to 21.
+    const log = [{ symbol: 'AAPL', date: '2029-01-01', verdict: 'aligned-up', score: 3, price: 100 }]
+    const out = repairUnresolved({ log, barsBySymbol, rescore })
+    expect(out.repaired).toEqual([])
+    expect(out.log).toHaveLength(1)
+    expect(out.log[0].date).toBe('2029-01-01')
+  })
+
+  it('rescores from history truncated to the entry bar, with no look-ahead', () => {
+    const seen = []
+    const log = [{ symbol: 'AAPL', date: '2026-08-07', verdict: 'aligned-up', score: 3, price: 100.4 }]
+    repairUnresolved({
+      log,
+      barsBySymbol,
+      rescore: (history) => {
+        seen.push(history.map((b) => b.date))
+        return { verdict: 'leaning-up', score: 1 }
+      },
+    })
+    expect(seen).toEqual([['2026-08-06', '2026-08-07']])
+    expect(log[0].score).toBe(1)
+    expect(log[0].verdict).toBe('leaning-up')
+  })
+
+  it('removes an entry the settled bar turns into a split', () => {
+    // A split is never logged in the first place, so leaving one behind would
+    // publish a call nobody made.
+    const log = [
+      { symbol: 'AAPL', date: '2026-08-07', verdict: 'aligned-up', score: 3, price: 100.4 },
+      { symbol: 'AAPL', date: '2026-08-08', verdict: 'aligned-up', score: 3, price: 101 },
+    ]
+    const out = repairUnresolved({ log, barsBySymbol, rescore: () => ({ verdict: 'split', score: 0 }) })
+    expect(out.log).toHaveLength(1)
+    expect(out.log[0].date).toBe('2026-08-08')
+    expect(out.repaired[0].dropped).toBe(true)
+  })
+
+  it('skips a symbol with no synced bars rather than throwing', () => {
+    const log = [{ symbol: 'NOPE', date: '2026-08-07', verdict: 'aligned-up', score: 3, price: 1 }]
+    expect(() => repairUnresolved({ log, barsBySymbol, rescore })).not.toThrow()
+    expect(repairUnresolved({ log, barsBySymbol: {}, rescore }).repaired).toEqual([])
   })
 })

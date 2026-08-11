@@ -12,7 +12,7 @@ import fs from 'fs'
 import { computeSignals } from '../src/lib/indicators.js'
 import { TICKERS } from '../src/lib/tickers.js'
 import { leanDirection } from '../src/lib/lean.js'
-import { entryBarIndex, utcToday } from '../src/lib/trackRecord.js'
+import { lastSettledIndex, repairUnresolved } from '../src/lib/trackRecord.js'
 
 const API_KEY = process.env.TWELVE_DATA_KEY
 // Lives in public/, not data/, so the built app can fetch it as a plain
@@ -102,7 +102,25 @@ async function main() {
     JSON.stringify({ generatedAt: new Date().toISOString(), bars: barsBySymbol }) + '\n'
   )
 
-  const log = loadJson(TRACK_RECORD_PATH, [])
+  let log = loadJson(TRACK_RECORD_PATH, [])
+
+  // Before anything is resolved: bring unresolved entries back into agreement
+  // with bars the provider has since settled. Runs first so a resolution
+  // computed below uses the corrected entry price rather than a provisional
+  // one. Settled outcomes are left alone — see repairUnresolved.
+  const repair = repairUnresolved({
+    log,
+    barsBySymbol,
+    rescore: (history) => computeSignals(history),
+  })
+  log = repair.log
+  for (const r of repair.repaired) {
+    console.log(
+      `Repaired ${r.symbol} ${r.date}: price ${r.from} -> ${r.to}` +
+        (r.dropped ? ' (verdict became split — entry removed)' : r.verdictFrom ? ` (verdict ${r.verdictFrom} -> rescored)` : '')
+    )
+  }
+
   let resolvedCount = 0
   for (const entry of log) {
     if (entry.outcome) continue
@@ -131,24 +149,25 @@ async function main() {
     const bars = barsBySymbol[t.symbol]
     if (!bars) continue
     // Stamp the entry with the date of the bar the signal was computed from,
-    // NOT the date the job happened to run.
+    // NOT the date the job happened to run, and never against the last bar —
+    // the provider is still revising that one. See lastSettledIndex.
     //
     // Resolution finds an entry's starting bar by matching this date against
     // the price series. A run on a weekend or a holiday — or any run before
     // the session's bar exists — stamped a date that appears in no bar, so
     // the entry could never be found and would sit "pending" permanently. A
     // manual trigger on a Sunday had already produced 15 such entries.
-    // The last bar is not always a finished one — see entryBarIndex.
-    const index = entryBarIndex({ bars, kind: t.kind, today: utcToday() })
+    const index = lastSettledIndex(bars)
     if (index < 0) continue
 
-    const today = bars[index].date
-    if (log.some((e) => e.symbol === t.symbol && e.date === today)) continue
-    // Scored on the same history the entry is stamped with, so the logged
-    // price is that bar's close and the verdict is what it was on that bar.
-    const signals = computeSignals(index === bars.length - 1 ? bars : bars.slice(0, index + 1))
+    const barDate = bars[index].date
+    if (log.some((e) => e.symbol === t.symbol && e.date === barDate)) continue
+    // Scored on history truncated to that same bar, so the logged price is
+    // that bar's close, the verdict is what it was on that bar, and nothing
+    // after it can leak into the score.
+    const signals = computeSignals(bars.slice(0, index + 1))
     if (signals.verdict === 'split') continue
-    log.push({ date: today, symbol: t.symbol, verdict: signals.verdict, score: signals.score, price: signals.price })
+    log.push({ date: barDate, symbol: t.symbol, verdict: signals.verdict, score: signals.score, price: signals.price })
     loggedCount++
   }
 
