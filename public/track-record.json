@@ -105,20 +105,6 @@
     "price": 153.04
   },
   {
-    "date": "2026-08-09",
-    "symbol": "BTC/USD",
-    "verdict": "leaning-up",
-    "score": 2,
-    "price": 65234.61
-  },
-  {
-    "date": "2026-08-09",
-    "symbol": "ETH/USD",
-    "verdict": "leaning-down",
-    "score": -2,
-    "price": 1926.3
-  },
-  {
     "date": "2026-08-10",
     "symbol": "AAPL",
     "verdict": "aligned-down",

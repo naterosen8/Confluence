@@ -12,6 +12,7 @@ import fs from 'fs'
 import { computeSignals } from '../src/lib/indicators.js'
 import { TICKERS } from '../src/lib/tickers.js'
 import { leanDirection } from '../src/lib/lean.js'
+import { entryBarIndex, utcToday } from '../src/lib/trackRecord.js'
 
 const API_KEY = process.env.TWELVE_DATA_KEY
 // Lives in public/, not data/, so the built app can fetch it as a plain
@@ -137,9 +138,15 @@ async function main() {
     // the session's bar exists — stamped a date that appears in no bar, so
     // the entry could never be found and would sit "pending" permanently. A
     // manual trigger on a Sunday had already produced 15 such entries.
-    const today = bars[bars.length - 1].date
+    // The last bar is not always a finished one — see entryBarIndex.
+    const index = entryBarIndex({ bars, kind: t.kind, today: utcToday() })
+    if (index < 0) continue
+
+    const today = bars[index].date
     if (log.some((e) => e.symbol === t.symbol && e.date === today)) continue
-    const signals = computeSignals(bars)
+    // Scored on the same history the entry is stamped with, so the logged
+    // price is that bar's close and the verdict is what it was on that bar.
+    const signals = computeSignals(index === bars.length - 1 ? bars : bars.slice(0, index + 1))
     if (signals.verdict === 'split') continue
     log.push({ date: today, symbol: t.symbol, verdict: signals.verdict, score: signals.score, price: signals.price })
     loggedCount++
