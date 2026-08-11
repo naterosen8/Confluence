@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { TICKERS } from '../lib/tickers'
 import { getSeries } from '../lib/dataProvider'
 import { cachedScoreDirectionCheck, DIRECTION_COPY } from '../lib/signalValidation'
+import Explain from './Explain'
 
 // Publishes the app's own self-check. If the score does not predict what its
 // label implies, that belongs on the site rather than in a private notebook.
@@ -24,9 +25,15 @@ export default function SignalCheck() {
       </div>
 
       <p className="muted small">
-        Correlation between the score and the next {result.forwardDays} sessions' return, measured per ticker across{' '}
-        {result.tickerCount} symbols: mean <strong>{result.meanCorr.toFixed(3)}</strong> (95% CI{' '}
-        {result.lower.toFixed(3)} to {result.upper.toFixed(3)}).{' '}
+        <Explain term="scoreCorrelation">
+          Correlation between the score and the next {result.forwardDays} sessions' return
+        </Explain>
+        , measured per ticker across {result.tickerCount} symbols: mean{' '}
+        <strong>{result.meanCorr.toFixed(3)}</strong> (
+        <Explain term="confidenceInterval">
+          95% CI {result.lower.toFixed(3)} to {result.upper.toFixed(3)}
+        </Explain>
+        ).{' '}
         <strong>
           {result.negativeCount} of {result.tickerCount}
         </strong>{' '}
@@ -37,9 +44,11 @@ export default function SignalCheck() {
         <table className="score-table">
           <thead>
             <tr>
-              <th>Score</th>
-              <th>Observations</th>
-              <th>Mean return over next {result.forwardDays} sessions</th>
+              <th><Explain term="confluenceScore">Score</Explain></th>
+              <th><Explain term="sampleSize">Observations</Explain></th>
+              <th>
+                <Explain term="forwardWindow">Mean return over next {result.forwardDays} sessions</Explain>
+              </th>
               <th></th>
             </tr>
           </thead>

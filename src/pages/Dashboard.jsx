@@ -58,16 +58,20 @@ export default function Dashboard() {
 
       <div className="toolbar">
         <span className="muted">
-          {HAS_LIVE_DATA
-            ? `Daily market data — last synced ${formatSyncTime(DATA_GENERATED_AT)}`
-            : 'Demo data — market data syncs daily via GitHub Actions (not run yet)'}
-          {HAS_LIVE_PRICE && ' + live price ticker (Finnhub)'}
+          {HAS_LIVE_DATA ? (
+            <Explain term="dailySnapshot">Daily market data — last synced {formatSyncTime(DATA_GENERATED_AT)}</Explain>
+          ) : (
+            <Explain term="demoData">Demo data — market data syncs daily via GitHub Actions (not run yet)</Explain>
+          )}
+          {HAS_LIVE_PRICE && <Explain term="livePrice"> + live price ticker (Finnhub)</Explain>}
         </span>
       </div>
 
       {topSetups.length > 0 && (
         <div className="top-setups">
-          <h2>Most extreme readings right now</h2>
+          <h2>
+            <Explain term="edge">Most extreme readings right now</Explain>
+          </h2>
           <p className="muted small">
             Ordered by how far each ticker's historical win rate sits from a coin flip, weighted by sample size. This
             is a <em>selection</em>, not a ranking of quality: picking the five most extreme results out of two dozen
@@ -112,13 +116,13 @@ export default function Dashboard() {
         <thead>
           <tr>
             <th>Symbol</th>
-            <th>Price</th>
-            <th>Trend</th>
+            <th><Explain term="livePrice">Price</Explain></th>
+            <th><Explain term="sparkline">Trend</Explain></th>
             <th><Explain term="rsi">RSI(14)</Explain></th>
             <th><Explain term="macd">MACD</Explain></th>
-            <th>Flags</th>
+            <th><Explain term="flags">Flags</Explain></th>
             <th><Explain term="edge">Edge</Explain></th>
-            <th><Explain term="confluenceScore">Confluence</Explain></th>
+            <th><Explain term="verdict">Confluence</Explain></th>
           </tr>
         </thead>
         <tbody>

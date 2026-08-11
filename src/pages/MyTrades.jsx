@@ -6,6 +6,7 @@ import { listTrades, closeTrade, deleteTrade } from '../lib/trades'
 import { getSeries, hasRealData } from '../lib/dataProvider'
 import { evaluatePosition, computePnl } from '../lib/pnl'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import Explain from '../components/Explain'
 
 function pct(v) {
   return `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
@@ -132,9 +133,11 @@ export default function MyTrades() {
     <div>
       <h1>My trades</h1>
       <p className="muted">
-        Hypothetical positions you opened yourself — the app never recommended any of these. Prices are as of the
-        last daily sync, not tick-live. These are tied to this browser — there's no login, so a different browser or
-        device won't see them.
+        <Explain term="simulatedTrade">
+          Hypothetical positions you opened yourself — the app never recommended any of these.
+        </Explain>{' '}
+        <Explain term="dailySnapshot">Prices are as of the last daily sync, not tick-live.</Explain> These are tied to
+        this browser — there's no login, so a different browser or device won't see them.
       </p>
 
       {error && <p className="muted small">Error: {error}</p>}
@@ -157,12 +160,12 @@ export default function MyTrades() {
                   <thead>
                     <tr>
                       <th>Symbol</th>
-                      <th>Direction</th>
+                      <th><Explain term="longShort">Direction</Explain></th>
                       <th>Entry</th>
-                      <th>Current</th>
+                      <th><Explain term="dailySnapshot">Current</Explain></th>
                       <th>Capital</th>
-                      <th>Leverage</th>
-                      <th>P&amp;L</th>
+                      <th><Explain term="leverage">Leverage</Explain></th>
+                      <th><Explain term="openPnl">P&amp;L</Explain></th>
                       <th></th>
                     </tr>
                   </thead>
@@ -239,13 +242,13 @@ export default function MyTrades() {
                   <thead>
                     <tr>
                       <th>Symbol</th>
-                      <th>Direction</th>
+                      <th><Explain term="longShort">Direction</Explain></th>
                       <th>Entry</th>
                       <th>Close</th>
                       <th>Capital</th>
-                      <th>Leverage</th>
-                      <th>P&amp;L</th>
-                      <th>Result</th>
+                      <th><Explain term="leverage">Leverage</Explain></th>
+                      <th><Explain term="openPnl">P&amp;L</Explain></th>
+                      <th><Explain term="wipedOut">Result</Explain></th>
                       <th></th>
                     </tr>
                   </thead>

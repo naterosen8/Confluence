@@ -86,14 +86,21 @@ function TickerAnalysis({ symbol, meta }) {
             this exact setup sits directly under it — including when that
             record disagrees with the badge, which is often. */}
         <div className="detail-verdict">
-          <VerdictBadge verdict={signals.verdict} bullishPoints={signals.bullishPoints} bearishPoints={signals.bearishPoints} />
+          {/* The "?" belongs on the badge, not floating ahead of the note
+              below it — an unlabelled marker reads as a stray glyph. */}
+          <Explain term="verdict">
+            <VerdictBadge verdict={signals.verdict} bullishPoints={signals.bullishPoints} bearishPoints={signals.bearishPoints} />
+          </Explain>
           <span className="muted small detail-verdict-note">
-            <Explain term="verdict" />{' '}
-            {setup.stat
-              ? setup.stat.distinguishable
-                ? `Historically ${setup.stat.winRate.toFixed(0)}% won over ${setup.stat.sampleSize} similar setups`
-                : `Historically ${setup.stat.winRate.toFixed(0)}% over ${setup.stat.sampleSize} setups — not distinguishable from chance`
-              : 'No comparable history yet for this setup'}
+            {/* Static term on purpose — a computed one would slip past the
+                glossary test that checks every term= actually resolves. */}
+            <Explain term="winRate">
+              {setup.stat
+                ? setup.stat.distinguishable
+                  ? `Historically ${setup.stat.winRate.toFixed(0)}% won over ${setup.stat.sampleSize} similar setups`
+                  : `Historically ${setup.stat.winRate.toFixed(0)}% over ${setup.stat.sampleSize} setups — not distinguishable from chance`
+                : 'No comparable history yet for this setup'}
+            </Explain>
           </span>
         </div>
       </div>
@@ -107,17 +114,22 @@ function TickerAnalysis({ symbol, meta }) {
 
       <div className="detail-chart">
         <Sparkline values={closes.slice(-90)} width={480} height={120} />
+        <div className="muted small">
+          <Explain term="sparkline">Last 90 closes</Explain>
+        </div>
       </div>
 
-      <Section title="Simulate a trade">
+      <Section title={<Explain term="simulatedTrade">Simulate a trade</Explain>}>
         <SimulateTradeForm symbol={symbol} currentPrice={liveQuote?.price ?? signals.price} />
       </Section>
 
       {!hasRealData(symbol) && (
         <div className="callout">
-          Running on generated demo data (a random walk), not real price history — either the daily sync hasn't run
-          yet, or it failed to fetch this symbol most recently. The mechanics below — divergence detection, base
-          rates, volatility context — are real; the numbers they're computed from aren't.
+          <Explain term="demoData">
+            Running on generated demo data (a random walk), not real price history
+          </Explain>{' '}
+          — either the daily sync hasn't run yet, or it failed to fetch this symbol most recently. The mechanics below
+          — divergence detection, base rates, volatility context — are real; the numbers they're computed from aren't.
         </div>
       )}
 
@@ -128,11 +140,11 @@ function TickerAnalysis({ symbol, meta }) {
         </div>
       )}
 
-      <Section title="Confluence: technical, fundamental, macro">
+      <Section title={<Explain term="confluence">Confluence: technical, fundamental, macro</Explain>}>
         <ConfluencePanel symbol={symbol} kind={meta.kind} bars={bars} price={signals.price} />
       </Section>
 
-      <Section title="What's driving this (technical detail)">
+      <Section title={<Explain term="confluenceScore">What's driving this (technical detail)</Explain>}>
         <ScoreBreakdown signals={signals} />
         {signals.notes.length > 0 && (
           <details className="detail-notes">
@@ -148,7 +160,10 @@ function TickerAnalysis({ symbol, meta }) {
 
       <Section title="Volatility, volume & structure">
         <div className="stat-grid">
-          <Stat label="Price" value={<LivePrice basePrice={signals.price} liveQuote={liveQuote} />} />
+          <Stat
+            label={<Explain term="livePrice">Price</Explain>}
+            value={<LivePrice basePrice={signals.price} liveQuote={liveQuote} />}
+          />
           <Stat
             label={<Explain term="atrPercentile">Volatility (ATR percentile)</Explain>}
             value={signals.atrPercentile != null ? `${signals.atrPercentile.toFixed(0)}th` : 'not enough data'}
@@ -194,7 +209,7 @@ function TickerAnalysis({ symbol, meta }) {
       </Section>
 
       {(signals.divergence.lowUnconfirmed || signals.divergence.highUnconfirmed) && (
-        <Section title="Price and momentum disagreeing">
+        <Section title={<Explain term="divergence">Price and momentum disagreeing</Explain>}>
           {signals.divergence.lowUnconfirmed && (
             <p>
               <strong>New low, unconfirmed:</strong> price fell from ${signals.divergence.lowUnconfirmed.priorPrice.toFixed(2)} (
@@ -214,7 +229,14 @@ function TickerAnalysis({ symbol, meta }) {
         </Section>
       )}
 
-      <Section title={`Confluence score history (next ${scoreBacktest.forwardDays} sessions)`}>
+      <Section
+        title={
+          <>
+            <Explain term="confluenceScore">Confluence score history</Explain>{' '}
+            <Explain term="forwardWindow">(next {scoreBacktest.forwardDays} sessions)</Explain>
+          </>
+        }
+      >
         <p className="muted small">
           Individual events (below) tell you whether one mechanism has mattered on its own. This is the more honest
           "confluence" question: every day in this ticker's history is scored on RSI + MACD + trend + weekly
@@ -249,8 +271,8 @@ function TickerAnalysis({ symbol, meta }) {
                 <th><Explain term="winRate">Win %</Explain></th>
                 <th><Explain term="avgReturn">Avg return</Explain></th>
                 <th><Explain term="regimeMatched">N</Explain></th>
-                <th>Win %</th>
-                <th>Avg return</th>
+                <th><Explain term="winRate">Win %</Explain></th>
+                <th><Explain term="avgReturn">Avg return</Explain></th>
               </tr>
             </thead>
             <tbody>
@@ -273,15 +295,22 @@ function TickerAnalysis({ symbol, meta }) {
         </div>
       </Section>
 
-      <Section title="Balance sheet vs market cap">
+      <Section title={<Explain term="bookEquity">Balance sheet vs market cap</Explain>}>
         <BalanceSheetValue symbol={symbol} kind={meta.kind} price={signals.price} bars={bars} />
       </Section>
 
-      <Section title="What leverage would have done to these signals">
+      <Section title={<Explain term="leverage">What leverage would have done to these signals</Explain>}>
         <LeverageStudy bars={bars} currentScore={scoreBacktest.currentScore} />
       </Section>
 
-      <Section title={`Individual-signal base rates (next ${backtest.forwardDays} sessions)`}>
+      <Section
+        title={
+          <>
+            <Explain term="signalEvent">Individual-signal base rates</Explain>{' '}
+            <Explain term="forwardWindow">(next {backtest.forwardDays} sessions)</Explain>
+          </>
+        }
+      >
         <p className="muted small">
           Every prior time each single event fired in this ticker's tracked history, forward-looking outcome. Small
           sample sizes are common and are called out — treat anything under ~15 occurrences as a hint, not a statistic.
@@ -363,7 +392,7 @@ function BacktestCard({ label, result, active }) {
             <span>{pct(result.avgReturn)}</span>
           </div>
           <div className="backtest-row">
-            <span className="muted small">Best / worst</span>
+            <span className="muted small"><Explain term="bestWorst">Best / worst</Explain></span>
             <span>
               {pct(result.bestReturn)} / {pct(result.worstReturn)}
             </span>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useEnsureSession } from '../context/AuthContext'
 import { HAS_SUPABASE } from '../lib/supabaseClient'
 import { createTrade } from '../lib/trades'
+import Explain from './Explain'
 
 export default function SimulateTradeForm({ symbol, currentPrice }) {
   const { user, loading, error: setupError } = useEnsureSession()
@@ -44,10 +45,15 @@ export default function SimulateTradeForm({ symbol, currentPrice }) {
   return (
     <form className="simulate-form" onSubmit={handleOpenTrade}>
       <p className="muted small">
-        You choose the direction and size — this only records your own hypothetical idea and tracks the outcome. It
-        is not a recommendation.
+        <Explain term="simulatedTrade">
+          You choose the direction and size — this only records your own hypothetical idea and tracks the outcome. It
+          is not a recommendation.
+        </Explain>
       </p>
-      <div className="simulate-row">
+      <div className="simulate-field">
+        <span className="muted small">
+          <Explain term="longShort">Direction</Explain>
+        </span>
         <div className="direction-toggle">
           <button
             type="button"
@@ -65,14 +71,31 @@ export default function SimulateTradeForm({ symbol, currentPrice }) {
           </button>
         </div>
       </div>
+      {/* Explicit htmlFor rather than a wrapping <label>: the "?" is a button,
+          and a button nested inside a label both forwards its click to the
+          input and gets absorbed into that input's accessible name. */}
       <div className="simulate-row">
-        <label className="simulate-field">
-          <span className="muted small">Hypothetical capital ($)</span>
-          <input type="number" min="1" step="1" required value={capital} onChange={(e) => setCapital(e.target.value)} />
-        </label>
-        <label className="simulate-field">
-          <span className="muted small">Leverage (1–50x)</span>
+        <div className="simulate-field">
+          <label className="muted small" htmlFor="sim-capital">
+            Hypothetical capital ($)
+          </label>
           <input
+            id="sim-capital"
+            type="number"
+            min="1"
+            step="1"
+            required
+            value={capital}
+            onChange={(e) => setCapital(e.target.value)}
+          />
+        </div>
+        <div className="simulate-field">
+          <span className="muted small">
+            <label htmlFor="sim-leverage">Leverage (1–50x)</label>
+            <Explain term="leverage" />
+          </span>
+          <input
+            id="sim-leverage"
             type="number"
             min="1"
             max="50"
@@ -81,7 +104,7 @@ export default function SimulateTradeForm({ symbol, currentPrice }) {
             value={leverage}
             onChange={(e) => setLeverage(e.target.value)}
           />
-        </label>
+        </div>
       </div>
       <button type="submit" className="button-primary" disabled={submitStatus === 'saving'}>
         {submitStatus === 'saving' ? 'Opening…' : `Open simulated ${direction} at $${currentPrice.toFixed(2)}`}

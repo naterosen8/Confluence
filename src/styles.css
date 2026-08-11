@@ -577,11 +577,13 @@ table.grid {
 }
 
 .explain-panel {
+  position: fixed;
+  z-index: 60;
   display: flex;
   flex-direction: column;
   gap: 7px;
-  margin-top: 8px;
   padding: 12px 14px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 55%);
   background: var(--bg);
   border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
@@ -594,7 +596,6 @@ table.grid {
   letter-spacing: normal;
   white-space: normal;
   text-align: left;
-  max-width: 460px;
 }
 
 .explain-head {
@@ -1008,4 +1009,30 @@ table.grid {
 }
 .layer-lean-mixed {
   color: var(--muted);
+}
+
+/* The concepts each confluence layer draws on, offered as "?" chips under it.
+   The reason lines above them are generated sentences, so their vocabulary
+   cannot carry an inline explainer of its own. */
+.layer-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+}
+.layer-input-label {
+  color: var(--muted);
+}
+
+
+
+/* Keep a short column label and its "?" on the same line. Without this the
+   marker wraps onto a second row on its own, which reads as a stray glyph
+   rather than as part of the heading. */
+.grid th .explain-wrap,
+.score-table th .explain-wrap {
+  white-space: nowrap;
 }

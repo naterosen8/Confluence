@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { leverageStudy } from '../lib/leverageStudy'
 import { marketImpactEstimate } from '../lib/pnl'
 import { FORWARD_DAYS } from '../lib/backtest'
+import Explain from './Explain'
 
 function pct(v, digits = 1) {
   if (v == null) return '—'
@@ -83,20 +84,45 @@ export default function LeverageStudy({ bars, currentScore }) {
   return (
     <div className="leverage-study">
       <p className="muted small">
-        Every past day this ticker’s indicator readings leaned one way rather than splitting, replayed as a hypothetical position held{' '}
-        {FORWARD_DAYS} sessions — long when the readings leaned up, short when they leaned down, taken from what the score
-        actually said that day. Every occurrence is included; none are filtered to the ones that worked.
+        Every past day this ticker’s indicator readings leaned one way rather than splitting, replayed as a{' '}
+        <Explain term="longShort">hypothetical position</Explain> held{' '}
+        <Explain term="forwardWindow">{FORWARD_DAYS} sessions</Explain> — long when the readings leaned up, short when
+        they leaned down, taken from what the score actually said that day. Every occurrence is included; none are
+        filtered to the ones that worked.
       </p>
 
+      {/* Explicit htmlFor rather than a wrapping <label>: the "?" is a button,
+          and a button nested inside a label both forwards its click to the
+          input and gets absorbed into that input's accessible name. */}
       <div className="simulate-row">
-        <label className="simulate-field">
-          <span className="muted small">Hypothetical stake ($)</span>
-          <input type="number" min="1" step="100" value={capital} onChange={(e) => setCapital(e.target.value)} />
-        </label>
-        <label className="simulate-field">
-          <span className="muted small">Leverage (1–50x)</span>
-          <input type="number" min="1" max="50" step="1" value={leverage} onChange={(e) => setLeverage(e.target.value)} />
-        </label>
+        <div className="simulate-field">
+          <label className="muted small" htmlFor="lev-stake">
+            Hypothetical stake ($)
+          </label>
+          <input
+            id="lev-stake"
+            type="number"
+            min="1"
+            step="100"
+            value={capital}
+            onChange={(e) => setCapital(e.target.value)}
+          />
+        </div>
+        <div className="simulate-field">
+          <span className="muted small">
+            <label htmlFor="lev-leverage">Leverage (1–50x)</label>
+            <Explain term="leverage" />
+          </span>
+          <input
+            id="lev-leverage"
+            type="number"
+            min="1"
+            max="50"
+            step="1"
+            value={leverage}
+            onChange={(e) => setLeverage(e.target.value)}
+          />
+        </div>
       </div>
 
       {headline && (
@@ -108,8 +134,11 @@ export default function LeverageStudy({ bars, currentScore }) {
             </>
           ) : (
             <>
-              At <strong>{leverageNum}x</strong>, a <strong>{breakEvenMove}%</strong> move against the position wipes
-              out the entire stake.{' '}
+              At <strong>{leverageNum}x</strong>, a{' '}
+              <Explain term="breakEvenMove">
+                <strong>{breakEvenMove}%</strong> move against the position wipes out the entire stake
+              </Explain>
+              .{' '}
               {headline.liquidatedCount > 0 ? (
                 <>
                   Across {headline.sampleSize} past signals that happened{' '}
@@ -136,14 +165,14 @@ export default function LeverageStudy({ bars, currentScore }) {
         <table className="score-table">
           <thead>
             <tr>
-              <th>Signals replayed</th>
-              <th>N</th>
-              <th>Wiped out</th>
-              <th>Win %</th>
-              <th>Avg</th>
-              <th>Median</th>
-              <th>Best / worst</th>
-              <th>Avg outcome</th>
+              <th><Explain term="signalEvent">Signals replayed</Explain></th>
+              <th><Explain term="sampleSize">N</Explain></th>
+              <th><Explain term="wipedOut">Wiped out</Explain></th>
+              <th><Explain term="winRate">Win %</Explain></th>
+              <th><Explain term="avgReturn">Avg</Explain></th>
+              <th><Explain term="medianReturn">Median</Explain></th>
+              <th><Explain term="bestWorst">Best / worst</Explain></th>
+              <th><Explain term="avgOutcome">Avg outcome</Explain></th>
             </tr>
           </thead>
           <tbody>
@@ -158,7 +187,8 @@ export default function LeverageStudy({ bars, currentScore }) {
       </div>
 
       <p className="muted small">
-        Liquidation is checked against each session's intraday low (long) or high (short), not its close — a leveraged
+        <Explain term="wipedOut">Liquidation</Explain> is checked against each session's intraday low (long) or high
+        (short), not its close — a leveraged
         position dies the moment price touches the level, so scoring on closes alone would count wipeouts as survivors.
         The model is still optimistic: real venues liquidate earlier, at a maintenance margin above zero equity, and
         charge funding and spread on top. It also assumes every signal was taken mechanically, with no slippage and no
@@ -166,9 +196,15 @@ export default function LeverageStudy({ bars, currentScore }) {
       </p>
       {impact && impact.material && (
         <div className="callout impact-note">
-          A ${capitalNum.toFixed(0)} stake at {leverageNum}x puts{' '}
-          <strong>${(impact.notional / 1000).toFixed(0)}k</strong> into the market — about{' '}
-          <strong>{impact.participationPct.toFixed(1)}%</strong> of this ticker's median daily dollar volume.
+          <Explain term="marketImpact">
+            A ${capitalNum.toFixed(0)} stake at {leverageNum}x puts{' '}
+            <strong>${(impact.notional / 1000).toFixed(0)}k</strong> into the market
+          </Explain>{' '}
+          — about{' '}
+          <Explain term="participation">
+            <strong>{impact.participationPct.toFixed(1)}%</strong> of this ticker's median daily dollar volume
+          </Explain>
+          .
           {impact.severe
             ? ' At that size the printed price is not a price you could actually transact at: the order moves the market against itself while it fills, so the entry, the exit and the equity marked against them are all worse than modelled.'
             : ' At that size, a rough square-root impact model puts the give-up at roughly ' +

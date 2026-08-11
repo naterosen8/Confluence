@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { technicalLayer, fundamentalLayer, macroLayer, combineLayers, CONFLUENCE_NAME } from '../lib/confluence'
 import { getSeries } from '../lib/dataProvider'
+import Explain from './Explain'
+import { LAYER_TERM, LAYER_INPUTS } from '../lib/confluenceLayers'
 
 let cache = null
 let inFlight = null
@@ -23,12 +25,30 @@ const ALIGNMENT = {
   unknown: { label: 'Nothing to assess yet' },
 }
 
+function LayerInputs({ layerKey }) {
+  const inputs = LAYER_INPUTS[layerKey]
+  if (!inputs) return null
+  return (
+    <div className="layer-inputs muted small">
+      <span>Reads:</span>
+      {inputs.map(([term, label], i) => (
+        <Explain key={`${term}-${i}`} term={term}>
+          <span className="layer-input-label">{label}</span>
+        </Explain>
+      ))}
+    </div>
+  )
+}
+
 function Layer({ layer }) {
+  const term = LAYER_TERM[layer.key]
   if (!layer.available) {
     return (
       <div className="confluence-layer confluence-layer-missing">
         <div className="confluence-layer-head">
-          <strong>{layer.label}</strong>
+          <Explain term={term}>
+            <strong>{layer.label}</strong>
+          </Explain>
           <span className="explain-basis">Not available</span>
         </div>
         <p className="muted small">{layer.reason}</p>
@@ -39,7 +59,9 @@ function Layer({ layer }) {
   return (
     <div className={`confluence-layer confluence-layer-${tone}`}>
       <div className="confluence-layer-head">
-        <strong>{layer.label}</strong>
+        <Explain term={term}>
+          <strong>{layer.label}</strong>
+        </Explain>
         <span className={`layer-lean layer-lean-${tone}`}>
           {layer.lean}
         </span>
@@ -51,6 +73,7 @@ function Layer({ layer }) {
           </li>
         ))}
       </ul>
+      <LayerInputs layerKey={layer.key} />
     </div>
   )
 }
@@ -87,11 +110,13 @@ export default function ConfluencePanel({ symbol, kind, bars, price }) {
   return (
     <div className="confluence-panel">
       <p className="muted small">
-        {CONFLUENCE_NAME.why}
+        <Explain term="confluence">{CONFLUENCE_NAME.why}</Explain>
       </p>
 
       <div className={`callout ${combined.alignment === 'conflicting' ? 'callout-highlight' : 'callout-highlight'}`}>
-        <strong>{alignment.label}</strong>
+        <Explain term="layerAlignment">
+          <strong>{alignment.label}</strong>
+        </Explain>
         {' — '}
         {combined.complete ? (
           <>all three layers have data behind them.</>

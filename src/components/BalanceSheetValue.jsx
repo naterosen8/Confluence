@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { balanceSheetValuation, classifyValuation, priceToBookHistory, summarizeHistory } from '../lib/mnav'
+import Explain from './Explain'
 
 let cache = null
 let inFlight = null
@@ -33,10 +34,10 @@ const money = (v) => {
 
 const shareCount = (n) => (n >= 1e9 ? `${(n / 1e9).toFixed(2)}B` : `${(n / 1e6).toFixed(0)}M`)
 
-function Row({ label, value, note }) {
+function Row({ label, value, note, term }) {
   return (
     <div className="stat">
-      <span className="muted small">{label}</span>
+      <span className="muted small">{term ? <Explain term={term}>{label}</Explain> : label}</span>
       <span className="stat-value">{value}</span>
       {note && <span className="stat-note">{note}</span>}
     </div>
@@ -109,9 +110,15 @@ export default function BalanceSheetValue({ symbol, kind, price, bars }) {
       </div>
 
       <div className="stat-grid">
-        <Row label="Market cap" value={money(valuation.marketCap)} note={`${shareCount(valuation.shares)} shares × $${price.toFixed(2)}`} />
-        <Row label="Book equity (assets − liabilities)" value={money(valuation.bookEquity)} note={asOfNote} />
         <Row
+          term="marketCap"
+          label="Market cap"
+          value={money(valuation.marketCap)}
+          note={`${shareCount(valuation.shares)} shares × $${price.toFixed(2)}`}
+        />
+        <Row term="bookEquity" label="Book equity (assets − liabilities)" value={money(valuation.bookEquity)} note={asOfNote} />
+        <Row
+          term="priceToBook"
           label="Price / book"
           value={valuation.priceToBook != null ? `${valuation.priceToBook.toFixed(2)}×` : 'n/a'}
           note={
@@ -121,6 +128,7 @@ export default function BalanceSheetValue({ symbol, kind, price, bars }) {
           }
         />
         <Row
+          term="premiumToBook"
           label="Gap vs book"
           value={valuation.premiumToBook != null ? money(valuation.premiumToBook) : 'n/a'}
           note={
@@ -130,16 +138,19 @@ export default function BalanceSheetValue({ symbol, kind, price, bars }) {
           }
         />
         <Row
+          term="netCash"
           label="Net cash (cash − debt)"
           value={money(valuation.netCash)}
           note={`${valuation.netCashPctOfMarketCap >= 0 ? '' : '−'}${Math.abs(valuation.netCashPctOfMarketCap).toFixed(0)}% of market cap · $${valuation.netCashPerShare.toFixed(2)}/share`}
         />
         <Row
+          term="enterpriseValue"
           label="Enterprise value"
           value={money(valuation.enterpriseValue)}
           note="Market cap less net cash — what the operating business alone is being priced at"
         />
         <Row
+          term="ncav"
           label="Net current asset value"
           value={money(valuation.ncav)}
           note={
@@ -150,6 +161,7 @@ export default function BalanceSheetValue({ symbol, kind, price, bars }) {
         />
         {range && (
           <Row
+            term="pbPercentile"
             label="P/B vs its own history"
             value={`${range.percentile.toFixed(0)}th pct`}
             note={`Range ${range.min.toFixed(2)}×–${range.max.toFixed(2)}× across ${range.sampleSize} reported quarters`}

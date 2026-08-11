@@ -32,6 +32,238 @@ export const BASIS = {
 }
 
 export const GLOSSARY = {
+  confluence: {
+    term: 'Confluence (the name)',
+    basis: 'current',
+    what: 'The point where separate streams meet. Here: technical, fundamental and macro evidence read side by side rather than blended.',
+    how: 'Each of the three layers is scored on its own inputs and reported separately. They are never summed into one number, because they measure different things in different units.',
+    isNot:
+      'Not a claim that agreement is proof. Independent streams can be wrong together, and three layers pointing the same way is a common feature of the top of a cycle. It also does not describe the five technical checks in the score — those overlap heavily and are not a confluence of anything.',
+  },
+  technicalLayer: {
+    term: 'Technical layer',
+    basis: 'current',
+    what: 'What price and volume are doing right now: whether a defended level has been cleared, whether participation backed it, and where price sits against structure.',
+    how: 'Breakout past a prior swing high (worth more when volume confirms), proximity to a swing low, price against its 50-day average, and unconfirmed highs or lows.',
+    isNot:
+      'Not independent evidence from the other technical numbers on this page — it reads the same price series. Its value in the confluence view is that it can disagree with the other two layers, which read different data entirely.',
+  },
+  fundamentalLayer: {
+    term: 'Fundamental layer',
+    basis: 'accounting',
+    what: 'Whether the business underneath is improving: revenue and net income direction year over year, and what the balance sheet can absorb.',
+    how: 'Year-over-year change in the latest reported quarter versus the quarter closest to a year earlier, plus net cash as a share of market cap.',
+    isNot:
+      'Not current. Filings are up to a quarter stale and describe a period that has already ended, so this layer moves four times a year while price moves every day. Absent when a filer does not tag usable quarterly figures — absent is reported as absent, never as neutral.',
+  },
+  macroLayer: {
+    term: 'Macro layer',
+    basis: 'current',
+    what: 'Whether the tide is coming in or going out — the price of money and the appetite for risk, read from what bond and credit markets are currently paying.',
+    how: 'TLT over 60 sessions as a proxy for long rates (rising TLT = falling rates = easing), and HYG over the same window as a proxy for credit spreads and risk appetite.',
+    isNot:
+      'Not an economic measurement or a policy forecast. It is two ETF prices standing in for conditions they are correlated with, and that correlation can break exactly when it matters most.',
+  },
+  layerAlignment: {
+    term: 'Layer alignment',
+    basis: 'current',
+    what: 'Whether the available layers point the same way, disagree with each other, or fail to lean at all.',
+    how: 'Each available layer is reduced to up, down or flat; all-up or all-down is aligned, any up-and-down mix is conflicting.',
+    isNot:
+      'Not a score, and not a count out of three. Alignment across two available layers is a two-layer reading — a missing layer is excluded, never counted as agreement or as neutral.',
+  },
+  breakout: {
+    term: 'Breakout',
+    basis: 'current',
+    what: 'Price clearing a swing high the market had previously turned at, with the crossing itself having happened recently.',
+    how: 'The nearest prior swing high below today\'s price, from the last 150 sessions, where price was still below that level at some point in the last 20 sessions.',
+    isNot:
+      'Not a signal that the move continues. Breakouts fail routinely, and the level being old is not itself evidence — what is checked is that the crossing is recent, not that the level is.',
+  },
+  volumeConfirmation: {
+    term: 'Volume confirmation',
+    basis: 'current',
+    what: 'Whether the breakout happened on more participation than usual, at 1.3× the 20-session average or better.',
+    how: 'Latest volume against the 20-session mean. A confirmed breakout scores double an unconfirmed one.',
+    isNot:
+      'Not the same as "no volume data". Some instruments here — spot crypto pairs on this feed — report no volume at all, and that case is labelled unavailable rather than unconfirmed, because "we looked and it was thin" and "we could not look" are different findings.',
+  },
+  earningsYoY: {
+    term: 'Year-over-year earnings trend',
+    basis: 'accounting',
+    what: 'Whether revenue and net income are higher than the same quarter a year ago — a direction, not a level.',
+    how: 'The latest reported quarter matched against the filed quarter closest to 365 days earlier, accepted only within a 45-day tolerance.',
+    isNot:
+      'Not sequential growth, which would mostly measure the calendar in a seasonal business. Not available for every filer either: several report a fiscal-year quarter only inside the annual total, so a genuine year-ago comparison sometimes does not exist and is reported as unavailable rather than estimated.',
+  },
+  livePrice: {
+    term: 'Live price',
+    basis: 'current',
+    what: 'A quote polled from Finnhub during market hours, shown with a dot beside it, overlaid on the daily snapshot price.',
+    how: 'Polled every few seconds per symbol. Cosmetic only — no indicator, score, base rate or backtest on the site uses it.',
+    isNot:
+      'Not what the analysis is computed from. Everything else on the page is as of the last daily sync, so a live price moving does not move the score, and the two can visibly disagree.',
+  },
+  dailySnapshot: {
+    term: 'Daily snapshot',
+    basis: 'current',
+    what: 'The committed file of daily bars that every indicator, score and base rate on this site is computed from.',
+    how: 'Written by a scheduled job after the US close each weekday, roughly 1000 daily bars per symbol.',
+    isNot:
+      'Not real time, and not guaranteed fresh. If the job fails the site keeps serving the last good file — which is why its age is stated rather than hidden, and why a stale snapshot describes that date rather than today.',
+  },
+  demoData: {
+    term: 'Demo data',
+    basis: 'current',
+    what: 'A generated random walk used only when a symbol has no synced history at all.',
+    how: 'Deterministic pseudo-random bars, so the page renders and the mechanics can be inspected.',
+    isNot:
+      'Not real prices, and never presented as though it were. Pages running on it say so; the base rates, verdicts and simulator refuse to mark anything to it.',
+  },
+  flags: {
+    term: 'Flags',
+    basis: 'current',
+    what: 'Notable conditions detected on the latest bar: an unconfirmed high or low, a volatility squeeze, or unusually heavy volume.',
+    how: 'Each flag is an independent check on the same latest bar; a row shows every one that currently applies, or a dash for none.',
+    isNot:
+      'Not a ranking, and not additive. Three flags is not a stronger case than one — several of them can fire off the same underlying move, and none of them carries a direction on its own.',
+  },
+  sparkline: {
+    term: 'Sparkline',
+    basis: 'current',
+    what: 'The recent closing prices drawn to scale, most recent at the right.',
+    how: 'Closes only, scaled to their own minimum and maximum over the window shown — no volume, no intraday range.',
+    isNot:
+      'Not comparable between tickers. Each one fills its own vertical space, so a dramatic-looking line may be a 2% range and a flat one a 40% range.',
+  },
+  forwardWindow: {
+    term: 'Forward window (5 sessions)',
+    basis: 'measured',
+    what: 'The fixed holding period every outcome on this site is measured over: the close 5 trading sessions after the signal.',
+    how: 'Close-to-close. Days without a full 5-session window ahead of them are excluded rather than half-counted.',
+    isNot:
+      'Not a chosen or optimal horizon, and not one the numbers were tuned to. It is also why occurrences on consecutive days are not independent — their windows overlap by four sessions out of five.',
+  },
+  medianReturn: {
+    term: 'Median return',
+    basis: 'measured',
+    what: 'The middle outcome once every replayed occurrence is sorted — half did better, half worse.',
+    how: 'The 50th percentile of the same set of outcomes the average is computed from.',
+    isNot:
+      'Not interchangeable with the average. When the two diverge sharply the distribution is lopsided — typically a few large moves carrying the mean — and the median is the better description of a typical occurrence, while the mean is what a mechanical taker of every signal would have compounded.',
+  },
+  bestWorst: {
+    term: 'Best / worst',
+    basis: 'measured',
+    what: 'The single most and least favourable occurrence in the sample.',
+    how: 'The extremes of the same outcomes summarized by the average and median.',
+    isNot:
+      'Not a range of what to expect, and not a bound. They are two individual observations out of a small sample, and the true worst case is simply one that has not happened yet in this history.',
+  },
+  signalEvent: {
+    term: 'Individual signal base rate',
+    basis: 'measured',
+    what: 'What happened over the next 5 sessions on every prior day this one specific event fired, in this one ticker.',
+    how: 'Each event is detected independently across the tracked history and its forward outcomes are summarized.',
+    isNot:
+      'Not evidence about the setup as a whole — these are single mechanisms in isolation, tested one ticker at a time, usually on very few occurrences. Several are also correlated with each other, so agreement between two cards is not two findings.',
+  },
+  simulatedTrade: {
+    term: 'Simulated trade',
+    basis: 'hypothetical',
+    what: 'A position you chose — direction, stake and leverage — recorded and marked against real prices so the outcome is visible.',
+    how: 'Stored against this browser, marked to the daily snapshot, and settled automatically as liquidated if the real price path since entry ever hit the wipeout level.',
+    isNot:
+      'Not a recommendation, and not the app taking a view. Nothing here suggests a direction or a size; it records the one you picked. No real money, no order, no venue — and no fees, funding, spread or slippage either, so a real version of the same position would have done worse.',
+  },
+  openPnl: {
+    term: 'Open P&L',
+    basis: 'hypothetical',
+    what: 'What the position would be worth if it were closed at the last synced price.',
+    how: 'Price change from entry, multiplied by leverage, applied to the stake — floored at losing the whole stake.',
+    isNot:
+      'Not settled, and not a price you could have transacted at. It moves with every sync, and it excludes every cost a real position would have paid.',
+  },
+  longShort: {
+    term: 'Long / short',
+    basis: 'hypothetical',
+    what: 'Which way the position is pointed: long gains when price rises, short gains when it falls.',
+    how: 'Direction is your input. The app records it and computes the outcome from it.',
+    isNot:
+      'Not symmetric in risk. A long can lose at most the stake; an unleveraged short has no upper bound on the loss, and a leveraged one reaches total loss on a smaller move than the equivalent long.',
+  },
+  breakEvenMove: {
+    term: 'Move that wipes out the stake',
+    basis: 'hypothetical',
+    what: 'How far price has to go the wrong way, in percent, before a leveraged position is worth nothing.',
+    how: '100 divided by the leverage. At 10× that is 10%; at 25× it is 4%.',
+    isNot:
+      'Not the margin call level. Real venues liquidate before equity reaches zero, at a maintenance margin, and charge funding and spread — so the real threshold is nearer than this number.',
+  },
+  marketImpact: {
+    term: 'Market impact',
+    basis: 'hypothetical',
+    what: 'How much the act of putting this size into the market would move the price against itself while filling.',
+    how: 'A square-root model: roughly the daily volatility multiplied by the square root of the order as a share of median daily dollar volume. Checked against notional, not stake, because leverage is what actually reaches the market.',
+    isNot:
+      'Not a precise cost estimate. It is an order-of-magnitude sanity check on whether the printed price is a price you could transact at — and none of the figures above it are adjusted for it.',
+  },
+  participation: {
+    term: 'Share of daily volume',
+    basis: 'hypothetical',
+    what: 'The position\'s notional size as a percentage of what this ticker typically trades in a day.',
+    how: 'Notional divided by the median daily dollar volume over the recent history.',
+    isNot:
+      'Not a limit anyone enforces. It is the input to the impact estimate: a fraction of a percent is negligible, a few percent is not, and a double-digit share means the price on the screen is fiction for an order that size.',
+  },
+  avgOutcome: {
+    term: 'Average outcome in dollars',
+    basis: 'hypothetical',
+    what: 'The mean result across every replayed occurrence, expressed on the stake entered above.',
+    how: 'The average percentage outcome applied to the stake, with wipeouts counted as losing the whole thing.',
+    isNot:
+      'Not what anyone earned, and not compoundable. These windows overlap in time, so stringing them together describes a strategy nobody could have run — which is why no equity curve is drawn.',
+  },
+  hitRate: {
+    term: 'Hit rate',
+    basis: 'measured',
+    what: 'The share of logged calls where price moved the way the readings leaned, 5 sessions later.',
+    how: 'Each call was written down the day it fired and scored later against the actual close. Misses included; nothing is removed.',
+    isNot:
+      'Not a grade, and meaningless read against 50%. In a rising market an upward-leaning call is right most of the time with no skill involved — the only informative number is the gap between this and the drift baseline beside it.',
+  },
+  driftBaseline: {
+    term: 'Drift baseline',
+    basis: 'measured',
+    what: 'How often price moved that direction anyway, across exactly the same resolved windows.',
+    how: 'The share of the same windows where price simply rose (for upward-leaning calls) or fell (for downward-leaning ones), ignoring what the call said.',
+    isNot:
+      'Not a benchmark that has to be beaten by much to be luck. On a sample this size the gap has to be large before it is distinguishable from chance at all — a few points either way is noise.',
+  },
+  scoreCorrelation: {
+    term: 'Score-to-return correlation',
+    basis: 'measured',
+    what: 'Whether a higher confluence score has actually been followed by a better return, measured across every tracked ticker.',
+    how: 'Correlation between the score on a day and the return over the following 5 sessions, computed per ticker and averaged with a 95% interval.',
+    isNot:
+      'Not a reason to invert the signal — that would be the same overfitting error in reverse, and costs would consume a gap this size. The measured value is close enough to zero to be useless either way, and it is published here rather than left in a private notebook.',
+  },
+  premiumToBook: {
+    term: 'Gap vs book',
+    basis: 'accounting',
+    what: 'The dollar difference between what the market is paying for the company and what its balance sheet carries.',
+    how: 'Market cap minus book equity.',
+    isNot:
+      'Not an overpayment. For most businesses the gap is the value of things accounting does not capitalize — brands, software built in-house, research, customer relationships — so a large positive gap is the normal case, not evidence of a bubble.',
+  },
+  pbPercentile: {
+    term: 'P/B against its own history',
+    basis: 'accounting',
+    what: 'Where today\'s price-to-book sits within this company\'s own reported range, rather than against other companies.',
+    how: 'Today\'s ratio ranked against the ratio at each past reported quarter, using the price at the time.',
+    isNot:
+      'Not a valuation signal. The sample is a handful of quarters over a couple of years, a company\'s asset mix and business change over that window, and being at the low end of a short history is not the same as being cheap.',
+  },
   confluenceScore: {
     term: 'Confluence score',
     basis: 'current',

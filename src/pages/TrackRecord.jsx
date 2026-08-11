@@ -4,6 +4,7 @@ import { FORWARD_DAYS } from '../lib/backtest'
 import { leanByKey, leanDirection } from '../lib/lean'
 import { distinguishableFromChance } from '../lib/stats'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import Explain from '../components/Explain'
 
 function pct(v, digits = 2) {
   if (v == null) return '—'
@@ -98,9 +99,12 @@ export default function TrackRecord() {
 
       <h1>Track record</h1>
       <p className="muted">
-        Every day the readings leaned one way rather than splitting, logged automatically as it happened and resolved{' '}
-        {FORWARD_DAYS} trading sessions later against the actual close — misses included. Nothing here is curated or
-        removed after the fact; the raw log is a committed file in the repo.
+        <Explain term="trackRecord">
+          Every day the readings leaned one way rather than splitting, logged automatically as it happened
+        </Explain>{' '}
+        and resolved <Explain term="forwardWindow">{FORWARD_DAYS} trading sessions later</Explain> against the actual
+        close — misses included. Nothing here is curated or removed after the fact; the raw log is a committed file in
+        the repo.
       </p>
 
       {!overall ? (
@@ -126,14 +130,22 @@ export default function TrackRecord() {
       ) : (
         <>
           <div className="stat-grid">
-            <Stat label="Resolved calls" value={overall.total} />
+            <Stat term="trackRecord" label="Resolved calls" value={overall.total} />
             <Stat
+              term="hitRate"
               label="Overall hit rate"
               value={`${overall.winRate.toFixed(0)}%`}
-              note={overall.low != null ? `95% range ${overall.low.toFixed(0)}–${overall.high.toFixed(0)}%` : null}
+              note={
+                overall.low != null ? (
+                  <Explain term="confidenceInterval">
+                    95% range {overall.low.toFixed(0)}–{overall.high.toFixed(0)}%
+                  </Explain>
+                ) : null
+              }
             />
-            <Stat label="Mean return per call" value={pct(overall.avgReturn)} />
+            <Stat term="avgReturn" label="Mean return per call" value={pct(overall.avgReturn)} />
             <Stat
+              term="driftBaseline"
               label="Upward-leaning calls"
               value={bullish ? `${bullish.winRate.toFixed(0)}% (N=${bullish.total})` : '—'}
               note={
@@ -145,6 +157,7 @@ export default function TrackRecord() {
               }
             />
             <Stat
+              term="driftBaseline"
               label="Downward-leaning calls"
               value={bearish ? `${bearish.winRate.toFixed(0)}% (N=${bearish.total})` : '—'}
               note={
@@ -155,11 +168,14 @@ export default function TrackRecord() {
                   : null
               }
             />
-            <Stat label="Pending resolution" value={pending.length} />
+            <Stat term="forwardWindow" label="Pending resolution" value={pending.length} />
           </div>
 
           <div className="callout impact-note">
-            <strong>Read the hit rate against the drift, not against 50%.</strong> Over a period when prices rose in
+            <Explain term="driftBaseline">
+              <strong>Read the hit rate against the drift, not against 50%.</strong>
+            </Explain>{' '}
+            Over a period when prices rose in
             most five-session windows, an upward-leaning call is right most of the time without any skill being
             involved. The only number that means anything here is the gap between the hit rate and the baseline shown
             beside it — and on a sample this size that gap needs to be large before it is distinguishable from chance
@@ -173,12 +189,12 @@ export default function TrackRecord() {
                   <tr>
                     <th>Date</th>
                     <th>Symbol</th>
-                    <th>Verdict</th>
-                    <th>Entry price</th>
-                    <th>Resolved</th>
+                    <th><Explain term="verdict">Verdict</Explain></th>
+                    <th><Explain term="dailySnapshot">Entry price</Explain></th>
+                    <th><Explain term="forwardWindow">Resolved</Explain></th>
                     <th>Exit price</th>
-                    <th>Return</th>
-                    <th>Result</th>
+                    <th><Explain term="avgReturn">Return</Explain></th>
+                    <th><Explain term="hitRate">Result</Explain></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -217,10 +233,10 @@ function Section({ title, children }) {
   )
 }
 
-function Stat({ label, value, note }) {
+function Stat({ label, value, note, term }) {
   return (
     <div className="stat">
-      <span className="muted small">{label}</span>
+      <span className="muted small">{term ? <Explain term={term}>{label}</Explain> : label}</span>
       <span className="stat-value">{value}</span>
       {note && <span className="stat-note">{note}</span>}
     </div>
