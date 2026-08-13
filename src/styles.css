@@ -1278,3 +1278,51 @@ table.grid {
 .setup-read-extended { border-left-color: #d8b45f; }
 .setup-read-compression { border-left-color: #6fb3d8; }
 .setup-read-no-trend { border-left-color: var(--muted); }
+
+/* The whole-tape read, above the rows it frames. */
+.market-read {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.market-read-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.market-read-head strong {
+  font-size: 1.05rem;
+}
+.market-read-breadth {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+.market-read-body {
+  margin: 8px 0 6px;
+  line-height: 1.55;
+  max-width: 78ch;
+  font-size: 0.9rem;
+}
+.market-read p.muted {
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* The per-row structure label. Colour carries the same meaning as the border
+   on the full read, so the two views agree at a glance. */
+.setup-cell {
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.setup-cell-breakdown,
+.setup-cell-failed-breakout { color: #e0715a; }
+.setup-cell-extended { color: #d8b45f; }
+.setup-cell-compression { color: #6fb3d8; }
+.setup-cell-trend-intact { color: #5cbf8a; }
+.setup-cell-pullback { color: var(--text); }
+.setup-cell-no-trend,
+.setup-cell-capitulation { color: var(--muted); }

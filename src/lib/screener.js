@@ -2,6 +2,8 @@ import { computeSignals } from './indicators.js'
 import { bestAvailableStat, FORWARD_DAYS } from './backtest.js'
 import { scoreDirectionCheck } from './signalValidation.js'
 import { leaderboardCheck } from './leaderboardCheck.js'
+import { readSetup } from './setupRead.js'
+import { marketRead } from './marketRead.js'
 
 // The dashboard's rows, computed once by the daily job instead of by every
 // visitor's browser.
@@ -57,6 +59,13 @@ export function buildScreenerRow({ ticker, bars, spyBars }) {
     bullishPoints: signals.bullishPoints,
     bearishPoints: signals.bearishPoints,
     flags: flagsFor(signals),
+    // Just the label, not the prose. A one-word structure per row is what
+    // makes twenty-four charts scannable without opening twenty-four pages;
+    // the full read stays on the ticker page where there is room for it.
+    setup: (() => {
+      const r = readSetup(bars, signals)
+      return r ? { key: r.key, name: r.name } : null
+    })(),
     spark: bars.slice(-SPARK_POINTS).map((b) => round(b.close, 4)),
     edge: round(setup.edge, 4),
     stat: stat
@@ -95,11 +104,16 @@ export function buildScreener({ barsBySymbol, tickers }) {
   // and that number is only known to the job that looked at all of them.
   const leaderboard = leaderboardCheck({ barsBySymbol, tickers })
 
+  // What kind of market this is right now. Needs every ticker at once —
+  // breadth is not visible from any single page — so it belongs here.
+  const market = marketRead({ barsBySymbol, tickers })
+
   return {
     generatedAt: new Date().toISOString(),
     forwardDays: FORWARD_DAYS,
     rows,
     directionCheck,
     leaderboard,
+    market,
   }
 }

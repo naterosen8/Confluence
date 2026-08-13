@@ -72,6 +72,14 @@ export const GLOSSARY = {
     isNot:
       'Not a score, and not a count out of three. Alignment across two available layers is a two-layer reading — a missing layer is excluded, never counted as agreement or as neutral.',
   },
+  marketRead: {
+    term: 'Market read',
+    basis: 'current',
+    what: 'What kind of tape this is right now: where the index sits against its own trend, how many individual names are participating, and what bond and credit markets are pricing.',
+    how: "The index against its 50- and 200-day averages, breadth as the share of tracked non-macro names holding above their own 50-day, index volatility as a percentile of its own recent range, and 60-session direction in TLT and HYG.",
+    isNot:
+      'Not a forecast, and not the whole market — breadth here is measured across the couple of dozen names this site tracks, which is a sample and a skewed one. Its value is that breadth cannot be seen from any single ticker page: an index holding up while most names are not is a fact about now that no individual chart shows.',
+  },
   setupRead: {
     term: 'Setup read',
     basis: 'current',

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
-import { screenerRows, screenerLeaderboardCheck, HAS_LIVE_DATA, DATA_GENERATED_AT, isSnapshotStale, snapshotAgeDays } from '../lib/dataProvider'
+import { screenerRows, screenerLeaderboardCheck, screenerMarketRead, HAS_LIVE_DATA, DATA_GENERATED_AT, isSnapshotStale, snapshotAgeDays } from '../lib/dataProvider'
 import { leaderboardVerdict } from '../lib/leaderboardCheck'
+import MarketRead from '../components/MarketRead'
 import { FORWARD_DAYS } from '../lib/backtest'
 import { pollLivePrices, HAS_LIVE_PRICE } from '../lib/livePrice'
 import Sparkline from '../components/Sparkline'
@@ -36,6 +37,7 @@ export default function Dashboard() {
   const rows = useMemo(() => screenerRows(), [])
 
   const leaderboard = useMemo(() => screenerLeaderboardCheck(), [])
+  const market = useMemo(() => screenerMarketRead(), [])
 
   const topSetups = useMemo(
     () =>
@@ -66,6 +68,8 @@ export default function Dashboard() {
           symbol for the full read.
         </p>
       </div>
+
+      <MarketRead market={market} />
 
       <div className="toolbar">
         <span className="muted">
@@ -138,6 +142,7 @@ export default function Dashboard() {
             <th><Explain term="sparkline">Trend</Explain></th>
             <th><Explain term="rsi">RSI(14)</Explain></th>
             <th><Explain term="macd">MACD</Explain></th>
+            <th><Explain term="setupRead">Setup</Explain></th>
             <th><Explain term="flags">Flags</Explain></th>
             <th><Explain term="edge">Edge</Explain></th>
             <th><Explain term="verdict">Confluence</Explain></th>
@@ -161,6 +166,9 @@ export default function Dashboard() {
                 </td>
                 <td>{row.rsi != null ? row.rsi.toFixed(1) : '—'}</td>
                 <td>{row.macd ? (row.macd === 'above' ? 'Above signal' : 'Below signal') : '—'}</td>
+                <td className={`setup-cell${row.setup ? ` setup-cell-${row.setup.key}` : ''}`}>
+                  {row.setup ? row.setup.name : '—'}
+                </td>
                 <td className="muted small">{row.flags.length ? row.flags.join(', ') : '—'}</td>
                 <td className="muted small">
                   {row.stat ? `${rate(row.stat.winRate)} (N=${row.stat.sampleSize})` : '—'}

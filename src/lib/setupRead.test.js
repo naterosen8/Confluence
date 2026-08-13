@@ -86,3 +86,51 @@ describe('readSetup', () => {
     expect(readSetup(null, {})).toBeNull()
   })
 })
+
+describe('marketRead', () => {
+  it('describes the tape without predicting it', async () => {
+    const { marketRead } = await import('./marketRead.js')
+    const m = marketRead({ barsBySymbol: readCommittedBars(), tickers: TICKERS })
+    expect(m).toBeTruthy()
+    expect(m.headline.length).toBeGreaterThan(5)
+    expect(m.read.length).toBeGreaterThan(120)
+    const banned = /\b(buy|sell|should|will (rise|fall|go)|recommend|target price|guaranteed|expect(ed)? to (rise|fall))\b/i
+    expect(m.read).not.toMatch(banned)
+    expect(m.caveat).toMatch(/not a forecast/i)
+  })
+
+  it('measures breadth across tracked names, excluding macro proxies', async () => {
+    const { breadthOf } = await import('./marketRead.js')
+    const b = breadthOf({ barsBySymbol: readCommittedBars(), tickers: TICKERS })
+    const nonMacro = TICKERS.filter((t) => t.kind !== 'macro').length
+    expect(b.counted).toBeLessThanOrEqual(nonMacro)
+    expect(b.above).toBeLessThanOrEqual(b.counted)
+    expect(b.pct).toBeCloseTo((b.above / b.counted) * 100, 6)
+  })
+
+  it('calls out an index holding up while its internals are not', async () => {
+    const { marketRead } = await import('./marketRead.js')
+    // A rising index with most names below their own 50-day is the divergence
+    // no single ticker page can show, and the reason the read exists.
+    const rising = (n, drift) => Array.from({ length: n }, (_, i) => {
+      const c = 100 + i * drift
+      return { date: `d${i}`, open: c, high: c + 1, low: c - 1, close: c, volume: 1e6 }
+    })
+    const falling = rising(260, 0.4).map((b, i, arr) =>
+      i > arr.length - 30 ? { ...b, close: b.close - 30, high: b.high - 30, low: b.low - 30 } : b
+    )
+    const bars = { SPY: rising(260, 0.4) }
+    const tickers = [{ symbol: 'SPY', kind: 'etf' }]
+    for (let k = 0; k < 8; k++) {
+      bars[`W${k}`] = falling
+      tickers.push({ symbol: `W${k}`, kind: 'stock' })
+    }
+    const m = marketRead({ barsBySymbol: bars, tickers })
+    expect(m.read).toMatch(/carried by a few of them/)
+  })
+
+  it('returns null rather than a read it cannot support', async () => {
+    const { marketRead } = await import('./marketRead.js')
+    expect(marketRead({ barsBySymbol: {}, tickers: TICKERS })).toBeNull()
+  })
+})
