@@ -357,6 +357,13 @@ function build(json, { maxQuarters }) {
       assets: as ?? (li != null && eq != null ? li + eq : null),
       liabilities: li ?? (as != null && eq != null ? as - eq : null),
       equity: eq ?? (as != null && li != null ? as - li : null),
+      // Derived equity is not the same measure as reported equity.
+      // StockholdersEquity is the parent's stake; assets minus liabilities is
+      // total equity, which also includes noncontrolling interests — a gap
+      // worth billions at CVX, XOM, TSLA and BAC. Without this flag the table
+      // silently mixes the two definitions across companies, and UNH did
+      // exactly that.
+      ...(eq == null && as != null && li != null ? { equityBasis: 'derived' } : {}),
       currentAssets: valueAsOf(currentAssets, asOf),
       currentLiabilities: valueAsOf(currentLiabilities, asOf),
       cash: sumAsOf([cash, shortTermInvestments], asOf),

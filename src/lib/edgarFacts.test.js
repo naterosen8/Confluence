@@ -337,3 +337,29 @@ describe('the accounting identity recovers a sparse leg', () => {
     expect(r.quarters.map((q) => q.asOf)).toEqual(['2023-12-31'])
   })
 })
+
+describe('reported equity and derived equity are not the same measure', () => {
+  // StockholdersEquity is the parent's stake; assets minus liabilities is
+  // total equity and includes noncontrolling interests. The gap is billions
+  // at CVX, XOM, TSLA and BAC, and the table was silently mixing the two.
+  it('flags a quarter whose equity came from the identity', () => {
+    const f = facts({ Assets: usd([e('2024-03-31', 5200)]), Liabilities: usd([e('2024-03-31', 3100)]) })
+    delete f.facts['us-gaap'].StockholdersEquity
+    const q = parseCompanyFacts(f).quarters.at(-1)
+    expect(q.equity).toBe(2100)
+    expect(q.equityBasis).toBe('derived')
+  })
+
+  it('leaves the flag off when the filer reports equity directly', () => {
+    const f = facts({
+      Assets: usd([e('2024-03-31', 5200)]),
+      Liabilities: usd([e('2024-03-31', 3100)]),
+      // Deliberately not 5200 - 3100: a filer with minority interests reports
+      // a smaller parent-only figure, and that is the one to keep.
+      StockholdersEquity: usd([e('2024-03-31', 2000)]),
+    })
+    const q = parseCompanyFacts(f).quarters.at(-1)
+    expect(q.equity).toBe(2000)
+    expect('equityBasis' in q).toBe(false)
+  })
+})

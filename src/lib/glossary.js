@@ -450,10 +450,10 @@ export const GLOSSARY = {
   bookEquity: {
     term: 'Book equity',
     basis: 'accounting',
-    what: "What the company's own balance sheet says the shareholders' stake is worth: total assets minus total liabilities.",
-    how: 'Taken from the most recent 10-Q or 10-K filed with the SEC.',
+    what: "What the company's own balance sheet says the shareholders' stake is worth.",
+    how: "Shareholders' equity exactly as reported in the most recent 10-Q or 10-K, which is the parent's stake and excludes minority interests in subsidiaries. Only where a filer does not report that figure is it computed as assets minus liabilities, which does include those minority interests — the row says which one you are looking at.",
     isNot:
-      'Not an appraisal or a liquidation value. Assets are carried at historical cost less depreciation, and internally-developed software, brands, patents and research are largely absent.',
+      'Not an appraisal or a liquidation value. Assets are carried at historical cost less depreciation, and internally-developed software, brands, patents and research are largely absent. The two bases above are also not interchangeable: the gap between them runs to billions at companies with large consolidated subsidiaries.',
   },
   priceToBook: {
     term: 'Price / book',

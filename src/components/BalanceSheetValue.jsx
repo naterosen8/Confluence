@@ -127,7 +127,21 @@ export default function BalanceSheetValue({ symbol, kind, price, bars }) {
               : '')
           }
         />
-        <Row term="bookEquity" label="Book equity (assets − liabilities)" value={money(valuation.bookEquity)} note={asOfNote} />
+        <Row
+          term="bookEquity"
+          label="Book equity"
+          value={money(valuation.bookEquity)}
+          note={
+            asOfNote +
+            // The old label said "(assets − liabilities)", which is only what
+            // this is when the filer does not report shareholders' equity
+            // directly. Where it does, this is the parent's stake and excludes
+            // noncontrolling interests — billions apart at CVX, XOM and BAC.
+            (latest.equityBasis === 'derived'
+              ? ' · assets less liabilities, as this filer does not report shareholders\' equity directly — so it includes any minority interests'
+              : ' · shareholders\' equity as reported, excluding minority interests')
+          }
+        />
         <Row
           term="priceToBook"
           label="Price / book"
