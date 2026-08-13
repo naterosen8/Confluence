@@ -138,11 +138,13 @@ function sumAsOf(entryLists, date) {
 export const CONCEPTS = {
   // LiabilitiesAndStockholdersEquity is not an approximation of total assets,
   // it is the same number: a balance sheet balances, so the liabilities-and-
-  // equity total equals the asset total by construction. It earns its place
-  // because some filers tag it far more consistently than Assets — XOM's
-  // companyfacts carries exactly two Assets facts in its entire history,
-  // which is why XOM had 2 quarters where every other company had 12. Assets
-  // still wins whenever it is present and no less complete.
+  // equity total equals the asset total by construction. Some filers tag it
+  // more consistently than Assets, and Assets still wins whenever it is
+  // present and no less complete.
+  //
+  // It did not rescue XOM, whose companyfacts carries exactly two facts under
+  // each of them — that needed the period grid to stop depending on the
+  // assets leg at all. See build().
   assets: ['Assets', 'AssetsNet', 'LiabilitiesAndStockholdersEquity'],
   liabilities: ['Liabilities'],
   equity: [
@@ -224,12 +226,13 @@ export function diagnoseCompanyFacts(json, { maxQuarters = 12 } = {}) {
     // reports full coverage of a grid that is itself wrong — which is exactly
     // how XOM read as healthy at 2 quarters. Show what the chain had to work
     // with before and after each filter.
-    assetsChain: CONCEPTS.assets.map((tag) => {
-      const raw = json.facts['us-gaap']?.[tag]?.units?.USD ?? []
-      const kept = latestByPeriodEnd(raw)
-      const forms = [...new Set(raw.map((e) => e.form ?? '(none)'))]
-      return `${tag}: raw=${raw.length} periods=${kept.length} forms=[${forms.slice(0, 6).join(',')}]`
-    }),
+    assetsChain: ['assets', 'liabilities', 'equity'].flatMap((key) =>
+      CONCEPTS[key].map((tag) => {
+        const raw = json.facts['us-gaap']?.[tag]?.units?.USD ?? []
+        const kept = latestByPeriodEnd(raw)
+        return `${key}/${tag}: raw=${raw.length} periods=${kept.length}`
+      })
+    ),
     periods: built.periodCount,
     kept: built.quarters.length,
     droppedNoShares: built.droppedNoShares,
@@ -242,18 +245,38 @@ function build(json, { maxQuarters }) {
   const facts = json?.facts
   if (!facts) return null
 
-  // Assets defines the period grid every other concept is measured against,
-  // so it is chosen on raw coverage before any target dates exist.
-  const assetPick = CONCEPTS.assets
-    .map((tag) => ({ tag, entries: conceptEntries(facts, 'us-gaap', tag, 'USD') }))
-    .filter((c) => c.entries.length)
-    .sort((a, b) => b.entries.length - a.entries.length)[0]
-  if (!assetPick) return null
-  const assets = assetPick.entries
+  // The period grid is the union of what the three core balance-sheet
+  // concepts report, not whatever Assets happens to cover.
+  //
+  // Anchoring on Assets alone was the deeper version of the XOM bug. Its
+  // companyfacts carries two Assets facts and two LiabilitiesAndStockholders-
+  // Equity facts, so both candidate anchors produced a two-quarter grid —
+  // against which every other concept then reported flawless 2/2 coverage.
+  // Liabilities and equity already recovered each other through the
+  // accounting identity, but assets did not, so a filer sparse in assets lost
+  // its entire history even when the other two were fully reported.
+  //
+  // Assets is now recovered the same way, from liabilities + equity, so any
+  // two of the three are enough to reconstruct a period.
+  // Built from each concept's *preferred* tag, not its longest one. Taking the
+  // longest would let StockholdersEquityIncludingPortionAttributableTo-
+  // NoncontrollingInterest — which usually has more history than the
+  // parent-only concept — widen the grid to dates only it reports, and then
+  // win the coverage contest on the grid it had just widened. Book equity
+  // would quietly change meaning from the common shareholders' stake to one
+  // including minority interests, which is a different number feeding
+  // price-to-book.
+  const grid = [
+    ...new Set(
+      [CONCEPTS.assets, CONCEPTS.liabilities, CONCEPTS.equity]
+        .map((tags) => firstAvailable(facts, 'us-gaap', tags, 'USD'))
+        .flatMap((entries) => entries.map((e) => e.end))
+    ),
+  ].sort()
+  if (!grid.length) return null
 
-  const periods = assets.slice(-maxQuarters)
-  const dates = periods.map((a) => a.end)
-  const chosen = { assets: assetPick.tag }
+  const dates = grid.slice(-maxQuarters)
+  const chosen = {}
 
   const pick = (key) => {
     const r = bestCovering(facts, 'us-gaap', CONCEPTS[key], 'USD', dates)
@@ -261,6 +284,7 @@ function build(json, { maxQuarters }) {
     return r.entries
   }
 
+  const assets = pick('assets')
   const liabilities = pick('liabilities')
   const equity = pick('equity')
   const currentAssets = pick('currentAssets')
@@ -311,18 +335,28 @@ function build(json, { maxQuarters }) {
     return weighted != null ? { shares: weighted, sharesBasis: 'weighted-average' } : { shares: null }
   }
 
-  const quarters = periods.map((a) => {
-    const asOf = a.end
-    const eq = valueAsOf(equity, asOf)
-    const li = valueAsOf(liabilities, asOf)
+  // The form label is only a label; take it from whichever core concept
+  // reported this period.
+  const formAt = (date) =>
+    [assets, liabilities, equity].map((entries) => entries.find((e) => e.end === date)?.form).find(Boolean) ?? null
+
+  const quarters = dates.map((asOf) => {
+    // Exact-date, not as-of: a balance sheet total belongs to its own period
+    // end, and carrying an older quarter's figure forward would silently
+    // publish stale assets as current ones.
+    const at = (entries) => entries.find((e) => e.end === asOf)?.val ?? null
+    const as = at(assets)
+    const eq = at(equity)
+    const li = at(liabilities)
     return {
       asOf,
-      form: a.form || null,
-      assets: a.val,
-      // Not every filer tags Liabilities directly; it is recoverable from the
-      // accounting identity whenever equity is present.
-      liabilities: li ?? (eq != null ? a.val - eq : null),
-      equity: eq ?? (li != null ? a.val - li : null),
+      form: formAt(asOf),
+      // The accounting identity, applied in all three directions. Any two of
+      // assets, liabilities and equity determine the third, so a filer sparse
+      // in one of them keeps its history instead of losing it.
+      assets: as ?? (li != null && eq != null ? li + eq : null),
+      liabilities: li ?? (as != null && eq != null ? as - eq : null),
+      equity: eq ?? (as != null && li != null ? as - li : null),
       currentAssets: valueAsOf(currentAssets, asOf),
       currentLiabilities: valueAsOf(currentLiabilities, asOf),
       cash: sumAsOf([cash, shortTermInvestments], asOf),
@@ -356,7 +390,7 @@ function build(json, { maxQuarters }) {
     // Diagnostics — see diagnoseCompanyFacts. Stripped by parseCompanyFacts so
     // none of this reaches the committed JSON.
     chosen,
-    periodCount: periods.length,
+    periodCount: dates.length,
     droppedNoShares: quarters.filter((q) => q.shares == null).length,
     droppedNoEquity: quarters.filter((q) => q.equity == null).length,
   }

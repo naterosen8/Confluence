@@ -240,7 +240,7 @@ describe('diagnoseCompanyFacts', () => {
     const d = diagnoseCompanyFacts(facts())
     expect(d.reason).toBeNull()
     expect(d.kept).toBe(2)
-    expect(d.concepts.assets).toBe('Assets')
+    expect(d.concepts.assets).toBe('Assets (2/2)')
     expect(d.concepts.liabilities).toBe('Liabilities (2/2)')
   })
 })
@@ -296,5 +296,44 @@ describe('a filer that barely tags Assets', () => {
       StockholdersEquity: usd([e('2023-12-31', 2000), e('2024-03-31', 2100)]),
     })
     expect(parseCompanyFacts(f).quarters.map((q) => q.assets)).toEqual([5000, 5200])
+  })
+})
+
+describe('the accounting identity recovers a sparse leg', () => {
+  // XOM's real shape: two Assets facts and two LiabilitiesAndStockholders-
+  // Equity facts across its whole history, while liabilities and equity are
+  // reported every quarter. Anchoring the period grid on assets threw the
+  // rest away and then reported flawless 2/2 coverage of the two that
+  // survived.
+  const sparseAssetsLeg = () => {
+    const f = facts({
+      Assets: usd([e('2024-03-31', 5200)]),
+      Liabilities: usd([e('2023-09-30', 2800), e('2023-12-31', 3000), e('2024-03-31', 3100)]),
+      StockholdersEquity: usd([e('2023-09-30', 1900), e('2023-12-31', 2000), e('2024-03-31', 2100)]),
+    })
+    return f
+  }
+
+  it('keeps every period the other two legs cover', () => {
+    const r = parseCompanyFacts(sparseAssetsLeg())
+    expect(r.quarters.map((q) => q.asOf)).toEqual(['2023-09-30', '2023-12-31', '2024-03-31'])
+  })
+
+  it('derives the missing assets figure rather than leaving it null or stale', () => {
+    const r = parseCompanyFacts(sparseAssetsLeg())
+    // liabilities + equity, exactly — never a carried-forward earlier value.
+    expect(r.quarters.map((q) => q.assets)).toEqual([4700, 5000, 5200])
+  })
+
+  it('never carries an older balance sheet total forward into a later period', () => {
+    // A period with no equity anywhere must come back null, not inherit the
+    // previous quarter's figure — that would publish stale equity as current.
+    const f = facts({
+      Assets: usd([e('2023-12-31', 5000), e('2024-03-31', 5200)]),
+      Liabilities: usd([e('2023-12-31', 3000)]),
+      StockholdersEquity: usd([e('2023-12-31', 2000)]),
+    })
+    const r = parseCompanyFacts(f)
+    expect(r.quarters.map((q) => q.asOf)).toEqual(['2023-12-31'])
   })
 })
