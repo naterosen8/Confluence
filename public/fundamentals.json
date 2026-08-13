@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-13T01:51:33.141Z",
+  "generatedAt": "2026-08-13T01:57:10.972Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -2486,6 +2486,7 @@
           "cash": 61123000000,
           "debt": 18383000000,
           "shares": 2623000000,
+          "sharesBasis": "weighted-average",
           "revenue": 34146000000,
           "netIncome": 11583000000
         },
@@ -2500,6 +2501,7 @@
           "cash": 65403000000,
           "debt": 18385000000,
           "shares": 2629000000,
+          "sharesBasis": "weighted-average",
           "revenue": null,
           "netIncome": null
         },
@@ -2514,6 +2516,7 @@
           "cash": 58120000000,
           "debt": 18387000000,
           "shares": 2625000000,
+          "sharesBasis": "weighted-average",
           "revenue": 36455000000,
           "netIncome": 12369000000
         },
@@ -2528,6 +2531,7 @@
           "cash": 58080000000,
           "debt": 18389000000,
           "shares": 2619000000,
+          "sharesBasis": "weighted-average",
           "revenue": 39071000000,
           "netIncome": 13465000000
         },
@@ -2542,6 +2546,7 @@
           "cash": 70900000000,
           "debt": 28823000000,
           "shares": 2615000000,
+          "sharesBasis": "weighted-average",
           "revenue": 40589000000,
           "netIncome": 15688000000
         },
@@ -2556,6 +2561,7 @@
           "cash": 77815000000,
           "debt": 28826000000,
           "shares": 2614000000,
+          "sharesBasis": "weighted-average",
           "revenue": null,
           "netIncome": null
         },
@@ -2570,6 +2576,7 @@
           "cash": 70230000000,
           "debt": 28829000000,
           "shares": 2590000000,
+          "sharesBasis": "weighted-average",
           "revenue": 42314000000,
           "netIncome": 16644000000
         },
@@ -2584,6 +2591,7 @@
           "cash": 47071000000,
           "debt": 28832000000,
           "shares": 2580000000,
+          "sharesBasis": "weighted-average",
           "revenue": 47516000000,
           "netIncome": 18337000000
         },
@@ -2598,6 +2606,7 @@
           "cash": 44448000000,
           "debt": 28834000000,
           "shares": 2578000000,
+          "sharesBasis": "weighted-average",
           "revenue": 51242000000,
           "netIncome": 2709000000
         },
@@ -2612,6 +2621,7 @@
           "cash": 81592000000,
           "debt": 58744000000,
           "shares": 2574000000,
+          "sharesBasis": "weighted-average",
           "revenue": null,
           "netIncome": null
         },
@@ -2626,6 +2636,7 @@
           "cash": 81180000000,
           "debt": 58748000000,
           "shares": 2564000000,
+          "sharesBasis": "weighted-average",
           "revenue": 56311000000,
           "netIncome": 26773000000
         },
@@ -2640,6 +2651,7 @@
           "cash": 90260000000,
           "debt": 83664000000,
           "shares": 2565000000,
+          "sharesBasis": "weighted-average",
           "revenue": 60801000000,
           "netIncome": 15848000000
         }
