@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
-import { screenerRows, HAS_LIVE_DATA, DATA_GENERATED_AT, isSnapshotStale, snapshotAgeDays } from '../lib/dataProvider'
+import { screenerRows, screenerLeaderboardCheck, HAS_LIVE_DATA, DATA_GENERATED_AT, isSnapshotStale, snapshotAgeDays } from '../lib/dataProvider'
+import { leaderboardVerdict } from '../lib/leaderboardCheck'
 import { FORWARD_DAYS } from '../lib/backtest'
 import { pollLivePrices, HAS_LIVE_PRICE } from '../lib/livePrice'
 import Sparkline from '../components/Sparkline'
@@ -33,6 +34,8 @@ export default function Dashboard() {
   // for every visitor, computed once a day by the job that already has the
   // bars in memory. See src/lib/screener.js.
   const rows = useMemo(() => screenerRows(), [])
+
+  const leaderboard = useMemo(() => screenerLeaderboardCheck(), [])
 
   const topSetups = useMemo(
     () =>
@@ -82,10 +85,16 @@ export default function Dashboard() {
           </h2>
           <p className="muted small">
             Ordered by how far each ticker's historical win rate sits from a coin flip, weighted by sample size. This
-            is a <em>selection</em>, not a ranking of quality: picking the five most extreme results out of two dozen
-            candidates produces numbers this size from pure noise too. Tested against shuffled price histories, this
-            list is not distinguishable from chance (p ≈ 0.5), so treat it as a starting point for looking, not as
-            evidence that these five are the strongest setups.
+            is a <em>selection</em>, not a ranking of quality: picking the most extreme few out of many candidates
+            produces numbers this size from pure noise too.
+          </p>
+          {/* Derived every sync, never hardcoded. The previous wording carried
+              a p-value measured once by hand, which would have kept claiming
+              the same number however many tickers were added — the one
+              hardcoded honesty claim on a site whose other self-checks all
+              derive themselves. */}
+          <p className="muted small">
+            <Explain term="selectionCorrection">{leaderboardVerdict(leaderboard)}</Explain>
           </p>
           <div className="top-setups-grid">
             {topSetups.map((row) => {

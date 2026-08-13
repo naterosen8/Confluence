@@ -336,6 +336,14 @@ export const GLOSSARY = {
     isNot:
       'Not automatically the better number. It is more relevant but much smaller, and a small relevant sample can mislead more than a large loose one. The app prefers it only when it has at least 8 occurrences.',
   },
+  selectionCorrection: {
+    term: 'Corrected for how many were looked at',
+    basis: 'measured',
+    what: 'Whether any ticker\u2019s record survives the fact that it was picked as the best of many.',
+    how: "Each ticker's win rate is tested against its own drift rate — how often price rose over the same windows regardless of any signal — with an exact binomial test. The resulting p-values then go through a Benjamini-Hochberg correction across every ticker ranked, controlling the false discovery rate at 5%.",
+    isNot:
+      'Not a filter that leaves the good ones behind. Surviving means a record is unlikely to be pure selection; it is still not a forecast, and it says nothing about what happens next. The correction gets stricter as more tickers are tracked, which is correct — more places to look means more chances to be fooled.',
+  },
   edge: {
     term: 'Edge (leaderboard ranking)',
     basis: 'measured',

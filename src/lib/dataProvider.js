@@ -41,6 +41,10 @@ export function screenerDirectionCheck() {
   return screener?.directionCheck ?? null
 }
 
+export function screenerLeaderboardCheck() {
+  return screener?.leaderboard ?? null
+}
+
 // True once a real snapshot has loaded (see scripts/sync-market-data.mjs) —
 // not tied to any browser-side API key, because there isn't one anymore.
 // Every indicator here is daily-bar based, so there's nothing to gain from

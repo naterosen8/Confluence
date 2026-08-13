@@ -1,6 +1,7 @@
 import { computeSignals } from './indicators.js'
 import { bestAvailableStat, FORWARD_DAYS } from './backtest.js'
 import { scoreDirectionCheck } from './signalValidation.js'
+import { leaderboardCheck } from './leaderboardCheck.js'
 
 // The dashboard's rows, computed once by the daily job instead of by every
 // visitor's browser.
@@ -89,10 +90,16 @@ export function buildScreener({ barsBySymbol, tickers }) {
   const symbols = rows.map((r) => r.symbol)
   const directionCheck = scoreDirectionCheck(barsBySymbol, symbols)
 
+  // Whether the leaderboard's ordering survives having been selected. Computed
+  // here because the correction has to know how many tickers were looked at,
+  // and that number is only known to the job that looked at all of them.
+  const leaderboard = leaderboardCheck({ barsBySymbol, tickers })
+
   return {
     generatedAt: new Date().toISOString(),
     forwardDays: FORWARD_DAYS,
     rows,
     directionCheck,
+    leaderboard,
   }
 }
