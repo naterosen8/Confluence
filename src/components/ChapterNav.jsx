@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useNavigationType } from 'react-router-dom'
 import { BASIS } from '../lib/glossary'
 import { chapterNeighbours } from '../lib/chapters'
 
@@ -50,10 +50,38 @@ export function ChapterNav({ chapters, current, hrefFor }) {
 // the time it appears here.
 export function ChapterHead({ chapter, index, total }) {
   const basis = chapter.basis ? BASIS[chapter.basis] : null
+  const headingRef = useRef(null)
+  const navigationType = useNavigationType()
+
+  // Turning a page in a single-page app is silent and invisible to anyone not
+  // watching pixels: the URL changes, the DOM swaps, and focus stays wherever
+  // it was — which after clicking a tab means it is dropped on <body>. A
+  // keyboard user then has to tab from the top of the document again, and a
+  // screen reader announces nothing at all.
+  //
+  // Moving focus to the new chapter's heading fixes both at once: it puts the
+  // keyboard caret at the start of the content that just appeared, and the
+  // heading gets read out, which is the announcement.
+  //
+  // Gated on PUSH rather than on a "have I rendered before" ref, because a ref
+  // cannot survive this: App keys the ErrorBoundary on location.pathname, so
+  // every chapter turn remounts the whole subtree and any such ref is born
+  // fresh each time. Navigation type is the router's own answer and is
+  // remount-proof — PUSH means a link was followed, while the initial load and
+  // the back button both report POP and are left alone.
+  useEffect(() => {
+    if (navigationType !== 'PUSH') return
+    headingRef.current?.focus()
+  }, [chapter.key, navigationType])
+
   return (
     <div className="chapter-head">
       <div className="chapter-head-line">
-        <h2>{chapter.label}</h2>
+        {/* tabIndex -1 makes it programmatically focusable without adding a
+            tab stop of its own. */}
+        <h2 ref={headingRef} tabIndex={-1}>
+          {chapter.label}
+        </h2>
         {basis && <span className={`explain-basis explain-basis-${chapter.basis}`}>{basis.label}</span>}
         <span className="chapter-pos muted small">
           {index + 1} of {total}

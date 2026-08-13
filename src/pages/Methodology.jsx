@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { BASIS, glossaryByBasis } from '../lib/glossary'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -23,14 +23,9 @@ export default function Methodology() {
   )
   useChapterKeys({ chapters: METHODOLOGY_CHAPTERS, current: chapter.key, hrefFor })
 
-  const firstRender = useRef(true)
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false
-      return
-    }
-    document.getElementById('chapter-top')?.scrollIntoView({ block: 'start' })
-  }, [chapter.key])
+  // Scroll position and focus are both handled by ChapterHead, which moves
+  // focus to the new heading — the browser scrolls it into view as a result,
+  // and doing it in one place keeps the two from fighting.
 
   return (
     <div className="methodology">
@@ -46,7 +41,6 @@ export default function Methodology() {
       </p>
 
       <ChapterNav chapters={METHODOLOGY_CHAPTERS} current={chapter.key} hrefFor={hrefFor} />
-      <div id="chapter-top" />
       <ChapterHead chapter={chapter} index={index} total={METHODOLOGY_CHAPTERS.length} />
 
       {chapter.key === 'reading' && (<>

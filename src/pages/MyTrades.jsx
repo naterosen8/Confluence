@@ -7,10 +7,7 @@ import { getSeries, hasRealData } from '../lib/dataProvider'
 import { evaluatePosition, computePnl } from '../lib/pnl'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import Explain from '../components/Explain'
-
-function pct(v) {
-  return `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
-}
+import { pct, price, signedMoney, compactMoney } from '../lib/format'
 
 // Returns null when the symbol has no real synced history. getSeries() falls
 // back to a demo random walk for anything it does not know, so without this
@@ -179,7 +176,7 @@ export default function MyTrades() {
                               <strong>{trade.symbol}</strong>
                             </td>
                             <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
-                            <td>${trade.entry_price.toFixed(2)}</td>
+                            <td>{price(trade.entry_price)}</td>
                             <td colSpan={4} className="muted small">
                               No synced price history for this symbol — it can't be marked to market, so no figure is
                               shown rather than one from placeholder data.
@@ -204,12 +201,12 @@ export default function MyTrades() {
                             </Link>
                           </td>
                           <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
-                          <td>${trade.entry_price.toFixed(2)}</td>
-                          <td>${result.asOfPrice.toFixed(2)}</td>
-                          <td>${trade.capital.toFixed(0)}</td>
+                          <td>{price(trade.entry_price)}</td>
+                          <td>{price(result.asOfPrice)}</td>
+                          <td>{compactMoney(trade.capital)}</td>
                           <td>{trade.leverage}x</td>
                           <td className={result.pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
-                            {pct(result.pnlPct)} ({result.pnlDollars >= 0 ? '+' : ''}${result.pnlDollars.toFixed(2)})
+                            {pct(result.pnlPct)} ({signedMoney(result.pnlDollars)})
                           </td>
                           <td>
                             <div className="trade-actions">
@@ -274,12 +271,12 @@ export default function MyTrades() {
                             </Link>
                           </td>
                           <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
-                          <td>${trade.entry_price.toFixed(2)}</td>
-                          <td>${trade.close_price.toFixed(2)}</td>
-                          <td>${trade.capital.toFixed(0)}</td>
+                          <td>{price(trade.entry_price)}</td>
+                          <td>{price(trade.close_price)}</td>
+                          <td>{compactMoney(trade.capital)}</td>
                           <td>{trade.leverage}x</td>
                           <td className={pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
-                            {pct(settled.pnlPct)} ({pnlDollars >= 0 ? '+' : ''}${pnlDollars.toFixed(2)})
+                            {pct(settled.pnlPct)} ({signedMoney(pnlDollars)})
                           </td>
                           <td className={trade.status === 'liquidated' ? 'pnl-negative' : 'muted small'} style={{ textTransform: 'capitalize' }}>
                             {trade.status}

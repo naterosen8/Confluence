@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
 import { getSeries, hasRealData } from '../lib/dataProvider'
@@ -17,14 +17,10 @@ import Explain from '../components/Explain'
 import SimulateTradeForm from '../components/SimulateTradeForm'
 import NotFound from './NotFound'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import { pct, rate, price } from '../lib/format'
 import { cachedScoreDirectionCheck, directionBanner } from '../lib/signalValidation'
 import { TICKER_CHAPTERS, chapterFor, chapterNeighbours } from '../lib/chapters'
 import { ChapterNav, ChapterHead, ChapterPager, useChapterKeys } from '../components/ChapterNav'
-
-function pct(v, digits = 2) {
-  if (v == null) return '—'
-  return `${v >= 0 ? '+' : ''}${v.toFixed(digits)}%`
-}
 
 export default function TickerDetail() {
   const { symbol, chapter } = useParams()
@@ -84,14 +80,9 @@ function TickerAnalysis({ symbol, meta, chapterKey }) {
 
   // Turning a page should put you at the top of it. Skipped on first load so
   // a deep link into a chapter does not fight the browser's own restoration.
-  const firstRender = useRef(true)
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false
-      return
-    }
-    document.getElementById('chapter-top')?.scrollIntoView({ block: 'start' })
-  }, [chapter.key])
+  // Scroll position and focus are both handled by ChapterHead, which moves
+  // focus to the new heading — the browser scrolls it into view as a result,
+  // and doing it in one place keeps the two from fighting.
 
   // The badge is the only claim about *now*, so the caveat that it does not
   // predict direction belongs beside it wherever it appears — but only on the
@@ -165,7 +156,6 @@ function TickerAnalysis({ symbol, meta, chapterKey }) {
       )}
 
       <ChapterNav chapters={TICKER_CHAPTERS} current={chapter.key} hrefFor={hrefFor} />
-      <div id="chapter-top" />
       <ChapterHead chapter={chapter} index={index} total={TICKER_CHAPTERS.length} />
 
       {chapter.key === 'layers' && (
@@ -224,12 +214,12 @@ function TickerAnalysis({ symbol, meta, chapterKey }) {
           />
           <Stat
             label={<Explain term="supportResistance">Nearest resistance</Explain>}
-            value={signals.levels.resistance ? `$${signals.levels.resistance.price.toFixed(2)}` : 'none nearby'}
+            value={signals.levels.resistance ? price(signals.levels.resistance.price) : 'none nearby'}
             note={signals.levels.resistance ? `Prior swing high on ${signals.levels.resistance.date}` : null}
           />
           <Stat
             label={<Explain term="supportResistance">Nearest support</Explain>}
-            value={signals.levels.support ? `$${signals.levels.support.price.toFixed(2)}` : 'none nearby'}
+            value={signals.levels.support ? price(signals.levels.support.price) : 'none nearby'}
             note={signals.levels.support ? `Prior swing low on ${signals.levels.support.date}` : null}
           />
           <Stat
@@ -318,10 +308,10 @@ function TickerAnalysis({ symbol, meta, chapterKey }) {
                     {row.score === scoreBacktest.currentScore && <span className="muted small"> ← today</span>}
                   </td>
                   <td>{row.all.sampleSize}</td>
-                  <td>{row.all.sampleSize ? `${row.all.winRate.toFixed(0)}%` : '—'}</td>
+                  <td>{row.all.sampleSize ? rate(row.all.winRate) : '—'}</td>
                   <td>{row.all.sampleSize ? pct(row.all.avgReturn) : '—'}</td>
                   <td>{row.regimeMatched.sampleSize}</td>
-                  <td>{row.regimeMatched.sampleSize ? `${row.regimeMatched.winRate.toFixed(0)}%` : '—'}</td>
+                  <td>{row.regimeMatched.sampleSize ? rate(row.regimeMatched.winRate) : '—'}</td>
                   <td>{row.regimeMatched.sampleSize ? pct(row.regimeMatched.avgReturn) : '—'}</td>
                 </tr>
               ))}
@@ -425,7 +415,7 @@ function BacktestCard({ label, result, active }) {
           </div>
           <div className="backtest-row">
             <span className="muted small"><Explain term="winRate">Win rate</Explain></span>
-            <span>{result.winRate.toFixed(0)}%</span>
+            <span>{rate(result.winRate)}</span>
           </div>
           {result.winRateLow != null && (
             <div className="backtest-row">
@@ -433,7 +423,7 @@ function BacktestCard({ label, result, active }) {
                 <Explain term="confidenceInterval">95% range</Explain>
               </span>
               <span className={result.distinguishable ? '' : 'muted small'}>
-                {result.winRateLow.toFixed(0)}–{result.winRateHigh.toFixed(0)}%
+                {result.winRateLow.toFixed(0)}–{rate(result.winRateHigh)}
                 {!result.distinguishable && ' · spans 50%'}
               </span>
             </div>

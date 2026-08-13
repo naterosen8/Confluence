@@ -4,12 +4,8 @@ import { FORWARD_DAYS } from '../lib/backtest'
 import { leanByKey, leanDirection } from '../lib/lean'
 import { distinguishableFromChance } from '../lib/stats'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import { pct, rate, price } from '../lib/format'
 import Explain from '../components/Explain'
-
-function pct(v, digits = 2) {
-  if (v == null) return '—'
-  return `${v >= 0 ? '+' : ''}${v.toFixed(digits)}%`
-}
 
 function summarize(entries) {
   const decidable = entries.filter((e) => e.outcome && e.outcome.correct !== null)
@@ -134,7 +130,7 @@ export default function TrackRecord() {
             <Stat
               term="hitRate"
               label="Overall hit rate"
-              value={`${overall.winRate.toFixed(0)}%`}
+              value={rate(overall.winRate)}
               note={
                 overall.low != null ? (
                   <Explain term="confidenceInterval">
@@ -147,7 +143,7 @@ export default function TrackRecord() {
             <Stat
               term="driftBaseline"
               label="Upward-leaning calls"
-              value={bullish ? `${bullish.winRate.toFixed(0)}% (N=${bullish.total})` : '—'}
+              value={bullish ? `${rate(bullish.winRate)} (N=${bullish.total})` : '—'}
               note={
                 bullish && upBaseline != null
                   ? `Price rose in ${upBaseline.toFixed(0)}% of these windows regardless — edge ${
@@ -159,7 +155,7 @@ export default function TrackRecord() {
             <Stat
               term="driftBaseline"
               label="Downward-leaning calls"
-              value={bearish ? `${bearish.winRate.toFixed(0)}% (N=${bearish.total})` : '—'}
+              value={bearish ? `${rate(bearish.winRate)} (N=${bearish.total})` : '—'}
               note={
                 bearish && downBaseline != null
                   ? `Price fell in ${downBaseline.toFixed(0)}% of these windows regardless — edge ${
@@ -205,9 +201,9 @@ export default function TrackRecord() {
                         <strong>{e.symbol}</strong>
                       </td>
                       <td>{leanByKey(e.verdict)?.short ?? e.verdict}</td>
-                      <td>${e.price.toFixed(2)}</td>
+                      <td>{price(e.price)}</td>
                       <td>{e.outcome.resolvedDate}</td>
-                      <td>${e.outcome.exitPrice.toFixed(2)}</td>
+                      <td>{price(e.outcome.exitPrice)}</td>
                       <td>{pct(e.outcome.returnPct)}</td>
                       <td className={e.outcome.correct ? 'top-setup-bullish' : 'top-setup-bearish'}>
                         {e.outcome.correct ? 'Hit' : 'Miss'}

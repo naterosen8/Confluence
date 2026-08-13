@@ -1158,3 +1158,15 @@ table.grid {
   font-size: 1rem;
   margin: 22px 0 10px;
 }
+
+/* The chapter heading receives focus on a page turn so keyboard users land on
+   the new content and screen readers announce it. It is not a control, so it
+   gets a quiet ring rather than the accent outline used for buttons. */
+.chapter-head h2:focus {
+  outline: none;
+}
+.chapter-head h2:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 3px;
+}

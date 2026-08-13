@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { balanceSheetValuation, classifyValuation, priceToBookHistory, summarizeHistory } from '../lib/mnav'
 import Explain from './Explain'
+// Aliased: this component takes a `price` prop, which would shadow the
+// formatter and turn price(price) into a call on a number at runtime.
+import { compactMoney as money, shareCount, price as priceText } from '../lib/format'
 
 let cache = null
 let inFlight = null
@@ -22,17 +25,6 @@ function loadFundamentals() {
   return inFlight
 }
 
-const money = (v) => {
-  if (v == null) return '—'
-  const abs = Math.abs(v)
-  const sign = v < 0 ? '−' : ''
-  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(2)}T`
-  if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(2)}B`
-  if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(1)}M`
-  return `${sign}$${abs.toFixed(0)}`
-}
-
-const shareCount = (n) => (n >= 1e9 ? `${(n / 1e9).toFixed(2)}B` : `${(n / 1e6).toFixed(0)}M`)
 
 function Row({ label, value, note, term }) {
   return (
@@ -115,7 +107,7 @@ export default function BalanceSheetValue({ symbol, kind, price, bars }) {
           label="Market cap"
           value={money(valuation.marketCap)}
           note={
-            `${shareCount(valuation.shares)} shares × $${price.toFixed(2)}` +
+            `${shareCount(valuation.shares)} shares × ${priceText(price)}` +
             // Multi-class filers report their cover-page count per share
             // class, which the SEC's companyfacts API omits entirely, so the
             // count here is the weighted average off the income statement.
@@ -148,7 +140,7 @@ export default function BalanceSheetValue({ symbol, kind, price, bars }) {
           value={valuation.priceToBook != null ? `${valuation.priceToBook.toFixed(2)}×` : 'n/a'}
           note={
             valuation.priceToBook != null
-              ? `Book value $${valuation.bookValuePerShare.toFixed(2)}/share vs $${price.toFixed(2)} price`
+              ? `Book value ${priceText(valuation.bookValuePerShare)}/share vs ${priceText(price)} price`
               : 'Book equity is negative, so the ratio is undefined'
           }
         />

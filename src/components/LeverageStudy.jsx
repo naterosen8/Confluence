@@ -3,16 +3,7 @@ import { leverageStudy } from '../lib/leverageStudy'
 import { marketImpactEstimate } from '../lib/pnl'
 import { FORWARD_DAYS } from '../lib/backtest'
 import Explain from './Explain'
-
-function pct(v, digits = 1) {
-  if (v == null) return '—'
-  return `${v >= 0 ? '+' : ''}${v.toFixed(digits)}%`
-}
-
-function dollars(v) {
-  const sign = v >= 0 ? '+' : '−'
-  return `${sign}$${Math.abs(v).toFixed(0)}`
-}
+import { pct, rate, signedMoney, compactMoney } from '../lib/format'
 
 function ScenarioRow({ label, study, capital }) {
   if (!study.sampleSize) {
@@ -30,16 +21,16 @@ function ScenarioRow({ label, study, capital }) {
       <td>{label}</td>
       <td>{study.sampleSize}</td>
       <td className={study.liquidatedPct > 0 ? 'pnl-negative' : 'muted'}>
-        {study.liquidatedPct.toFixed(0)}%
+        {rate(study.liquidatedPct)}
       </td>
-      <td>{study.winRate.toFixed(0)}%</td>
+      <td>{rate(study.winRate)}</td>
       <td className={study.avgReturnPct >= 0 ? 'pnl-positive' : 'pnl-negative'}>{pct(study.avgReturnPct)}</td>
       <td className={study.medianReturnPct >= 0 ? 'pnl-positive' : 'pnl-negative'}>{pct(study.medianReturnPct)}</td>
       <td className="muted small">
         {pct(study.bestPct, 0)} / {pct(study.worstPct, 0)}
       </td>
       <td className={study.avgDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
-        {dollars(study.avgDollars)} on ${capital.toFixed(0)}
+        {signedMoney(study.avgDollars, 0)} on {compactMoney(capital)}
       </td>
     </tr>
   )
@@ -144,9 +135,9 @@ export default function LeverageStudy({ bars, currentScore }) {
                   Across {headline.sampleSize} past signals that happened{' '}
                   <strong>
                     {headline.liquidatedCount} time{headline.liquidatedCount === 1 ? '' : 's'} (
-                    {headline.liquidatedPct.toFixed(0)}%)
+                    {rate(headline.liquidatedPct)})
                   </strong>{' '}
-                  — a total loss of the ${capitalNum.toFixed(0)} stake, in some cases where the direction later proved
+                  — a total loss of the {compactMoney(capitalNum)} stake, in some cases where the direction later proved
                   right anyway.
                 </>
               ) : (
@@ -197,7 +188,7 @@ export default function LeverageStudy({ bars, currentScore }) {
       {impact && impact.material && (
         <div className="callout impact-note">
           <Explain term="marketImpact">
-            A ${capitalNum.toFixed(0)} stake at {leverageNum}x puts{' '}
+            A {compactMoney(capitalNum)} stake at {leverageNum}x puts{' '}
             <strong>${(impact.notional / 1000).toFixed(0)}k</strong> into the market
           </Explain>{' '}
           — about{' '}
