@@ -369,5 +369,12 @@
     "verdict": "aligned-up",
     "score": 4,
     "price": 159.8
+  },
+  {
+    "date": "2026-08-12",
+    "symbol": "BTC/USD",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 63479.99
   }
 ]
