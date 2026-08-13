@@ -160,8 +160,10 @@ export default function MyTrades() {
                       <th><Explain term="longShort">Direction</Explain></th>
                       <th>Entry</th>
                       <th><Explain term="dailySnapshot">Current</Explain></th>
+                      <th>Price move</th>
                       <th>Capital</th>
                       <th><Explain term="leverage">Leverage</Explain></th>
+                      <th><Explain term="wipedOut">Wipes out at</Explain></th>
                       <th><Explain term="openPnl">P&amp;L</Explain></th>
                       <th></th>
                     </tr>
@@ -177,7 +179,7 @@ export default function MyTrades() {
                             </td>
                             <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
                             <td>{price(trade.entry_price)}</td>
-                            <td colSpan={4} className="muted small">
+                            <td colSpan={6} className="muted small">
                               No synced price history for this symbol — it can't be marked to market, so no figure is
                               shown rather than one from placeholder data.
                             </td>
@@ -203,10 +205,28 @@ export default function MyTrades() {
                           <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
                           <td>{price(trade.entry_price)}</td>
                           <td>{price(result.asOfPrice)}</td>
+                          {/* The underlying move, so the leverage is visible as
+                              arithmetic rather than taken on faith. */}
+                          <td className="muted">{pct(result.underlyingPct)}</td>
                           <td>{compactMoney(trade.capital)}</td>
                           <td>{trade.leverage}x</td>
+                          <td className="muted small">
+                            {result.liquidationAt == null ? (
+                              'no borrowing'
+                            ) : (
+                              <>
+                                {price(result.liquidationAt)}
+                                <br />
+                                {pct(result.roomToLiquidationPct, 1)} away
+                              </>
+                            )}
+                          </td>
                           <td className={result.pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
                             {pct(result.pnlPct)} ({signedMoney(result.pnlDollars)})
+                            <br />
+                            <span className="muted small">
+                              {pct(result.underlyingPct)} × {trade.leverage}
+                            </span>
                           </td>
                           <td>
                             <div className="trade-actions">
@@ -242,6 +262,7 @@ export default function MyTrades() {
                       <th><Explain term="longShort">Direction</Explain></th>
                       <th>Entry</th>
                       <th>Close</th>
+                      <th>Price move</th>
                       <th>Capital</th>
                       <th><Explain term="leverage">Leverage</Explain></th>
                       <th><Explain term="openPnl">P&amp;L</Explain></th>
@@ -273,10 +294,15 @@ export default function MyTrades() {
                           <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
                           <td>{price(trade.entry_price)}</td>
                           <td>{price(trade.close_price)}</td>
+                          <td className="muted">{pct(settled.underlyingPct)}</td>
                           <td>{compactMoney(trade.capital)}</td>
                           <td>{trade.leverage}x</td>
                           <td className={pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
                             {pct(settled.pnlPct)} ({signedMoney(pnlDollars)})
+                            <br />
+                            <span className="muted small">
+                              {pct(settled.underlyingPct)} × {trade.leverage}
+                            </span>
                           </td>
                           <td className={trade.status === 'liquidated' ? 'pnl-negative' : 'muted small'} style={{ textTransform: 'capitalize' }}>
                             {trade.status}

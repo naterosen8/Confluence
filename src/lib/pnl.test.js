@@ -142,3 +142,89 @@ describe('marketImpactEstimate', () => {
     expect(marketImpactEstimate({ bars: bars.map((b) => ({ ...b, volume: 0 })), notional: 1000 })).toBeNull()
   })
 })
+
+// Reported as "leverage isn't being applied": a BTC long, $1000 at 50x, showing
+// +96% and about +$960. The inference was that +96% of $1000 = $960 means 1:1.
+// It does not — $960 IS 96% of $1000 by definition, whatever the leverage. The
+// leverage lives inside the 96%, and these pin that.
+describe('the "+96% on $1000 must mean 1:1" report', () => {
+  const move = { direction: 'long', entryPrice: 62274.34, currentPrice: 63470.01, capital: 1000 }
+
+  it('multiplies the same price move by the leverage', () => {
+    const at1 = computePnl({ ...move, leverage: 1 })
+    const at50 = computePnl({ ...move, leverage: 50 })
+    // Identical underlying move, fifty times the result.
+    expect(at1.underlyingPct).toBeCloseTo(at50.underlyingPct, 6)
+    expect(at50.pnlPct / at1.pnlPct).toBeCloseTo(50, 6)
+    expect(at1.pnlDollars).toBeCloseTo(19.2, 1)
+    expect(at50.pnlDollars).toBeCloseTo(960, 0)
+  })
+
+  it('reports the underlying move separately so the arithmetic is visible', () => {
+    const r = computePnl({ ...move, leverage: 50 })
+    expect(r.underlyingPct).toBeCloseTo(1.92, 2)
+    expect(r.pnlPct).toBeCloseTo(96, 0)
+    // The relationship the UI now prints: underlying × leverage = P&L.
+    expect(r.underlyingPct * 50).toBeCloseTo(r.pnlPct, 6)
+  })
+
+  it('dollars are always that percentage of the stake, at every leverage', () => {
+    for (const leverage of [1, 2, 10, 50]) {
+      const r = computePnl({ ...move, leverage })
+      expect(r.pnlDollars).toBeCloseTo(1000 * (r.pnlPct / 100), 6)
+    }
+  })
+})
+
+// Reported as "liquidation isn't working": a long showing −34% that should have
+// been wiped out. Liquidation is losing the whole stake — −100%, not −34% —
+// and −34% is a third of the stake at any leverage.
+describe('the "−34% should have liquidated" report', () => {
+  const bars = [
+    { date: '2026-01-01', open: 100, high: 100, low: 100, close: 100 },
+    { date: '2026-01-02', open: 100, high: 100, low: 99.32, close: 99.32 },
+  ]
+
+  it('does not liquidate a position that has only lost part of the stake', () => {
+    const r = evaluatePosition({
+      bars, entryDate: '2026-01-01', entryPrice: 100,
+      direction: 'long', capital: 1000, leverage: 50,
+    })
+    expect(r.pnlPct).toBeCloseTo(-34, 0)
+    expect(r.liquidated).toBe(false)
+    expect(r.pnlDollars).toBeCloseTo(-340, 0)
+  })
+
+  it('liquidates exactly when the whole stake is gone, not before', () => {
+    const toZero = [
+      bars[0],
+      { date: '2026-01-02', open: 100, high: 100, low: 98, close: 98 }, // −2% at 50x
+    ]
+    const r = evaluatePosition({
+      bars: toZero, entryDate: '2026-01-01', entryPrice: 100,
+      direction: 'long', capital: 1000, leverage: 50,
+    })
+    expect(r.liquidated).toBe(true)
+    expect(r.pnlPct).toBe(-100)
+    expect(r.pnlDollars).toBe(-1000)
+  })
+
+  it('publishes the level and the distance to it while the position is open', () => {
+    const r = evaluatePosition({
+      bars, entryDate: '2026-01-01', entryPrice: 100,
+      direction: 'long', capital: 1000, leverage: 50,
+    })
+    expect(r.liquidationAt).toBeCloseTo(98, 6)
+    // 99.32 has to fall a further ~1.33% to reach 98.
+    expect(r.roomToLiquidationPct).toBeCloseTo(-1.33, 1)
+  })
+
+  it('reports no liquidation level at all without borrowing', () => {
+    const r = evaluatePosition({
+      bars, entryDate: '2026-01-01', entryPrice: 100,
+      direction: 'long', capital: 1000, leverage: 1,
+    })
+    expect(r.liquidationAt).toBeNull()
+    expect(r.liquidated).toBe(false)
+  })
+})

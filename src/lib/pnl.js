@@ -6,13 +6,21 @@
 // teaches: a leveraged position can be wiped out entirely, and fast.
 export function computePnl({ direction, entryPrice, currentPrice, capital, leverage }) {
   const dirMult = direction === 'long' ? 1 : -1
-  let pnlPct = dirMult * leverage * ((currentPrice - entryPrice) / entryPrice)
+  const underlying = (currentPrice - entryPrice) / entryPrice
+  let pnlPct = dirMult * leverage * underlying
   const liquidated = pnlPct <= -1
   if (liquidated) pnlPct = -1
   return {
     pnlPct: pnlPct * 100,
     pnlDollars: capital * pnlPct,
     liquidated,
+    // The raw price move, before direction and leverage. Reported because a
+    // return shown only as a percentage of capital is genuinely ambiguous:
+    // "+96% and +$960" on $1000 looks like an unleveraged 1:1 result, when it
+    // is a 1.92% move multiplied by 50. Without the underlying figure beside
+    // it there is no way to tell those apart from the screen, and the app
+    // was asking people to take the leverage on faith.
+    underlyingPct: underlying * 100,
   }
 }
 
@@ -108,5 +116,18 @@ export function evaluatePosition({ bars, entryDate, entryPrice, direction, capit
   const last = path[path.length - 1]
   const asOfDate = last ? last.date : entryDate
   const asOfPrice = last ? last.close : entryPrice
-  return { ...computePnl({ direction, entryPrice, currentPrice: asOfPrice, capital, leverage }), asOfDate, asOfPrice }
+  // How much further price has to move before the stake is gone. An open
+  // leveraged position showing a loss says nothing about how close it is to
+  // being wiped out — a 34% loss is a third of the stake whatever the
+  // leverage, while the distance to zero depends entirely on it. Reporting
+  // the level and the gap is what makes that legible.
+  const survivesTo = leverage > 1 ? liq : null
+  const roomPct = survivesTo != null && asOfPrice > 0 ? ((survivesTo - asOfPrice) / asOfPrice) * 100 : null
+  return {
+    ...computePnl({ direction, entryPrice, currentPrice: asOfPrice, capital, leverage }),
+    asOfDate,
+    asOfPrice,
+    liquidationAt: survivesTo,
+    roomToLiquidationPct: roomPct,
+  }
 }
