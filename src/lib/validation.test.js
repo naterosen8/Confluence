@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
+import { readCommittedBars } from './testBars.js'
 import path from 'node:path'
 import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries, computeSignals } from './indicators'
 import { bestAvailableStat, FORWARD_DAYS } from './backtest'
@@ -14,8 +15,9 @@ import { wilsonInterval } from './stats'
 // invariant would make every downstream figure quietly wrong, so these run in
 // CI alongside everything else.
 
-const DATA_PATH = path.resolve(process.cwd(), 'public/market-data.json')
-const snapshot = fs.existsSync(DATA_PATH) ? JSON.parse(fs.readFileSync(DATA_PATH, 'utf8')) : null
+// Bars ship as one file per symbol now — see src/lib/barsFile.js.
+const committedBars = readCommittedBars()
+const snapshot = Object.keys(committedBars).length ? { bars: committedBars } : null
 const bars = snapshot?.bars ?? {}
 const symbols = Object.keys(bars).filter((s) => bars[s]?.length > 200)
 const hasData = symbols.length > 0

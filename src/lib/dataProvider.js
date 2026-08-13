@@ -4,8 +4,12 @@
 // every visitor before the app can render anything. As a plain public/
 // asset it's fetched once, in parallel with everything else, and cached by
 // the browser like any other static file.
-let marketData = { generatedAt: null, bars: {} }
-let loadPromise = null
+import { barsPath } from './barsFile.js'
+
+// One entry per symbol, filled in as pages ask for them. Nothing fetches the
+// whole universe any more — see loadBars.
+const barStore = {}
+const barsInFlight = {}
 
 // The dashboard's precomputed rows — a few hundred bytes per ticker against
 // ~20 KB of gzipped bars, so this is what the app waits for before it paints.
@@ -49,26 +53,32 @@ export function screenerDirectionCheck() {
 // re-renders, no extra plumbing needed.
 export let HAS_LIVE_DATA = false
 export let DATA_GENERATED_AT = null
-// Separate from HAS_LIVE_DATA: the screener index can be present and painting
-// rows while the bar history — two orders of magnitude larger — is still on
-// the wire or has never been requested.
-export let BARS_READY = false
+
 
 // Called once from App.jsx before anything else renders. Safe to call more
 // than once — every caller shares the same in-flight/completed fetch.
-export function loadMarketData() {
-  if (!loadPromise) {
-    loadPromise = fetch('/market-data.json')
-      .then((res) => (res.ok ? res.json() : { generatedAt: null, bars: {} }))
-      .catch(() => ({ generatedAt: null, bars: {} }))
-      .then((data) => {
-        marketData = data
-        HAS_LIVE_DATA = HAS_LIVE_DATA || Object.keys(marketData.bars || {}).length > 0
-        DATA_GENERATED_AT = marketData.generatedAt || DATA_GENERATED_AT
-        BARS_READY = true
-      })
-  }
-  return loadPromise
+// Fetches the bar history for exactly the symbols asked for, once each.
+// A ticker page wants its own symbol plus SPY (for regime matching); the
+// simulator wants whichever symbols the user actually has positions in.
+export function loadBars(symbols) {
+  const wanted = [...new Set(symbols)].filter(Boolean)
+  return Promise.all(
+    wanted.map((symbol) => {
+      if (barStore[symbol]) return Promise.resolve()
+      if (!barsInFlight[symbol]) {
+        barsInFlight[symbol] = fetch(barsPath(symbol))
+          .then((res) => (res.ok ? res.json() : null))
+          .catch(() => null)
+          .then((data) => {
+            if (data?.bars?.length) {
+              barStore[symbol] = data.bars
+              if (data.generatedAt && !DATA_GENERATED_AT) DATA_GENERATED_AT = data.generatedAt
+            }
+          })
+      }
+      return barsInFlight[symbol]
+    })
+  )
 }
 
 // Deterministic PRNG so each symbol's demo history is stable across reloads.
@@ -125,13 +135,13 @@ const seriesStore = {}
 // random walk for any symbol the snapshot doesn't have, or before
 // loadMarketData() has resolved.
 export function getSeries(symbol) {
-  if (marketData.bars?.[symbol]?.length) return marketData.bars[symbol]
+  if (barStore[symbol]?.length) return barStore[symbol]
   if (!seriesStore[symbol]) seriesStore[symbol] = generateMockBars(symbol)
   return seriesStore[symbol]
 }
 
 export function hasRealData(symbol) {
-  return Boolean(marketData.bars?.[symbol]?.length)
+  return Boolean(barStore[symbol]?.length)
 }
 
 // How old the snapshot is, in calendar days. The sync can fail silently — it

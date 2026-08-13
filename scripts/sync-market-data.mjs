@@ -14,11 +14,15 @@ import { TICKERS } from '../src/lib/tickers.js'
 import { leanDirection } from '../src/lib/lean.js'
 import { lastSettledIndex, repairUnresolved } from '../src/lib/trackRecord.js'
 import { buildScreener } from '../src/lib/screener.js'
+import { barsFileName } from '../src/lib/barsFile.js'
 
 const API_KEY = process.env.TWELVE_DATA_KEY
 // Lives in public/, not data/, so the built app can fetch it as a plain
 // static asset at runtime instead of it being bundled into the JS.
-const MARKET_DATA_PATH = new URL('../public/market-data.json', import.meta.url)
+// One file per symbol rather than one file for everything. See barsFile.js:
+// a combined file hits GitHub's 100 MB per-file limit around a thousand
+// tickers, and forces a ticker page to download every symbol to show one.
+const BARS_DIR = new URL('../public/bars/', import.meta.url)
 // Also in public/, not data/, for the same reason: this log only ever
 // grows (a new row every non-neutral verdict, every trading day), so a
 // static import would mean an ever-larger JS bundle every visitor has to
@@ -79,9 +83,27 @@ function saveJson(path, value) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
+function readAllBars() {
+  const dir = new URL('.', BARS_DIR)
+  if (!fs.existsSync(dir)) return {}
+  const out = {}
+  for (const file of fs.readdirSync(dir)) {
+    if (!file.endsWith('.json')) continue
+    try {
+      const parsed = JSON.parse(fs.readFileSync(new URL(file, BARS_DIR), 'utf8'))
+      if (parsed?.symbol && Array.isArray(parsed.bars)) out[parsed.symbol] = parsed.bars
+    } catch (e) {
+      console.error(`Could not read ${file}: ${e.message}`)
+    }
+  }
+  return out
+}
+
 async function main() {
-  const previousSnapshot = loadJson(MARKET_DATA_PATH, { generatedAt: null, bars: {} })
-  const barsBySymbol = { ...previousSnapshot.bars }
+  fs.mkdirSync(BARS_DIR, { recursive: true })
+  // Previous history, so a symbol that fails to fetch keeps yesterday's data
+  // instead of being blanked out site-wide.
+  const barsBySymbol = readAllBars()
   let fetchedCount = 0
   let failedCount = 0
 
@@ -100,10 +122,13 @@ async function main() {
 
   // Written compact rather than indented: at this depth the whitespace alone
   // was a third of the file, and nobody reads this by hand.
-  fs.writeFileSync(
-    MARKET_DATA_PATH,
-    JSON.stringify({ generatedAt: new Date().toISOString(), bars: barsBySymbol }) + '\n'
-  )
+  const generatedAt = new Date().toISOString()
+  for (const [symbol, bars] of Object.entries(barsBySymbol)) {
+    fs.writeFileSync(
+      new URL(barsFileName(symbol), BARS_DIR),
+      JSON.stringify({ symbol, generatedAt, bars }) + '\n'
+    )
+  }
 
   // The dashboard's rows, computed here once instead of in every visitor's
   // browser. See src/lib/screener.js.

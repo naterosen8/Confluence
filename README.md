@@ -13,7 +13,11 @@ This is deliberately **not** a signal service or a "time the market" tool. Indic
 
 ## Data model
 
-Every indicator here — RSI, MACD, backtests, everything — is computed from **daily** closes, so there's nothing to gain from polling continuously. `.github/workflows/sync-market-data.yml` runs `scripts/sync-market-data.mjs` once a day after market close: it fetches fresh bars for every ticker from Twelve Data and commits the result to `public/market-data.json`. The app fetches that file at runtime (`dataProvider.loadMarketData`, called once from `App.jsx` before anything renders) rather than statically importing it — it's ~1MB of real history, and a static import would bake the whole thing into the JS bundle instead of letting the browser load and cache it as its own file. No API key ever ships to the browser, and it costs the same ~22 API requests/day regardless of how many people have the site open, because everyone reads the same snapshot instead of each visitor's browser calling Twelve Data independently.
+Every indicator here — RSI, MACD, backtests, everything — is computed from **daily** closes, so there's nothing to gain from polling continuously. `.github/workflows/sync-market-data.yml` runs `scripts/sync-market-data.mjs` once a day after market close: it fetches fresh bars for every ticker from Twelve Data and writes them as one file per symbol under `public/bars/`, plus a precomputed `public/screener.json`.
+
+The split matters for growth. A combined file is ~92KB of raw bars per symbol, so it reaches GitHub's 100MB per-file limit at roughly a thousand tickers, and it forces a ticker page to download every symbol to show one. Per-symbol files stay a fixed size however many exist, and a page fetches only what it displays (`dataProvider.loadBars`).
+
+`screener.json` is the dashboard, computed once by the job rather than in every visitor's browser: ~228 bytes per row against ~20KB gzipped of bars, so the dashboard paints from a few KB and never downloads bar history at all. No API key ever ships to the browser, and it costs the same ~22 API requests/day regardless of how many people have the site open, because everyone reads the same snapshot instead of each visitor's browser calling Twelve Data independently.
 
 The same job also updates `public/track-record.json` (see below) from the same fetch, so there's no duplicate API usage between the two features.
 
@@ -27,7 +31,7 @@ npm run dev
 npm test    # vitest — covers the leverage/liquidation math
 ```
 
-To sync real data locally: `TWELVE_DATA_KEY=your_key node scripts/sync-market-data.mjs` (takes ~3 minutes, throttled to stay under Twelve Data's free-tier rate limit). Commit the resulting `public/market-data.json` or just leave it uncommitted for local testing.
+To sync real data locally: `TWELVE_DATA_KEY=your_key node scripts/sync-market-data.mjs` (takes ~3 minutes, throttled to stay under Twelve Data's free-tier rate limit). Commit the resulting `public/bars/` and `public/screener.json`, or leave them uncommitted for local testing.
 
 ## Scope
 

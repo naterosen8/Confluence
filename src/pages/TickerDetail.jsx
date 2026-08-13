@@ -17,7 +17,7 @@ import Explain from '../components/Explain'
 import SimulateTradeForm from '../components/SimulateTradeForm'
 import NotFound from './NotFound'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
-import { useMarketData } from '../lib/useMarketData'
+import { useBars } from '../lib/useMarketData'
 import { pct, rate, price } from '../lib/format'
 import { directionBanner } from '../lib/signalValidation'
 import { TICKER_CHAPTERS, chapterFor, chapterNeighbours } from '../lib/chapters'
@@ -45,7 +45,8 @@ export default function TickerDetail() {
 }
 
 function TickerAnalysis({ symbol, meta, chapterKey }) {
-  const barsReady = useMarketData()
+  // SPY too: its trend defines the regime the base rates are matched against.
+  const barsReady = useBars([symbol, 'SPY'])
   if (!barsReady) {
     return (
       <div>

@@ -3,10 +3,9 @@ import { Link } from 'react-router-dom'
 import { useEnsureSession } from '../context/AuthContext'
 import { HAS_SUPABASE } from '../lib/supabaseClient'
 import { listTrades, closeTrade, deleteTrade } from '../lib/trades'
-import { getSeries, hasRealData } from '../lib/dataProvider'
+import { getSeries, hasRealData, loadBars } from '../lib/dataProvider'
 import { evaluatePosition, computePnl } from '../lib/pnl'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
-import { useMarketData } from '../lib/useMarketData'
 import Explain from '../components/Explain'
 import { pct, price, signedMoney, compactMoney } from '../lib/format'
 
@@ -30,7 +29,6 @@ function evaluate(trade) {
 export default function MyTrades() {
   useDocumentTitle('My trades')
   const { user, loading, error: sessionError } = useEnsureSession()
-  const barsReady = useMarketData()
   const [trades, setTrades] = useState(null)
   const [error, setError] = useState(null)
   const [closingId, setClosingId] = useState(null)
@@ -40,6 +38,13 @@ export default function MyTrades() {
     if (!user) return
     listTrades(user.id)
       .then(async (loaded) => {
+        // Bars are fetched per symbol now, so the history for these positions
+        // has to be in hand before anything is marked to market. Without this
+        // the settle pass below would run against no data, hasRealData would
+        // be false for every symbol, and an open position that had actually
+        // been wiped out would quietly stay open.
+        await loadBars(loaded.map((t) => t.symbol))
+
         // A leveraged position can hit -100% on a day nobody was looking and
         // recover before the next visit — walk each open trade's real price
         // path since entry and settle it as liquidated then, not "now."
@@ -116,7 +121,7 @@ export default function MyTrades() {
     )
   }
 
-  if (loading || !user || !barsReady) {
+  if (loading || !user) {
     return (
       <div>
         <h1>My trades</h1>

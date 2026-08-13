@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
+import { readCommittedBars } from './testBars.js'
 import path from 'node:path'
 import { buildScreener, buildScreenerRow, flagsFor, SPARK_POINTS } from './screener.js'
 import { computeSignals } from './indicators.js'
 import { bestAvailableStat } from './backtest.js'
 
-const dataPath = path.resolve(new URL('../../public/market-data.json', import.meta.url).pathname)
-const barsBySymbol = JSON.parse(fs.readFileSync(dataPath, 'utf8')).bars
+const barsBySymbol = readCommittedBars()
 const tickers = [
   { symbol: 'AAPL', name: 'Apple', kind: 'stock' },
   { symbol: 'SPY', name: 'S&P 500 ETF', kind: 'etf' },
@@ -98,5 +98,37 @@ describe('the committed index is current', () => {
       expect(Array.isArray(row.spark)).toBe(true)
       expect(Array.isArray(row.flags)).toBe(true)
     }
+  })
+})
+
+describe('per-symbol bar files', () => {
+  it('maps every tracked symbol to a distinct, path-safe filename', async () => {
+    const { barsFileName } = await import('./barsFile.js')
+    const { TICKERS } = await import('./tickers.js')
+    const names = TICKERS.map((t) => barsFileName(t.symbol))
+    // A slash is the only character in these symbols a path cannot carry, and
+    // collapsing it could in principle collide two symbols onto one file —
+    // which would serve one ticker's history under another's name.
+    expect(new Set(names).size).toBe(names.length)
+    for (const n of names) expect(n).toMatch(/^[A-Za-z0-9._-]+\.json$/)
+    expect(barsFileName('BTC/USD')).toBe('BTC-USD.json')
+  })
+
+  it('ships a file for every symbol the screener has a row for', () => {
+    const shipped = JSON.parse(
+      fs.readFileSync(path.resolve(new URL('../../public/screener.json', import.meta.url).pathname), 'utf8')
+    )
+    const have = readCommittedBars()
+    for (const row of shipped.rows) {
+      expect(have[row.symbol], `bars missing for ${row.symbol}`).toBeTruthy()
+    }
+  })
+
+  it('keeps each file far below the limit that capped the combined one', () => {
+    // The combined file hit GitHub's 100 MB ceiling around a thousand tickers.
+    // Split, the largest file is a fixed ~100 KB no matter how many exist.
+    const dir = path.resolve(new URL('../../public/bars', import.meta.url).pathname)
+    const sizes = fs.readdirSync(dir).map((f) => fs.statSync(path.join(dir, f)).size)
+    expect(Math.max(...sizes)).toBeLessThan(1024 * 1024)
   })
 })
