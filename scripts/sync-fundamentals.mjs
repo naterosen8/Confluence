@@ -97,7 +97,12 @@ async function main() {
         const thin = parsed.quarters.length < 8 || q.revenue == null || q.netIncome == null
         if (thin) {
           const d = diagnoseCompanyFacts(facts)
-          console.log(`  ${t.symbol} is incomplete — periods=${d.periods} kept=${d.kept} concepts=${JSON.stringify(d.concepts)}`)
+          console.log(
+            `  ${t.symbol} is incomplete — periods=${d.periods} kept=${d.kept} concepts=${JSON.stringify(d.concepts)}` +
+              // A short period grid makes every other concept report full
+              // coverage of a grid that is itself wrong, so say so separately.
+              (d.periods < 8 ? `\n  ${t.symbol} assets chain — ${d.assetsChain.join(' | ')}` : '')
+          )
         }
       }
     } catch (e) {

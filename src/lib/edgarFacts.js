@@ -46,16 +46,6 @@ function latestQuarterlyByPeriodEnd(entries = []) {
   return [...byEnd.values()].sort((a, b) => (a.end < b.end ? -1 : a.end > b.end ? 1 : 0))
 }
 
-function firstAvailableQuarterly(facts, tags, unit = 'USD') {
-  for (const tag of tags) {
-    const units = facts?.['us-gaap']?.[tag]?.units
-    if (!units) continue
-    const entries = latestQuarterlyByPeriodEnd(units[unit] || [])
-    if (entries.length) return entries
-  }
-  return []
-}
-
 function conceptEntries(facts, namespace, tag, unit) {
   const units = facts?.[namespace]?.[tag]?.units
   if (!units) return []
@@ -223,6 +213,16 @@ export function diagnoseCompanyFacts(json, { maxQuarters = 12 } = {}) {
   return {
     reason: built.quarters.length ? null : 'every period dropped',
     concepts: built.chosen,
+    // Assets defines the period grid, so when it is short every other concept
+    // reports full coverage of a grid that is itself wrong — which is exactly
+    // how XOM read as healthy at 2 quarters. Show what the chain had to work
+    // with before and after each filter.
+    assetsChain: CONCEPTS.assets.map((tag) => {
+      const raw = json.facts['us-gaap']?.[tag]?.units?.USD ?? []
+      const kept = latestByPeriodEnd(raw)
+      const forms = [...new Set(raw.map((e) => e.form ?? '(none)'))]
+      return `${tag}: raw=${raw.length} periods=${kept.length} forms=[${forms.slice(0, 6).join(',')}]`
+    }),
     periods: built.periodCount,
     kept: built.quarters.length,
     droppedNoShares: built.droppedNoShares,
