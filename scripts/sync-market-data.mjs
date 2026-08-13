@@ -122,19 +122,35 @@ async function main() {
 
   // Written compact rather than indented: at this depth the whitespace alone
   // was a third of the file, and nobody reads this by hand.
+  //
+  // Only symbols whose bars actually moved are rewritten. Stamping every file
+  // with the run time meant a run that fetched nothing — a weekend, a holiday,
+  // a provider outage — still rewrote every file and committed the lot. At 24
+  // symbols that is 2.2 MB of git history bought with no new data; at 500 it
+  // is 46 MB a day. So generatedAt means "when this symbol's bars last
+  // changed", which is both more useful and free of churn.
   const generatedAt = new Date().toISOString()
+  let writtenCount = 0
   for (const [symbol, bars] of Object.entries(barsBySymbol)) {
-    fs.writeFileSync(
-      new URL(barsFileName(symbol), BARS_DIR),
-      JSON.stringify({ symbol, generatedAt, bars }) + '\n'
-    )
+    const target = new URL(barsFileName(symbol), BARS_DIR)
+    const existing = fs.existsSync(target) ? JSON.parse(fs.readFileSync(target, 'utf8')) : null
+    if (existing && JSON.stringify(existing.bars) === JSON.stringify(bars)) continue
+    fs.writeFileSync(target, JSON.stringify({ symbol, generatedAt, bars }) + '\n')
+    writtenCount++
   }
+  console.log(`Bar files rewritten: ${writtenCount} of ${Object.keys(barsBySymbol).length}.`)
 
   // The dashboard's rows, computed here once instead of in every visitor's
   // browser. See src/lib/screener.js.
   const screener = buildScreener({ barsBySymbol, tickers: TICKERS })
-  fs.writeFileSync(SCREENER_PATH, JSON.stringify(screener) + '\n')
-  console.log(`Wrote screener index: ${screener.rows.length} rows.`)
+  // Same rule as the bar files: if the numbers did not move, do not rewrite
+  // the file just to restamp it.
+  const previousScreener = loadJson(SCREENER_PATH, null)
+  const screenerChanged =
+    !previousScreener ||
+    JSON.stringify({ ...previousScreener, generatedAt: null }) !== JSON.stringify({ ...screener, generatedAt: null })
+  if (screenerChanged) fs.writeFileSync(SCREENER_PATH, JSON.stringify(screener) + '\n')
+  console.log(`Screener index: ${screener.rows.length} rows, ${screenerChanged ? 'rewritten' : 'unchanged'}.`)
 
   let log = loadJson(TRACK_RECORD_PATH, [])
 
