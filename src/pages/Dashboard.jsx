@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
-import { getSeries, HAS_LIVE_DATA, DATA_GENERATED_AT, isSnapshotStale, snapshotAgeDays } from '../lib/dataProvider'
-import { computeSignals } from '../lib/indicators'
-import { bestAvailableStat, FORWARD_DAYS } from '../lib/backtest'
+import { screenerRows, HAS_LIVE_DATA, DATA_GENERATED_AT, isSnapshotStale, snapshotAgeDays } from '../lib/dataProvider'
+import { FORWARD_DAYS } from '../lib/backtest'
 import { pollLivePrices, HAS_LIVE_PRICE } from '../lib/livePrice'
 import Sparkline from '../components/Sparkline'
 import VerdictBadge from '../components/VerdictBadge'
 import Explain from '../components/Explain'
 import LivePrice from '../components/LivePrice'
+import { rate } from '../lib/format'
 
 function formatSyncTime(iso) {
   if (!iso) return null
@@ -27,21 +27,18 @@ export default function Dashboard() {
     return () => controller.abort()
   }, [])
 
-  const rows = useMemo(() => {
-    const spyBars = getSeries('SPY')
-    return TICKERS.map((t) => {
-      const bars = getSeries(t.symbol)
-      const signals = computeSignals(bars)
-      const setup = bestAvailableStat(bars, spyBars)
-      return { ...t, bars, signals, setup }
-    })
-  }, [])
+  // Read straight from the precomputed index rather than downloading every
+  // ticker's full history and recomputing RSI, MACD, divergence and a base-rate
+  // backtest for all of them before the first row can paint. Identical numbers
+  // for every visitor, computed once a day by the job that already has the
+  // bars in memory. See src/lib/screener.js.
+  const rows = useMemo(() => screenerRows(), [])
 
   const topSetups = useMemo(
     () =>
       [...rows]
-        .filter((r) => r.setup.stat && r.kind !== 'macro')
-        .sort((a, b) => Math.abs(b.setup.edge) - Math.abs(a.setup.edge))
+        .filter((r) => r.stat && r.kind !== 'macro')
+        .sort((a, b) => Math.abs(b.edge) - Math.abs(a.edge))
         .slice(0, 5),
     [rows]
   )
@@ -92,13 +89,13 @@ export default function Dashboard() {
           </p>
           <div className="top-setups-grid">
             {topSetups.map((row) => {
-              const { stat, source } = row.setup
+              const { stat } = row
               const direction = stat.winRate >= 50 ? 'up' : 'down'
               return (
                 <Link key={row.symbol} to={`/ticker/${encodeURIComponent(row.symbol)}`} className="top-setup-card">
                   <div className="top-setup-head">
                     <strong>{row.symbol}</strong>
-                    <VerdictBadge verdict={row.signals.verdict} bullishPoints={row.signals.bullishPoints} bearishPoints={row.signals.bearishPoints} />
+                    <VerdictBadge verdict={row.verdict} bullishPoints={row.bullishPoints} bearishPoints={row.bearishPoints} />
                   </div>
                   {/* Spelling out the direction matters here: a card reading
                       "0% win rate" next to a "Bullish" badge looks like a
@@ -113,7 +110,7 @@ export default function Dashboard() {
                   <div className="muted small">
                     {stat.avgReturn >= 0 ? '+' : ''}
                     {stat.avgReturn.toFixed(2)}% avg over the next {FORWARD_DAYS} sessions · N={stat.sampleSize} (
-                    {source === 'regime-matched' ? 'this regime' : 'all history'})
+                    {stat.source === 'regime-matched' ? 'this regime' : 'all history'})
                   </div>
                 </Link>
               )
@@ -139,13 +136,6 @@ export default function Dashboard() {
         </thead>
         <tbody>
           {rows.map((row) => {
-            const { signals, setup } = row
-            const flags = []
-            if (signals.divergence.lowUnconfirmed) flags.push('low unconfirmed by momentum')
-            if (signals.divergence.highUnconfirmed) flags.push('high unconfirmed by momentum')
-            if (signals.squeeze?.isSqueeze) flags.push('volatility squeeze')
-            if (signals.relVolume != null && signals.relVolume >= 1.5) flags.push(`${signals.relVolume.toFixed(1)}x volume`)
-
             return (
               <tr key={row.symbol}>
                 <td>
@@ -155,19 +145,19 @@ export default function Dashboard() {
                   </Link>
                 </td>
                 <td>
-                  <LivePrice basePrice={signals.price} liveQuote={livePrices[row.symbol]} />
+                  <LivePrice basePrice={row.price} liveQuote={livePrices[row.symbol]} />
                 </td>
                 <td>
-                  <Sparkline values={row.bars.slice(-40).map((b) => b.close)} />
+                  <Sparkline values={row.spark} />
                 </td>
-                <td>{signals.rsi != null ? signals.rsi.toFixed(1) : '—'}</td>
-                <td>{signals.macd ? (signals.macd.histogram > 0 ? 'Above signal' : 'Below signal') : '—'}</td>
-                <td className="muted small">{flags.length ? flags.join(', ') : '—'}</td>
+                <td>{row.rsi != null ? row.rsi.toFixed(1) : '—'}</td>
+                <td>{row.macd ? (row.macd === 'above' ? 'Above signal' : 'Below signal') : '—'}</td>
+                <td className="muted small">{row.flags.length ? row.flags.join(', ') : '—'}</td>
                 <td className="muted small">
-                  {setup.stat ? `${setup.stat.winRate.toFixed(0)}% (N=${setup.stat.sampleSize})` : '—'}
+                  {row.stat ? `${rate(row.stat.winRate)} (N=${row.stat.sampleSize})` : '—'}
                 </td>
                 <td>
-                  <VerdictBadge verdict={signals.verdict} bullishPoints={signals.bullishPoints} bearishPoints={signals.bearishPoints} />
+                  <VerdictBadge verdict={row.verdict} bullishPoints={row.bullishPoints} bearishPoints={row.bearishPoints} />
                 </td>
               </tr>
             )

@@ -6,6 +6,7 @@ import { listTrades, closeTrade, deleteTrade } from '../lib/trades'
 import { getSeries, hasRealData } from '../lib/dataProvider'
 import { evaluatePosition, computePnl } from '../lib/pnl'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import { useMarketData } from '../lib/useMarketData'
 import Explain from '../components/Explain'
 import { pct, price, signedMoney, compactMoney } from '../lib/format'
 
@@ -29,6 +30,7 @@ function evaluate(trade) {
 export default function MyTrades() {
   useDocumentTitle('My trades')
   const { user, loading, error: sessionError } = useEnsureSession()
+  const barsReady = useMarketData()
   const [trades, setTrades] = useState(null)
   const [error, setError] = useState(null)
   const [closingId, setClosingId] = useState(null)
@@ -114,7 +116,7 @@ export default function MyTrades() {
     )
   }
 
-  if (loading || !user) {
+  if (loading || !user || !barsReady) {
     return (
       <div>
         <h1>My trades</h1>

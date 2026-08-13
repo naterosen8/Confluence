@@ -7,6 +7,36 @@
 let marketData = { generatedAt: null, bars: {} }
 let loadPromise = null
 
+// The dashboard's precomputed rows — a few hundred bytes per ticker against
+// ~20 KB of gzipped bars, so this is what the app waits for before it paints.
+// Bars are fetched separately and only when a page actually needs them.
+let screener = null
+let screenerPromise = null
+export let SCREENER = null
+
+export function loadScreener() {
+  if (!screenerPromise) {
+    screenerPromise = fetch('/screener.json')
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null)
+      .then((data) => {
+        screener = data
+        SCREENER = data
+        if (data?.generatedAt && !DATA_GENERATED_AT) DATA_GENERATED_AT = data.generatedAt
+        if (data?.rows?.length) HAS_LIVE_DATA = true
+      })
+  }
+  return screenerPromise
+}
+
+export function screenerRows() {
+  return screener?.rows ?? []
+}
+
+export function screenerDirectionCheck() {
+  return screener?.directionCheck ?? null
+}
+
 // True once a real snapshot has loaded (see scripts/sync-market-data.mjs) —
 // not tied to any browser-side API key, because there isn't one anymore.
 // Every indicator here is daily-bar based, so there's nothing to gain from
@@ -19,6 +49,10 @@ let loadPromise = null
 // re-renders, no extra plumbing needed.
 export let HAS_LIVE_DATA = false
 export let DATA_GENERATED_AT = null
+// Separate from HAS_LIVE_DATA: the screener index can be present and painting
+// rows while the bar history — two orders of magnitude larger — is still on
+// the wire or has never been requested.
+export let BARS_READY = false
 
 // Called once from App.jsx before anything else renders. Safe to call more
 // than once — every caller shares the same in-flight/completed fetch.
@@ -29,8 +63,9 @@ export function loadMarketData() {
       .catch(() => ({ generatedAt: null, bars: {} }))
       .then((data) => {
         marketData = data
-        HAS_LIVE_DATA = Object.keys(marketData.bars || {}).length > 0
-        DATA_GENERATED_AT = marketData.generatedAt
+        HAS_LIVE_DATA = HAS_LIVE_DATA || Object.keys(marketData.bars || {}).length > 0
+        DATA_GENERATED_AT = marketData.generatedAt || DATA_GENERATED_AT
+        BARS_READY = true
       })
   }
   return loadPromise

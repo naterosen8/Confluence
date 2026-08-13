@@ -9,7 +9,7 @@ import NotFound from './pages/NotFound'
 import Methodology from './pages/Methodology'
 import ErrorBoundary from './components/ErrorBoundary'
 import { AuthProvider } from './context/AuthContext'
-import { loadMarketData } from './lib/dataProvider'
+import { loadScreener } from './lib/dataProvider'
 
 function RoutedContent() {
   const location = useLocation()
@@ -35,7 +35,11 @@ export default function App() {
   const [dataReady, setDataReady] = useState(false)
 
   useEffect(() => {
-    loadMarketData().finally(() => setDataReady(true))
+    // Paint as soon as the screener index is in — a few KB — rather than
+    // waiting on the full bar history, which is two orders of magnitude
+    // larger and is only needed once someone opens a ticker page. The bars
+    // are started in parallel so that page rarely waits either.
+    loadScreener().finally(() => setDataReady(true))
   }, [])
 
   return (

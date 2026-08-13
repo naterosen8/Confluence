@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
-import { getSeries, hasRealData } from '../lib/dataProvider'
+import { getSeries, hasRealData, screenerDirectionCheck } from '../lib/dataProvider'
 import { computeSignals } from '../lib/indicators'
 import { backtestTicker, backtestByScore, bestAvailableStat, mostRecentEvent, SIGNAL_LABELS } from '../lib/backtest'
 import { pollLivePrices } from '../lib/livePrice'
@@ -17,8 +17,9 @@ import Explain from '../components/Explain'
 import SimulateTradeForm from '../components/SimulateTradeForm'
 import NotFound from './NotFound'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+import { useMarketData } from '../lib/useMarketData'
 import { pct, rate, price } from '../lib/format'
-import { cachedScoreDirectionCheck, directionBanner } from '../lib/signalValidation'
+import { directionBanner } from '../lib/signalValidation'
 import { TICKER_CHAPTERS, chapterFor, chapterNeighbours } from '../lib/chapters'
 import { ChapterNav, ChapterHead, ChapterPager, useChapterKeys } from '../components/ChapterNav'
 
@@ -44,6 +45,22 @@ export default function TickerDetail() {
 }
 
 function TickerAnalysis({ symbol, meta, chapterKey }) {
+  const barsReady = useMarketData()
+  if (!barsReady) {
+    return (
+      <div>
+        <Link to="/" className="back-link">
+          ← Back to screener
+        </Link>
+        <h1>{symbol}</h1>
+        <p className="muted">Loading price history…</p>
+      </div>
+    )
+  }
+  return <TickerAnalysisBody symbol={symbol} meta={meta} chapterKey={chapterKey} />
+}
+
+function TickerAnalysisBody({ symbol, meta, chapterKey }) {
   const chapter = chapterFor(chapterKey)
   const { index } = chapterNeighbours(chapter.key)
   useDocumentTitle(`${symbol} — ${chapter.label}`)
@@ -55,12 +72,10 @@ function TickerAnalysis({ symbol, meta, chapterKey }) {
   const scoreBacktest = useMemo(() => backtestByScore(bars, spyBars), [bars, spyBars])
   const setup = useMemo(() => bestAvailableStat(bars, spyBars), [bars, spyBars])
   const trigger = useMemo(() => mostRecentEvent(bars), [bars])
-  // Derived from the live self-check, never hardcoded — see directionBanner.
-  const banner = useMemo(() => {
-    const bySymbol = {}
-    for (const t of TICKERS) bySymbol[t.symbol] = getSeries(t.symbol)
-    return directionBanner(cachedScoreDirectionCheck(bySymbol, TICKERS.map((t) => t.symbol)))
-  }, [])
+  // Derived from the self-check, never hardcoded — see directionBanner. Reads
+  // the precomputed result rather than recomputing across every tracked
+  // symbol on each ticker page view.
+  const banner = useMemo(() => directionBanner(screenerDirectionCheck()), [])
   const [liveQuote, setLiveQuote] = useState(null)
 
   useEffect(() => {

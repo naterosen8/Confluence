@@ -13,6 +13,7 @@ import { computeSignals } from '../src/lib/indicators.js'
 import { TICKERS } from '../src/lib/tickers.js'
 import { leanDirection } from '../src/lib/lean.js'
 import { lastSettledIndex, repairUnresolved } from '../src/lib/trackRecord.js'
+import { buildScreener } from '../src/lib/screener.js'
 
 const API_KEY = process.env.TWELVE_DATA_KEY
 // Lives in public/, not data/, so the built app can fetch it as a plain
@@ -23,6 +24,8 @@ const MARKET_DATA_PATH = new URL('../public/market-data.json', import.meta.url)
 // static import would mean an ever-larger JS bundle every visitor has to
 // download and parse before the app renders anything.
 const TRACK_RECORD_PATH = new URL('../public/track-record.json', import.meta.url)
+// The dashboard's rows, precomputed. See src/lib/screener.js for why.
+const SCREENER_PATH = new URL('../public/screener.json', import.meta.url)
 const FORWARD_SESSIONS = 5
 
 if (!API_KEY) {
@@ -101,6 +104,12 @@ async function main() {
     MARKET_DATA_PATH,
     JSON.stringify({ generatedAt: new Date().toISOString(), bars: barsBySymbol }) + '\n'
   )
+
+  // The dashboard's rows, computed here once instead of in every visitor's
+  // browser. See src/lib/screener.js.
+  const screener = buildScreener({ barsBySymbol, tickers: TICKERS })
+  fs.writeFileSync(SCREENER_PATH, JSON.stringify(screener) + '\n')
+  console.log(`Wrote screener index: ${screener.rows.length} rows.`)
 
   let log = loadJson(TRACK_RECORD_PATH, [])
 

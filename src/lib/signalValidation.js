@@ -1,6 +1,6 @@
-import { scoreSeries } from './indicators'
-import { FORWARD_DAYS } from './backtest'
-import { meanWithInterval } from './stats'
+import { scoreSeries } from './indicators.js'
+import { FORWARD_DAYS } from './backtest.js'
+import { meanWithInterval } from './stats.js'
 
 // Measures, from the live snapshot, whether the confluence score has actually
 // been followed by the direction its label implies.

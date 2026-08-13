@@ -1,5 +1,5 @@
-import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries } from './indicators'
-import { distinguishableFromChance, independentCount } from './stats'
+import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries } from './indicators.js'
+import { distinguishableFromChance, independentCount } from './stats.js'
 
 // How many sessions forward every base rate in this file looks. Exported so
 // the UI can name the window ("over the next 5 sessions") without a third

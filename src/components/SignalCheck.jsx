@@ -1,17 +1,16 @@
-import { useMemo } from 'react'
-import { TICKERS } from '../lib/tickers'
-import { getSeries } from '../lib/dataProvider'
-import { cachedScoreDirectionCheck, DIRECTION_COPY } from '../lib/signalValidation'
+import { screenerDirectionCheck } from '../lib/dataProvider'
+import { DIRECTION_COPY } from '../lib/signalValidation'
 import Explain from './Explain'
 
 // Publishes the app's own self-check. If the score does not predict what its
 // label implies, that belongs on the site rather than in a private notebook.
 export default function SignalCheck() {
-  const result = useMemo(() => {
-    const bySymbol = {}
-    for (const t of TICKERS) bySymbol[t.symbol] = getSeries(t.symbol)
-    return cachedScoreDirectionCheck(bySymbol, TICKERS.map((t) => t.symbol))
-  }, [])
+  // Precomputed by the daily job. This is the one client-side computation
+  // whose cost scaled with the size of the whole ticker universe rather than
+  // with what the visitor was looking at — it read every symbol's full
+  // history, on the methodology page and behind the banner on every ticker
+  // page.
+  const result = screenerDirectionCheck()
 
   if (!result) return <p className="muted small">{DIRECTION_COPY.unknown.detail}</p>
   const copy = DIRECTION_COPY[result.direction]
