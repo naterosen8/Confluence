@@ -272,7 +272,8 @@ table.grid {
   margin-bottom: 28px;
 }
 
-.detail-section h2 {
+.detail-section h2,
+.detail-section h3 {
   font-size: 1rem;
   margin-bottom: 10px;
 }
@@ -755,7 +756,7 @@ table.grid {
   padding: 14px 16px;
 }
 
-.glossary-entry h3 {
+.glossary-entry h4 {
   margin: 0 0 8px;
   font-size: 0.95rem;
 }
@@ -1139,4 +1140,21 @@ table.grid {
     margin-left: 0;
     width: 100%;
   }
+}
+
+.page-head {
+  margin-bottom: 14px;
+}
+.page-head h1 {
+  margin: 0 0 4px;
+  font-size: 1.5rem;
+}
+.page-head p {
+  margin: 0;
+  max-width: 70ch;
+  line-height: 1.45;
+}
+.table-heading {
+  font-size: 1rem;
+  margin: 22px 0 10px;
 }

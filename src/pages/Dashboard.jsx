@@ -56,6 +56,17 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* The screener had no h1 at all: the outline started at the "Most
+          extreme readings" h2, so the site's main page was the one page with
+          no top-level heading for a screen reader to land on. */}
+      <div className="page-head">
+        <h1>Screener</h1>
+        <p className="muted small">
+          {TICKERS.length} tickers, each scored on the same checks and shown with the record behind them. Click any
+          symbol for the full read.
+        </p>
+      </div>
+
       <div className="toolbar">
         <span className="muted">
           {HAS_LIVE_DATA ? (
@@ -111,6 +122,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      <h2 className="table-heading">All tracked tickers</h2>
       <div className="table-wrap">
       <table className="grid">
         <thead>

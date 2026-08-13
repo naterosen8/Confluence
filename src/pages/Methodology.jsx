@@ -1,15 +1,36 @@
-import { Link } from 'react-router-dom'
+import { useCallback, useEffect, useRef } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import { BASIS, glossaryByBasis } from '../lib/glossary'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { FORWARD_DAYS } from '../lib/backtest'
 import { CONFLUENCE_NAME } from '../lib/confluence'
 import SignalCheck from '../components/SignalCheck'
+import { METHODOLOGY_CHAPTERS, chapterFor, chapterNeighbours } from '../lib/chapters'
+import { ChapterNav, ChapterHead, ChapterPager, useChapterKeys } from '../components/ChapterNav'
 
 const ORDER = ['current', 'measured', 'hypothetical', 'accounting']
 
 export default function Methodology() {
-  useDocumentTitle('Methodology')
+  const { chapter: chapterKey } = useParams()
+  const chapter = chapterFor(chapterKey, METHODOLOGY_CHAPTERS)
+  const { index } = chapterNeighbours(chapter.key, METHODOLOGY_CHAPTERS)
+  useDocumentTitle(`How to read this — ${chapter.label}`)
   const groups = glossaryByBasis()
+
+  const hrefFor = useCallback(
+    (key) => `/methodology${key === METHODOLOGY_CHAPTERS[0].key ? '' : `/${key}`}`,
+    []
+  )
+  useChapterKeys({ chapters: METHODOLOGY_CHAPTERS, current: chapter.key, hrefFor })
+
+  const firstRender = useRef(true)
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+      return
+    }
+    document.getElementById('chapter-top')?.scrollIntoView({ block: 'start' })
+  }, [chapter.key])
 
   return (
     <div className="methodology">
@@ -24,8 +45,13 @@ export default function Methodology() {
         <span className="explain-toggle explain-toggle-inline-demo">?</span> marks.
       </p>
 
+      <ChapterNav chapters={METHODOLOGY_CHAPTERS} current={chapter.key} hrefFor={hrefFor} />
+      <div id="chapter-top" />
+      <ChapterHead chapter={chapter} index={index} total={METHODOLOGY_CHAPTERS.length} />
+
+      {chapter.key === 'reading' && (<>
       <section className="detail-section">
-        <h2>Why it is called Confluence</h2>
+        <h3>Why it is called Confluence</h3>
         <p>
           <strong>Confluence</strong> — {CONFLUENCE_NAME.what}
         </p>
@@ -45,7 +71,26 @@ export default function Methodology() {
       </section>
 
       <section className="detail-section">
-        <h2>Does the score actually work? (the app's own self-check)</h2>
+        <h3>Four different kinds of number</h3>
+        <p className="muted small">
+          This is the distinction worth internalising before anything else. The site shows four kinds of claim, and
+          they look alike on the page while meaning very different things.
+        </p>
+        <div className="basis-grid">
+          {ORDER.map((key) => (
+            <div key={key} className={`basis-card basis-card-${key}`}>
+              <span className={`explain-basis explain-basis-${key}`}>{BASIS[key].label}</span>
+              <p className="muted small">{BASIS[key].blurb}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      </>)}
+
+      {chapter.key === 'evidence' && (<>
+      <section className="detail-section">
+        <h3>Does the score actually work? (the app's own self-check)</h3>
         <p className="muted small">
           Computed live from the same snapshot the rest of the site uses, so it cannot drift out of date and will
           change on its own if the relationship changes. Published whatever it says.
@@ -54,7 +99,7 @@ export default function Methodology() {
       </section>
 
       <section className="detail-section">
-        <h2>How confident any of this is</h2>
+        <h3>How confident any of this is</h3>
         <p className="muted small">
           Every win rate on the site carries a 95% confidence interval, and the site says plainly when that interval
           spans 50% — because a sample that cannot be distinguished from a coin flip should not be presented as an
@@ -71,24 +116,11 @@ export default function Methodology() {
         </p>
       </section>
 
-      <section className="detail-section">
-        <h2>Four different kinds of number</h2>
-        <p className="muted small">
-          This is the distinction worth internalising before anything else. The site shows four kinds of claim, and
-          they look alike on the page while meaning very different things.
-        </p>
-        <div className="basis-grid">
-          {ORDER.map((key) => (
-            <div key={key} className={`basis-card basis-card-${key}`}>
-              <span className={`explain-basis explain-basis-${key}`}>{BASIS[key].label}</span>
-              <p className="muted small">{BASIS[key].blurb}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      </>)}
 
+      {chapter.key === 'limits' && (<>
       <section className="detail-section">
-        <h2>The three things this site will never tell you</h2>
+        <h3>The three things this site will never tell you</h3>
         <ul className="plain-list">
           <li>
             <strong>What to buy or sell.</strong> Nothing here is a recommendation, and no part of the app picks a
@@ -107,7 +139,7 @@ export default function Methodology() {
       </section>
 
       <section className="detail-section">
-        <h2>The most common misreadings</h2>
+        <h3>The most common misreadings</h3>
         <ul className="plain-list">
           <li>
             <strong>The verdict badge and the historical record often disagree.</strong> The badge reads today's
@@ -134,31 +166,8 @@ export default function Methodology() {
         </ul>
       </section>
 
-      {ORDER.map((basisKey) => (
-        <section className="detail-section" key={basisKey}>
-          <h2>
-            <span className={`explain-basis explain-basis-${basisKey}`}>{BASIS[basisKey].label}</span>
-          </h2>
-          <p className="muted small">{BASIS[basisKey].blurb}</p>
-          <div className="glossary-list">
-            {(groups[basisKey] || []).map((entry) => (
-              <div className="glossary-entry" key={entry.key} id={`term-${entry.key}`}>
-                <h3>{entry.term}</h3>
-                <p>{entry.what}</p>
-                <p className="muted small">
-                  <em>How:</em> {entry.how}
-                </p>
-                <p className="small explain-isnot">
-                  <em>What it is not:</em> {entry.isNot}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
-
       <section className="detail-section">
-        <h2>Known limitations</h2>
+        <h3>Known limitations</h3>
         <ul className="plain-list">
           <li>
             Roughly one year of daily price history per ticker, so every base rate is computed over a short window
@@ -181,6 +190,36 @@ export default function Methodology() {
           </li>
         </ul>
       </section>
+
+      </>)}
+
+      {chapter.key === 'glossary' && (<>
+      {ORDER.map((basisKey) => (
+        <section className="detail-section" key={basisKey}>
+          <h3>
+            <span className={`explain-basis explain-basis-${basisKey}`}>{BASIS[basisKey].label}</span>
+          </h3>
+          <p className="muted small">{BASIS[basisKey].blurb}</p>
+          <div className="glossary-list">
+            {(groups[basisKey] || []).map((entry) => (
+              <div className="glossary-entry" key={entry.key} id={`term-${entry.key}`}>
+                <h4>{entry.term}</h4>
+                <p>{entry.what}</p>
+                <p className="muted small">
+                  <em>How:</em> {entry.how}
+                </p>
+                <p className="small explain-isnot">
+                  <em>What it is not:</em> {entry.isNot}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+      </>)}
+
+      <ChapterPager chapters={METHODOLOGY_CHAPTERS} current={chapter.key} hrefFor={hrefFor} />
+
     </div>
   )
 }

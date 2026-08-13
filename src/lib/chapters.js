@@ -59,6 +59,40 @@ export const TICKER_CHAPTERS = [
   },
 ]
 
+// The methodology page, same treatment. It was one scroll carrying six essays
+// and a 51-entry glossary — the reference material people arrive at from a "?"
+// panel was buried underneath the arguments about what the site refuses to do.
+//
+// Split so the two audiences are served separately: someone deciding whether
+// to trust the site reads the first three, someone looking up one word goes
+// straight to the glossary.
+export const METHODOLOGY_CHAPTERS = [
+  {
+    key: 'reading',
+    label: 'How to read it',
+    blurb:
+      'What the site is for, why it is called Confluence, and the four different kinds of number it puts on a page. Start here.',
+  },
+  {
+    key: 'evidence',
+    label: 'Does it work',
+    blurb:
+      "The site's own measurement of whether its score predicts anything, published whatever it says, and how much confidence any of it supports.",
+  },
+  {
+    key: 'limits',
+    label: 'Limits',
+    blurb:
+      'What this will never tell you, the misreadings that happen most, and the known weaknesses that have not been solved.',
+  },
+  {
+    key: 'glossary',
+    label: 'Glossary',
+    blurb:
+      'Every term on the site, grouped by the kind of claim it makes. The same definitions that sit behind the ? marks.',
+  },
+]
+
 // An unrecognised chapter falls back to the first rather than dead-ending.
 // Unlike an unknown ticker — which would have meant rendering invented
 // analysis, and correctly returns NotFound — a mistyped chapter still shows

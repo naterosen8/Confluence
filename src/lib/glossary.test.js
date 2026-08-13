@@ -73,3 +73,49 @@ describe('every term referenced in the UI exists', () => {
     expect(missing).toEqual([])
   })
 })
+
+// Chapter splits move content between URLs, and a link pointing at the page a
+// section *used to* be on still resolves — it just lands somewhere that no
+// longer contains what it promised. That is invisible to every other check
+// here, so the destinations are pinned.
+describe('cross-page links point at the chapter that holds the content', () => {
+  const read = (f) => fs.readFileSync(path.join(SRC, f), 'utf8')
+
+  it('sends the self-check link to the chapter the self-check lives on', async () => {
+    const { METHODOLOGY_CHAPTERS } = await import('./chapters.js')
+    const detail = read('pages/TickerDetail.jsx')
+    const target = detail.match(/to="(\/methodology[^"]*)">self-check</)?.[1]
+    expect(target).toBe('/methodology/evidence')
+    expect(METHODOLOGY_CHAPTERS.some((c) => c.key === 'evidence')).toBe(true)
+    // And that chapter is the one rendering it.
+    const methodology = read('pages/Methodology.jsx')
+    const evidence = methodology.split("chapter.key === 'evidence'")[1]?.split('</>)}')[0] ?? ''
+    expect(evidence).toContain('<SignalCheck')
+  })
+
+  it('routes every chapter key the nav can produce', async () => {
+    const { TICKER_CHAPTERS, METHODOLOGY_CHAPTERS } = await import('./chapters.js')
+    const app = read('App.jsx')
+    expect(app).toContain('/ticker/:symbol/:chapter')
+    expect(app).toContain('/methodology/:chapter')
+    // Every chapter must actually be rendered by its page, or the tab leads
+    // to a blank panel.
+    const detail = read('pages/TickerDetail.jsx')
+    for (const c of TICKER_CHAPTERS) expect(detail, c.key).toContain(`chapter.key === '${c.key}'`)
+    const methodology = read('pages/Methodology.jsx')
+    for (const c of METHODOLOGY_CHAPTERS) expect(methodology, c.key).toContain(`chapter.key === '${c.key}'`)
+  })
+
+  it('keeps chapter keys URL-safe and unique', async () => {
+    const { TICKER_CHAPTERS, METHODOLOGY_CHAPTERS } = await import('./chapters.js')
+    for (const set of [TICKER_CHAPTERS, METHODOLOGY_CHAPTERS]) {
+      const keys = set.map((c) => c.key)
+      expect(new Set(keys).size).toBe(keys.length)
+      for (const k of keys) expect(k).toMatch(/^[a-z0-9-]+$/)
+      for (const c of set) {
+        expect(c.label, `${c.key} label`).toBeTruthy()
+        expect(c.blurb, `${c.key} blurb`).toBeTruthy()
+      }
+    }
+  })
+})

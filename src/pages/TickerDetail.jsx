@@ -136,7 +136,7 @@ function TickerAnalysis({ symbol, meta, chapterKey }) {
       {banner && scoreChapter && (
         <div className="callout impact-note">
           Read the badge as how much the indicators currently agree with each other, not as a direction to expect.{' '}
-          {banner} See the <Link to="/methodology">self-check</Link> for the measurement and its caveats.
+          {banner} See the <Link to="/methodology/evidence">self-check</Link> for the measurement and its caveats.
         </div>
       )}
 
@@ -395,7 +395,7 @@ function TickerAnalysis({ symbol, meta, chapterKey }) {
 function Section({ title, children }) {
   return (
     <section className="detail-section">
-      <h2>{title}</h2>
+      <h3>{title}</h3>
       {children}
     </section>
   )

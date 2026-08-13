@@ -24,6 +24,7 @@ function RoutedContent() {
         <Route path="/track-record" element={<TrackRecord />} />
         <Route path="/my-trades" element={<MyTrades />} />
         <Route path="/methodology" element={<Methodology />} />
+        <Route path="/methodology/:chapter" element={<Methodology />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ErrorBoundary>
