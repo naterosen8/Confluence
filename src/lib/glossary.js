@@ -443,9 +443,9 @@ export const GLOSSARY = {
     term: 'Market cap',
     basis: 'accounting',
     what: 'What the market is currently paying for the whole company.',
-    how: 'Current share price multiplied by shares outstanding from the latest SEC filing.',
+    how: "Current share price multiplied by shares outstanding from the latest SEC filing. A company with multiple share classes reports that count per class, which the filings API leaves out, so for those the weighted-average share count off the income statement is used instead and the row says so.",
     isNot:
-      'Not the cost to buy the company. It ignores debt, and buying every share would move the price well above the last trade.',
+      'Not the cost to buy the company. It ignores debt, and buying every share would move the price well above the last trade. Where the weighted average stands in, it is also not exact — that is an average across the quarter rather than a count on its last day.',
   },
   bookEquity: {
     term: 'Book equity',

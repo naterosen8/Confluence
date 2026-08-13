@@ -114,7 +114,18 @@ export default function BalanceSheetValue({ symbol, kind, price, bars }) {
           term="marketCap"
           label="Market cap"
           value={money(valuation.marketCap)}
-          note={`${shareCount(valuation.shares)} shares × $${price.toFixed(2)}`}
+          note={
+            `${shareCount(valuation.shares)} shares × $${price.toFixed(2)}` +
+            // Multi-class filers report their cover-page count per share
+            // class, which the SEC's companyfacts API omits entirely, so the
+            // count here is the weighted average off the income statement.
+            // It is an average over the quarter rather than a count at the end
+            // of it, and saying so is the difference between an approximation
+            // and a wrong number presented as an exact one.
+            (latest.sharesBasis === 'weighted-average'
+              ? ' — weighted-average shares (this filer reports its share count per class, which the filings API omits), so the cap is approximate'
+              : '')
+          }
         />
         <Row term="bookEquity" label="Book equity (assets − liabilities)" value={money(valuation.bookEquity)} note={asOfNote} />
         <Row

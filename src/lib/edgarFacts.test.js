@@ -251,3 +251,22 @@ describe('parseCompanyFacts output shape', () => {
     expect(Object.keys(r).sort()).toEqual(['cik', 'entityName', 'quarters'])
   })
 })
+
+describe('share-count basis is recorded, not hidden', () => {
+  it('marks a quarter that fell back to the weighted average', () => {
+    const f = facts({
+      StockholdersEquity: usd([e('2023-12-31', 2000), e('2024-03-31', 2100)]),
+      WeightedAverageNumberOfDilutedSharesOutstanding: sh([e('2023-12-31', 2500), e('2024-03-31', 2490)]),
+    })
+    delete f.facts.dei
+    const r = parseCompanyFacts(f)
+    expect(r.quarters.every((q) => q.sharesBasis === 'weighted-average')).toBe(true)
+  })
+
+  it('leaves the field off entirely when a real cover-page count was used', () => {
+    // Absent rather than 'cover-page': this ships to every visitor in a JSON
+    // payload, and the common case should cost nothing.
+    const r = parseCompanyFacts(facts())
+    expect(r.quarters.every((q) => !('sharesBasis' in q))).toBe(true)
+  })
+})

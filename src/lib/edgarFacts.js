@@ -289,6 +289,21 @@ function build(json, { maxQuarters }) {
   // the year-over-year comparison this data exists to support.
   const exact = (entries, date) => entries.find((e) => e.end === date)?.val ?? null
 
+  // A market cap built from weighted-average shares is a slightly different
+  // number from one built from the cover-page count, and the UI would render
+  // the two identically. Whichever was used is recorded so the page can say
+  // so — only when it is the approximation, to keep the payload clean.
+  const sharesFor = (asOf) => {
+    const exactCount =
+      valueAsOf(shares, asOf) ??
+      valueAsOf(sharesFallback, asOf) ??
+      nearestValue(shares, asOf) ??
+      nearestValue(sharesFallback, asOf)
+    if (exactCount != null) return { shares: exactCount }
+    const weighted = valueAsOf(sharesWeighted.entries, asOf)
+    return weighted != null ? { shares: weighted, sharesBasis: 'weighted-average' } : { shares: null }
+  }
+
   const quarters = periods.map((a) => {
     const asOf = a.end
     const eq = valueAsOf(equity, asOf)
@@ -305,12 +320,7 @@ function build(json, { maxQuarters }) {
       currentLiabilities: valueAsOf(currentLiabilities, asOf),
       cash: sumAsOf([cash, shortTermInvestments], asOf),
       debt: sumAsOf([longTermDebt, shortTermDebt], asOf),
-      shares:
-        valueAsOf(shares, asOf) ??
-        valueAsOf(sharesFallback, asOf) ??
-        nearestValue(shares, asOf) ??
-        nearestValue(sharesFallback, asOf) ??
-        valueAsOf(sharesWeighted.entries, asOf),
+      ...sharesFor(asOf),
       revenue: exact(revenue, asOf),
       netIncome: exact(netIncome, asOf),
     }
@@ -323,7 +333,11 @@ function build(json, { maxQuarters }) {
   const newest = quarters[quarters.length - 1]
   if (newest && newest.shares == null) {
     const latestOf = (entries) => (entries.length ? entries[entries.length - 1].val : null)
-    newest.shares = latestOf(shares) ?? latestOf(sharesFallback) ?? latestOf(sharesWeighted.entries)
+    newest.shares = latestOf(shares) ?? latestOf(sharesFallback)
+    if (newest.shares == null) {
+      newest.shares = latestOf(sharesWeighted.entries)
+      if (newest.shares != null) newest.sharesBasis = 'weighted-average'
+    }
   }
 
   const kept = quarters.filter((q) => q.shares != null && q.equity != null)
