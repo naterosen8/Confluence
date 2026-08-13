@@ -1170,3 +1170,71 @@ table.grid {
   outline-offset: 4px;
   border-radius: 3px;
 }
+
+/* --- Trades on a phone -----------------------------------------------------
+   Ten columns in a horizontal scroller is not a table anyone can read on a
+   390px screen: you land on it scrolled to one end, with no way to tell which
+   row or column you are looking at. Below the breakpoint each row restacks
+   into a labelled card, so every field carries its own heading and nothing
+   scrolls sideways. Labels come from data-label on each cell, so there is one
+   copy of the markup rather than a table and a card list to keep in step. */
+@media (max-width: 720px) {
+  table.grid.trades-table,
+  table.grid.trades-table tbody,
+  table.grid.trades-table tr,
+  table.grid.trades-table td {
+    display: block;
+    width: auto;
+    min-width: 0;
+  }
+  table.grid.trades-table thead {
+    display: none;
+  }
+  .table-wrap:has(.trades-table) {
+    overflow-x: visible;
+    background: none;
+    border: none;
+    border-radius: 0;
+  }
+  table.grid.trades-table tr {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px 10px;
+    margin-bottom: 12px;
+  }
+  table.grid.trades-table td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    text-align: right;
+  }
+  table.grid.trades-table td:last-child {
+    border-bottom: none;
+  }
+  table.grid.trades-table td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: left;
+    flex: 0 0 auto;
+  }
+  /* The action cell has no label, so let the buttons use the full width. */
+  table.grid.trades-table td[data-label='']::before {
+    content: none;
+  }
+  table.grid.trades-table td[data-label=''] {
+    padding-top: 12px;
+  }
+  .trades-table .trade-actions {
+    width: 100%;
+  }
+  .trades-table .trade-actions button {
+    flex: 1;
+  }
+}

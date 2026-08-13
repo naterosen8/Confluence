@@ -174,16 +174,16 @@ export default function MyTrades() {
                       if (!result) {
                         return (
                           <tr key={trade.id}>
-                            <td>
+                            <td data-label="Symbol">
                               <strong>{trade.symbol}</strong>
                             </td>
-                            <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
-                            <td>{price(trade.entry_price)}</td>
-                            <td colSpan={6} className="muted small">
+                            <td data-label="Direction" style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
+                            <td data-label="Entry">{price(trade.entry_price)}</td>
+                            <td data-label="Status" colSpan={6} className="muted small">
                               No synced price history for this symbol — it can't be marked to market, so no figure is
                               shown rather than one from placeholder data.
                             </td>
-                            <td>
+                            <td data-label="">
                               <button
                                 className="button-secondary"
                                 disabled={deletingId === trade.id}
@@ -197,20 +197,20 @@ export default function MyTrades() {
                       }
                       return (
                         <tr key={trade.id}>
-                          <td>
+                          <td data-label="Symbol">
                             <Link to={`/ticker/${encodeURIComponent(trade.symbol)}`} className="symbol-link">
                               <strong>{trade.symbol}</strong>
                             </Link>
                           </td>
-                          <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
-                          <td>{price(trade.entry_price)}</td>
-                          <td>{price(result.asOfPrice)}</td>
+                          <td data-label="Direction" style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
+                          <td data-label="Entry">{price(trade.entry_price)}</td>
+                          <td data-label="Current">{price(result.asOfPrice)}</td>
                           {/* The underlying move, so the leverage is visible as
                               arithmetic rather than taken on faith. */}
-                          <td className="muted">{pct(result.underlyingPct)}</td>
-                          <td>{compactMoney(trade.capital)}</td>
-                          <td>{trade.leverage}x</td>
-                          <td className="muted small">
+                          <td data-label="Price move" className="muted">{pct(result.underlyingPct)}</td>
+                          <td data-label="Capital">{compactMoney(trade.capital)}</td>
+                          <td data-label="Leverage">{trade.leverage}x</td>
+                          <td data-label="Wipes out at" className="muted small">
                             {result.liquidationAt == null ? (
                               'no borrowing'
                             ) : (
@@ -221,14 +221,14 @@ export default function MyTrades() {
                               </>
                             )}
                           </td>
-                          <td className={result.pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
+                          <td data-label="P&L" className={result.pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
                             {pct(result.pnlPct)} ({signedMoney(result.pnlDollars)})
                             <br />
                             <span className="muted small">
                               {pct(result.underlyingPct)} × {trade.leverage}
                             </span>
                           </td>
-                          <td>
+                          <td data-label="">
                             <div className="trade-actions">
                               <button className="button-secondary" disabled={closingId === trade.id} onClick={() => handleClose(trade)}>
                                 {closingId === trade.id ? 'Closing…' : 'Close'}
@@ -286,28 +286,28 @@ export default function MyTrades() {
                       const pnlDollars = settled.pnlDollars
                       return (
                         <tr key={trade.id}>
-                          <td>
+                          <td data-label="Symbol">
                             <Link to={`/ticker/${encodeURIComponent(trade.symbol)}`} className="symbol-link">
                               <strong>{trade.symbol}</strong>
                             </Link>
                           </td>
-                          <td style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
-                          <td>{price(trade.entry_price)}</td>
-                          <td>{price(trade.close_price)}</td>
-                          <td className="muted">{pct(settled.underlyingPct)}</td>
-                          <td>{compactMoney(trade.capital)}</td>
-                          <td>{trade.leverage}x</td>
-                          <td className={pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
+                          <td data-label="Direction" style={{ textTransform: 'capitalize' }}>{trade.direction}</td>
+                          <td data-label="Entry">{price(trade.entry_price)}</td>
+                          <td data-label="Close">{price(trade.close_price)}</td>
+                          <td data-label="Price move" className="muted">{pct(settled.underlyingPct)}</td>
+                          <td data-label="Capital">{compactMoney(trade.capital)}</td>
+                          <td data-label="Leverage">{trade.leverage}x</td>
+                          <td data-label="P&L" className={pnlDollars >= 0 ? 'pnl-positive' : 'pnl-negative'}>
                             {pct(settled.pnlPct)} ({signedMoney(pnlDollars)})
                             <br />
                             <span className="muted small">
                               {pct(settled.underlyingPct)} × {trade.leverage}
                             </span>
                           </td>
-                          <td className={trade.status === 'liquidated' ? 'pnl-negative' : 'muted small'} style={{ textTransform: 'capitalize' }}>
+                          <td data-label="Result" className={trade.status === 'liquidated' ? 'pnl-negative' : 'muted small'} style={{ textTransform: 'capitalize' }}>
                             {trade.status}
                           </td>
-                          <td>
+                          <td data-label="">
                             <button
                               className="button-secondary"
                               disabled={deletingId === trade.id}
