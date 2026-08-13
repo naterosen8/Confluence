@@ -1,54 +1,27 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FORWARD_DAYS } from '../lib/backtest'
-import { leanByKey, leanDirection } from '../lib/lean'
-import { distinguishableFromChance } from '../lib/stats'
+import { leanByKey } from '../lib/lean'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { pct, rate, price } from '../lib/format'
+import { RECENT_LIMIT } from '../lib/trackRecordSummary'
 import Explain from '../components/Explain'
 
-function summarize(entries) {
-  const decidable = entries.filter((e) => e.outcome && e.outcome.correct !== null)
-  if (!decidable.length) return null
-  const wins = decidable.filter((e) => e.outcome.correct).length
-  const avgReturn = decidable.reduce((a, e) => a + e.outcome.returnPct, 0) / decidable.length
-  const ci = distinguishableFromChance(wins, decidable.length)
-  return {
-    total: decidable.length,
-    winRate: (wins / decidable.length) * 100,
-    avgReturn,
-    low: ci ? ci.lower * 100 : null,
-    high: ci ? ci.upper * 100 : null,
-  }
-}
-
-// A hit rate is meaningless without the rate it has to beat. Over a rising
-// market, "price went up" is true more often than not no matter what the call
-// said — so a 54% hit rate on upward-leaning calls against a 54% drift rate is
-// exactly zero skill, while looking like a passing grade. This computes the
-// drift over the same resolved windows so the two can be shown together.
-function baselineOf(resolved, direction) {
-  const decidable = resolved.filter((e) => e.outcome && e.outcome.correct !== null)
-  if (!decidable.length) return null
-  const moved = decidable.filter((e) =>
-    direction === 'up' ? e.outcome.returnPct > 0 : e.outcome.returnPct < 0
-  ).length
-  return (moved / decidable.length) * 100
-}
-
-// Fetched at runtime, same as market-data.json — this log only ever grows,
-// so baking it into the JS bundle via a static import would mean an
-// ever-larger download for every visitor, on every page, whether or not
-// they ever open this one.
+// Reads the precomputed summary rather than the raw log. The log only ever
+// grows — one row per ticker per session whose readings leaned — so at any
+// real number of tickers downloading all of it to render summary statistics
+// and a table stops being viable. The summary is a fixed size however long the
+// log gets. The raw log stays committed and linked, because "nothing is
+// removed after the fact" only means something if it is there to check.
 export default function TrackRecord() {
   useDocumentTitle('Track record')
-  const [trackRecord, setTrackRecord] = useState(null)
+  const [summary, setSummary] = useState(null)
   const [loadError, setLoadError] = useState(null)
 
   useEffect(() => {
-    fetch('/track-record.json')
-      .then((res) => (res.ok ? res.json() : []))
-      .then(setTrackRecord)
+    fetch('/track-record-summary.json')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setSummary(data ?? { resolvedCount: 0, pendingCount: 0, recent: [] }))
       .catch(() => setLoadError('Could not load the track record right now.'))
   }, [])
 
@@ -64,7 +37,7 @@ export default function TrackRecord() {
     )
   }
 
-  if (!trackRecord) {
+  if (!summary) {
     return (
       <div>
         <Link to="/" className="back-link">
@@ -76,16 +49,10 @@ export default function TrackRecord() {
     )
   }
 
-  const resolved = trackRecord.filter((e) => e.outcome).sort((a, b) => (a.date < b.date ? 1 : -1))
-  const pending = trackRecord.filter((e) => !e.outcome)
-
-  const overall = summarize(resolved)
   // Scored by band direction, which resolves both the current keys and the
-  // pre-rename labels still present in the logged history.
-  const bullish = summarize(resolved.filter((e) => leanDirection(e.verdict) === 'up'))
-  const bearish = summarize(resolved.filter((e) => leanDirection(e.verdict) === 'down'))
-  const upBaseline = baselineOf(resolved, 'up')
-  const downBaseline = baselineOf(resolved, 'down')
+  // pre-rename labels still present in the logged history — done by the job.
+  const { overall, up: bullish, down: bearish, upBaseline, downBaseline, recent } = summary
+  const pending = { length: summary.pendingCount }
 
   return (
     <div>
@@ -99,8 +66,8 @@ export default function TrackRecord() {
           Every day the readings leaned one way rather than splitting, logged automatically as it happened
         </Explain>{' '}
         and resolved <Explain term="forwardWindow">{FORWARD_DAYS} trading sessions later</Explain> against the actual
-        close — misses included. Nothing here is curated or removed after the fact; the raw log is a committed file in
-        the repo.
+        close — misses included. Nothing here is curated or removed after the fact: this page shows a summary, and the{' '}
+        <a href="/track-record.json">complete raw log</a> is a committed file you can read yourself.
       </p>
 
       {!overall ? (
@@ -178,7 +145,13 @@ export default function TrackRecord() {
             at all.
           </div>
 
-          <Section title="Resolved calls">
+          <Section
+            title={
+              summary.truncated
+                ? `Resolved calls — most recent ${RECENT_LIMIT} of ${summary.resolvedCount}`
+                : 'Resolved calls'
+            }
+          >
             <div className="score-table-wrap">
               <table className="score-table">
                 <thead>
@@ -194,7 +167,7 @@ export default function TrackRecord() {
                   </tr>
                 </thead>
                 <tbody>
-                  {resolved.map((e) => (
+                  {recent.map((e) => (
                     <tr key={`${e.symbol}-${e.date}`}>
                       <td>{e.date}</td>
                       <td>

@@ -15,6 +15,7 @@ import { leanDirection } from '../src/lib/lean.js'
 import { lastSettledIndex, repairUnresolved } from '../src/lib/trackRecord.js'
 import { buildScreener } from '../src/lib/screener.js'
 import { barsFileName } from '../src/lib/barsFile.js'
+import { summarizeTrackRecord } from '../src/lib/trackRecordSummary.js'
 
 const API_KEY = process.env.TWELVE_DATA_KEY
 // Lives in public/, not data/, so the built app can fetch it as a plain
@@ -30,6 +31,9 @@ const BARS_DIR = new URL('../public/bars/', import.meta.url)
 const TRACK_RECORD_PATH = new URL('../public/track-record.json', import.meta.url)
 // The dashboard's rows, precomputed. See src/lib/screener.js for why.
 const SCREENER_PATH = new URL('../public/screener.json', import.meta.url)
+// The track-record page's figures, precomputed. The raw log stays committed
+// as the audit trail; this is what the page actually downloads.
+const TRACK_SUMMARY_PATH = new URL('../public/track-record-summary.json', import.meta.url)
 const FORWARD_SESSIONS = 5
 
 if (!API_KEY) {
@@ -223,6 +227,18 @@ async function main() {
 
   log.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.symbol.localeCompare(b.symbol)))
   saveJson(TRACK_RECORD_PATH, log)
+
+  // Same rule as everywhere else: precompute what the page needs, ship a
+  // payload that does not grow with the data behind it.
+  const summary = summarizeTrackRecord(log)
+  const previousSummary = loadJson(TRACK_SUMMARY_PATH, null)
+  const summaryChanged =
+    !previousSummary ||
+    JSON.stringify({ ...previousSummary, generatedAt: null }) !== JSON.stringify({ ...summary, generatedAt: null })
+  if (summaryChanged) fs.writeFileSync(TRACK_SUMMARY_PATH, JSON.stringify(summary) + '\n')
+  console.log(
+    `Track record: ${summary.resolvedCount} resolved, ${summary.pendingCount} pending, summary ${summaryChanged ? 'rewritten' : 'unchanged'}.`
+  )
 
   console.log(
     `Synced ${fetchedCount} ticker(s), ${failedCount} failure(s) (kept prior data). Resolved ${resolvedCount} prior call(s), logged ${loggedCount} new call(s).`
