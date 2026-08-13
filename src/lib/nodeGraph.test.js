@@ -64,3 +64,23 @@ describe('scripts run under plain Node, so their whole import graph needs extens
     })
   }
 })
+
+// The guard above walks only the sync's transitive imports, which is why
+// confluence.js, leverageStudy.js, shareCard.js, trades.js and useMarketData.js
+// all carried extensionless imports undetected — none of them was reachable
+// from the script. They broke the moment anything new imported them. Every
+// module in lib is checked now, whether the sync reaches it today or not.
+describe('every lib module is importable by plain Node', () => {
+  it('has no extensionless relative import anywhere in src/lib', () => {
+    const dir = path.resolve(new URL('.', import.meta.url).pathname)
+    const offenders = []
+    for (const file of fs.readdirSync(dir)) {
+      if (!file.endsWith('.js') || file.endsWith('.test.js')) continue
+      const source = fs.readFileSync(path.join(dir, file), 'utf8')
+      for (const m of source.matchAll(/from '(\.\/[^']+)'/g)) {
+        if (!m[1].endsWith('.js')) offenders.push(`${file} imports "${m[1]}"`)
+      }
+    }
+    expect(offenders).toEqual([])
+  })
+})

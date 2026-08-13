@@ -80,6 +80,30 @@ export const GLOSSARY = {
     isNot:
       'Not a forecast, and not the whole market — breadth here is measured across the couple of dozen names this site tracks, which is a sample and a skewed one. Its value is that breadth cannot be seen from any single ticker page: an index holding up while most names are not is a fact about now that no individual chart shows.',
   },
+  fundamentalRead: {
+    term: 'Balance sheet read',
+    basis: 'accounting',
+    what: 'What kind of business the filings describe, and where the risk in the equity sits — put together as a sentence rather than left as a row of separate figures.',
+    how: 'Capital structure first (net cash or net debt against market cap), then the direction of revenue and net income year over year, then what the price-to-book multiple implies. The first structure that fits is reported.',
+    isNot:
+      'Not current and not a forecast. These are filed figures, up to a quarter behind the price they are compared against, and the read says which filing date it came from. It also cannot tell a one-off charge from a durable margin problem — the filing does not distinguish them either.',
+  },
+  positionRead: {
+    term: 'Position read',
+    basis: 'hypothetical',
+    what: 'How close an open position is to the level that ends it, measured in the instrument\u2019s own daily range rather than in percent.',
+    how: "Distance from the current price to the liquidation level, divided by the 14-day average true range, alongside a count of how many of the last 250 sessions moved at least that far against the position in a single day.",
+    isNot:
+      'Not a probability. The session count is what already happened, not the chance the next one does. And it is optimistic: real venues close a position before equity reaches zero, and charge funding and spread on the way.',
+  },
+  macroRead: {
+    term: 'Macro read',
+    basis: 'current',
+    what: 'Long rates and corporate credit read as a pair rather than as two separate scores — the four combinations of the two mean four different things, and one of them is invisible if you add them up.',
+    how: 'Sixty-session change in TLT (long Treasuries; up means long yields falling) against the same change in HYG (high-yield credit; up means spreads tightening). Both up is easing, both down is tightening, and the two mixed cases are a flight to quality and a reflation respectively. Moves under 1.5% in either are treated as drift rather than direction.',
+    isNot:
+      'Not a measurement of rates or credit — two ETFs standing in for them, each with its own duration, supply and fund-flow behaviour. Not specific to any ticker either: it is the weather every position is held in, not a statement about one of them. And it describes sixty sessions that already happened.',
+  },
   setupRead: {
     term: 'Setup read',
     basis: 'current',

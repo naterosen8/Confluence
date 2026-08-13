@@ -1,4 +1,5 @@
 import { smaSeries, atrPercentile } from './indicators.js'
+import { macroQuadrant } from './macroRead.js'
 
 // One read of the whole tape, for the top of the screener.
 //
@@ -89,15 +90,12 @@ export function marketRead({ barsBySymbol, tickers }) {
     parts.push('Most individual names are holding their trend while the index is not — weakness concentrated in the largest weights.')
   }
 
-  // The price of money and the appetite for risk.
-  if (ratesPct != null && creditPct != null) {
-    const easing = ratesPct > 0
-    const risky = creditPct > 0
-    if (easing && risky) parts.push('Long bonds and high-yield credit are both up over 60 sessions: conditions easing, risk appetite present.')
-    else if (!easing && !risky) parts.push('Long bonds and high-yield credit are both down over 60 sessions: conditions tightening and risk appetite retreating together.')
-    else if (easing && !risky) parts.push('Long bonds up while credit is down — money getting cheaper but appetite for risk not following, which is the shape of a flight to quality.')
-    else parts.push('Credit up while long bonds are down — risk appetite present despite rates rising, which is a late-cycle combination as often as an early one.')
-  }
+  // The price of money and the appetite for risk. One shared quadrant with the
+  // ticker page's macro read — these were two separate copies of the same
+  // four-way branch, which is how the same two numbers end up described two
+  // different ways on two pages. See src/lib/macroRead.js.
+  const quadrant = macroQuadrant({ ratesChangePct: ratesPct, creditChangePct: creditPct })
+  if (quadrant) parts.push(quadrant.short)
 
   if (vol != null) {
     if (vol < 25) parts.push(`Index volatility sits at the ${vol.toFixed(0)}th percentile of its own recent range — a quiet tape, and quiet tapes do not stay quiet indefinitely.`)
@@ -119,6 +117,7 @@ export function marketRead({ barsBySymbol, tickers }) {
     goldenCross: spyTrend.golden,
     ratesChangePct: ratesPct,
     creditChangePct: creditPct,
+    macro: quadrant,
     caveat:
       'A description of the tape as it stands, from the tickers this site tracks — not a forecast, and a two-dozen-name sample is not the whole market.',
   }

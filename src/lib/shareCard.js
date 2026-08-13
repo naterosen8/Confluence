@@ -1,5 +1,5 @@
-import { scalePoints } from './scalePoints'
-import { leanByKey, LEAN_COLORS } from './lean'
+import { scalePoints } from './scalePoints.js'
+import { leanByKey, LEAN_COLORS } from './lean.js'
 
 const COLORS = {
   bg: '#0b0f14',

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { loadBars } from './dataProvider'
+import { loadBars } from './dataProvider.js'
 
 // Bar history is fetched per symbol, on demand.
 //

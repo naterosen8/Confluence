@@ -1326,3 +1326,34 @@ table.grid {
 .setup-cell-pullback { color: var(--text); }
 .setup-cell-no-trend,
 .setup-cell-capitulation { color: var(--muted); }
+
+/* Shared shell for the plain-language reads. One look for all three so a
+   chart read, a balance-sheet read and a position read are visibly the same
+   kind of claim — a description of now. */
+.plain-read {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 14px 0;
+}
+.plain-read-head strong { font-size: 1rem; }
+.plain-read-body {
+  margin: 8px 0 0;
+  line-height: 1.55;
+  max-width: 76ch;
+  font-size: 0.9rem;
+}
+.plain-read-note {
+  margin: 10px 0 8px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.plain-read .muted { margin: 6px 0 0; line-height: 1.45; }
+.plain-read-critical { border-left-color: #e0715a; }
+.plain-read-tight { border-left-color: #d8b45f; }
+.plain-read-moderate { border-left-color: #6fb3d8; }
+.plain-read-wide { border-left-color: #5cbf8a; }

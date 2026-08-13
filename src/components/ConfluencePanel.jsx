@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { technicalLayer, fundamentalLayer, macroLayer, combineLayers, CONFLUENCE_NAME } from '../lib/confluence'
-import { getSeries } from '../lib/dataProvider'
+import { getSeries, hasRealData, screenerMarketRead } from '../lib/dataProvider'
 import Explain from './Explain'
+import PlainRead from './PlainRead'
+import { readFundamentals } from '../lib/fundamentalRead'
+import { macroRead, macroLayerFromQuadrant } from '../lib/macroRead'
 import { LAYER_TERM, LAYER_INPUTS } from '../lib/confluenceLayers'
 
 let cache = null
@@ -101,11 +104,42 @@ export default function ConfluencePanel({ symbol, kind, bars, price }) {
                 ? 'No issuer, no filings — a spot crypto pair has no fundamentals to read.'
                 : 'An ETF has no operating business of its own; its fundamentals are those of what it holds.',
           }
-    const macro = macroLayer({ tltBars: getSeries('TLT'), hygBars: getSeries('HYG') })
+    // getSeries() falls back to a generated random walk for any symbol whose
+    // bars are not loaded, and this page only loads its own ticker plus SPY —
+    // so the macro layer was being handed mock TLT and HYG and reporting the
+    // result as measured percentages. It said "high-yield credit rose 11.5%"
+    // on data that came from a random number generator.
+    //
+    // The macro pair is market-wide and identical on every ticker page, so the
+    // fix is not to download two more histories per visit: the sync already
+    // computes it once with the real bars in memory and ships it in the
+    // screener index. Fall back to the layer only when the bars are genuinely
+    // present, and to "not available" otherwise — which is the truth.
+    const macro =
+      macroLayerFromQuadrant(screenerMarketRead()?.macro) ??
+      (hasRealData('TLT') && hasRealData('HYG')
+        ? macroLayer({ tltBars: getSeries('TLT'), hygBars: getSeries('HYG') })
+        : { available: false, reason: 'Macro proxies (TLT, HYG) have not synced yet.' })
     return combineLayers({ technical, fundamental, macro })
   }, [bars, price, symbol, kind, fundamentals])
 
   const alignment = ALIGNMENT[combined.alignment]
+
+  // The balance sheet as a sentence. The layer below already lists the
+  // mechanical facts; a list of facts is not a read.
+  const fundamentalRead = useMemo(() => {
+    const layer = combined.layers.find((l) => l.key === 'fundamental')
+    if (!layer?.available || !layer.valuation) return null
+    return readFundamentals({ valuation: layer.valuation, trend: layer.trend })
+  }, [combined])
+
+  // Same treatment for the macro pair. The layer scores TLT and HYG separately
+  // and sums them, which nets "bonds bid while credit is sold" to neutral —
+  // the one configuration where a score is worse than no score at all.
+  const macro = useMemo(
+    () => macroRead({ macro: combined.layers.find((l) => l.key === 'macro') }),
+    [combined]
+  )
 
   return (
     <div className="confluence-panel">
@@ -138,6 +172,18 @@ export default function ConfluencePanel({ symbol, kind, bars, price }) {
           </>
         )}
       </div>
+
+      {fundamentalRead && (
+        <PlainRead term="fundamentalRead" headline={fundamentalRead.headline} caveat={fundamentalRead.caveat}>
+          {fundamentalRead.read}
+        </PlainRead>
+      )}
+
+      {macro && (
+        <PlainRead term="macroRead" headline={macro.headline} note={macro.note} caveat={macro.caveat}>
+          {macro.read}
+        </PlainRead>
+      )}
 
       <div className="confluence-grid">
         {combined.layers.map((l) => (

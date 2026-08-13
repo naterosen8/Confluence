@@ -1,5 +1,5 @@
-import { smaSeries, findSwingPoints, relativeVolume, computeSignals } from './indicators'
-import { balanceSheetValuation } from './mnav'
+import { smaSeries, findSwingPoints, relativeVolume, computeSignals } from './indicators.js'
+import { balanceSheetValuation } from './mnav.js'
 
 // ---------------------------------------------------------------------------
 // Why this file exists, and why the app is called Confluence.

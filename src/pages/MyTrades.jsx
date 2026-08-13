@@ -8,6 +8,8 @@ import { evaluatePosition, computePnl } from '../lib/pnl'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import Explain from '../components/Explain'
 import { pct, price, signedMoney, compactMoney } from '../lib/format'
+import PlainRead from '../components/PlainRead'
+import { readPosition } from '../lib/positionRead'
 
 // Returns null when the symbol has no real synced history. getSeries() falls
 // back to a demo random walk for anything it does not know, so without this
@@ -154,6 +156,26 @@ export default function MyTrades() {
         </p>
       ) : (
         <>
+          {/* How close each open position is to the level that ends it, in
+              the instrument's own daily range. "Wipes out at $61,028" means
+              nothing without knowing whether that is a normal Tuesday. */}
+          {openTrades.map((trade) => {
+            const result = evaluate(trade)
+            const read = result ? readPosition({ bars: getSeries(trade.symbol), trade, result }) : null
+            if (!read) return null
+            return (
+              <PlainRead
+                key={`read-${trade.id}`}
+                term="positionRead"
+                tone={read.key}
+                headline={`${trade.symbol} ${trade.direction} · ${read.headline}`}
+                caveat={read.caveat}
+              >
+                {read.read}
+              </PlainRead>
+            )
+          })}
+
           <section className="detail-section">
             <h2>Open positions</h2>
             {openTrades.length === 0 ? (

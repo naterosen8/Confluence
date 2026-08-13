@@ -1,11 +1,11 @@
-import { scoreSeries } from './indicators'
-import { FORWARD_DAYS } from './backtest'
+import { scoreSeries } from './indicators.js'
+import { FORWARD_DAYS } from './backtest.js'
 // Single definition, shared with the trade simulator, so the two features
 // cannot disagree about whether the same position survived. At Nx a 1/N
 // adverse move is fatal: 10x dies on 10%, 25x on 4%. The number people
 // underestimate is not the upside, it is how little movement takes you to
 // zero.
-import { liquidationPrice } from './pnl'
+import { liquidationPrice } from './pnl.js'
 
 export { liquidationPrice }
 
