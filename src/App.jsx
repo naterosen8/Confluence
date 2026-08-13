@@ -18,6 +18,9 @@ function RoutedContent() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/ticker/:symbol" element={<TickerDetail />} />
+        {/* Each chapter is its own URL, so a page can be linked to, opened in
+            a new tab, and walked with the browser's own back button. */}
+        <Route path="/ticker/:symbol/:chapter" element={<TickerDetail />} />
         <Route path="/track-record" element={<TrackRecord />} />
         <Route path="/my-trades" element={<MyTrades />} />
         <Route path="/methodology" element={<Methodology />} />

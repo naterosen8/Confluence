@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
 import { getSeries, hasRealData } from '../lib/dataProvider'
@@ -18,6 +18,8 @@ import SimulateTradeForm from '../components/SimulateTradeForm'
 import NotFound from './NotFound'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { cachedScoreDirectionCheck, directionBanner } from '../lib/signalValidation'
+import { TICKER_CHAPTERS, chapterFor, chapterNeighbours } from '../lib/chapters'
+import { ChapterNav, ChapterHead, ChapterPager, useChapterKeys } from '../components/ChapterNav'
 
 function pct(v, digits = 2) {
   if (v == null) return '—'
@@ -25,7 +27,7 @@ function pct(v, digits = 2) {
 }
 
 export default function TickerDetail() {
-  const { symbol } = useParams()
+  const { symbol, chapter } = useParams()
   const meta = TICKERS.find((t) => t.symbol === symbol)
 
   // Bail out before computing anything. getSeries() falls back to a demo
@@ -42,11 +44,13 @@ export default function TickerDetail() {
     )
   }
 
-  return <TickerAnalysis symbol={symbol} meta={meta} />
+  return <TickerAnalysis symbol={symbol} meta={meta} chapterKey={chapter} />
 }
 
-function TickerAnalysis({ symbol, meta }) {
-  useDocumentTitle(`${symbol} — ${meta.name}`)
+function TickerAnalysis({ symbol, meta, chapterKey }) {
+  const chapter = chapterFor(chapterKey)
+  const { index } = chapterNeighbours(chapter.key)
+  useDocumentTitle(`${symbol} — ${chapter.label}`)
   const bars = getSeries(symbol)
   const closes = bars.map((b) => b.close)
   const spyBars = getSeries('SPY')
@@ -69,6 +73,30 @@ function TickerAnalysis({ symbol, meta }) {
     pollLivePrices([symbol], (_, quote) => setLiveQuote(quote), { signal: controller.signal })
     return () => controller.abort()
   }, [symbol])
+
+  // Chapter one lives at the bare /ticker/:symbol so existing links, the
+  // dashboard and every shared card keep working untouched.
+  const hrefFor = useCallback(
+    (key) => `/ticker/${encodeURIComponent(symbol)}${key === TICKER_CHAPTERS[0].key ? '' : `/${key}`}`,
+    [symbol]
+  )
+  useChapterKeys({ chapters: TICKER_CHAPTERS, current: chapter.key, hrefFor })
+
+  // Turning a page should put you at the top of it. Skipped on first load so
+  // a deep link into a chapter does not fight the browser's own restoration.
+  const firstRender = useRef(true)
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+      return
+    }
+    document.getElementById('chapter-top')?.scrollIntoView({ block: 'start' })
+  }, [chapter.key])
+
+  // The badge is the only claim about *now*, so the caveat that it does not
+  // predict direction belongs beside it wherever it appears — but only on the
+  // pages the score actually drives.
+  const scoreChapter = ['layers', 'signals', 'record'].includes(chapter.key)
 
   return (
     <div>
@@ -105,7 +133,7 @@ function TickerAnalysis({ symbol, meta }) {
         </div>
       </div>
 
-      {banner && (
+      {banner && scoreChapter && (
         <div className="callout impact-note">
           Read the badge as how much the indicators currently agree with each other, not as a direction to expect.{' '}
           {banner} See the <Link to="/methodology">self-check</Link> for the measurement and its caveats.
@@ -119,10 +147,6 @@ function TickerAnalysis({ symbol, meta }) {
         </div>
       </div>
 
-      <Section title={<Explain term="simulatedTrade">Simulate a trade</Explain>}>
-        <SimulateTradeForm symbol={symbol} currentPrice={liveQuote?.price ?? signals.price} />
-      </Section>
-
       {!hasRealData(symbol) && (
         <div className="callout">
           <Explain term="demoData">
@@ -135,15 +159,23 @@ function TickerAnalysis({ symbol, meta }) {
 
       {trigger && (
         <div className="callout callout-highlight">
-          <strong>{SIGNAL_LABELS[trigger.key]}</strong> — triggered {trigger.barsAgo === 0 ? 'today' : `${trigger.barsAgo} session${trigger.barsAgo > 1 ? 's' : ''} ago`}.
-          See the base rate for this exact setup below.
+          <strong>{SIGNAL_LABELS[trigger.key]}</strong> — triggered {trigger.barsAgo === 0 ? 'today' : `${trigger.barsAgo} session${trigger.barsAgo > 1 ? 's' : ''} ago`}.{' '}
+          <Link to={hrefFor('record')}>See what happened the other times it fired.</Link>
         </div>
       )}
 
+      <ChapterNav chapters={TICKER_CHAPTERS} current={chapter.key} hrefFor={hrefFor} />
+      <div id="chapter-top" />
+      <ChapterHead chapter={chapter} index={index} total={TICKER_CHAPTERS.length} />
+
+      {chapter.key === 'layers' && (
       <Section title={<Explain term="confluence">Confluence: technical, fundamental, macro</Explain>}>
         <ConfluencePanel symbol={symbol} kind={meta.kind} bars={bars} price={signals.price} />
       </Section>
 
+      )}
+
+      {chapter.key === 'signals' && (<>
       <Section title={<Explain term="confluenceScore">What's driving this (technical detail)</Explain>}>
         <ScoreBreakdown signals={signals} />
         {signals.notes.length > 0 && (
@@ -229,6 +261,9 @@ function TickerAnalysis({ symbol, meta }) {
         </Section>
       )}
 
+      </>)}
+
+      {chapter.key === 'record' && (<>
       <Section
         title={
           <>
@@ -295,14 +330,6 @@ function TickerAnalysis({ symbol, meta }) {
         </div>
       </Section>
 
-      <Section title={<Explain term="bookEquity">Balance sheet vs market cap</Explain>}>
-        <BalanceSheetValue symbol={symbol} kind={meta.kind} price={signals.price} bars={bars} />
-      </Section>
-
-      <Section title={<Explain term="leverage">What leverage would have done to these signals</Explain>}>
-        <LeverageStudy bars={bars} currentScore={scoreBacktest.currentScore} />
-      </Section>
-
       <Section
         title={
           <>
@@ -322,6 +349,27 @@ function TickerAnalysis({ symbol, meta }) {
         </div>
       </Section>
 
+      </>)}
+
+      {chapter.key === 'balance-sheet' && (
+      <Section title={<Explain term="bookEquity">Balance sheet vs market cap</Explain>}>
+        <BalanceSheetValue symbol={symbol} kind={meta.kind} price={signals.price} bars={bars} />
+      </Section>
+
+      )}
+
+      {chapter.key === 'what-if' && (<>
+      <Section title={<Explain term="simulatedTrade">Simulate a trade</Explain>}>
+        <SimulateTradeForm symbol={symbol} currentPrice={liveQuote?.price ?? signals.price} />
+      </Section>
+
+      <Section title={<Explain term="leverage">What leverage would have done to these signals</Explain>}>
+        <LeverageStudy bars={bars} currentScore={scoreBacktest.currentScore} />
+      </Section>
+
+      </>)}
+
+      {chapter.key === 'share' && (
       <Section title="Share this setup">
         <p className="muted small">
           Generates a downloadable image and a ready-to-paste caption from what's on this page right now — the
@@ -337,6 +385,9 @@ function TickerAnalysis({ symbol, meta }) {
           statSource={setup.source}
         />
       </Section>
+      )}
+
+      <ChapterPager chapters={TICKER_CHAPTERS} current={chapter.key} hrefFor={hrefFor} />
     </div>
   )
 }
