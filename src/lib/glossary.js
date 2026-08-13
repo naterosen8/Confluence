@@ -72,6 +72,14 @@ export const GLOSSARY = {
     isNot:
       'Not a score, and not a count out of three. Alignment across two available layers is a two-layer reading — a missing layer is excluded, never counted as agreement or as neutral.',
   },
+  setupRead: {
+    term: 'Setup read',
+    basis: 'current',
+    what: 'A plain-language description of what this chart is currently doing, named the way a technician would name it, with the price that would prove the description wrong.',
+    how: 'Structural tests in priority order — position against the 50- and 200-day averages, whether a cleared level was given back, how stretched price is from trend in units of its own daily range, whether volatility is compressed. The first structure that fits is the one reported.',
+    isNot:
+      'Not a forecast and not a recommendation. It says what the chart IS, not what it will do — this site\u2019s own measurements find no relationship between these structures and what follows. Its value is that it is falsifiable: every read names the level that breaks it, so it can be checked rather than believed.',
+  },
   breakout: {
     term: 'Breakout',
     basis: 'current',

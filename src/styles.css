@@ -1238,3 +1238,43 @@ table.grid {
     flex: 1;
   }
 }
+
+/* The plain-language read. Given real visual weight because it is the only
+   thing on the page that answers "what am I looking at" in one sentence —
+   everything else is the evidence behind it. */
+.setup-read {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 22px;
+}
+.setup-read-head strong {
+  font-size: 1.1rem;
+}
+.setup-read-body {
+  margin: 10px 0 0;
+  line-height: 1.55;
+  max-width: 72ch;
+}
+.setup-read-invalidation {
+  margin: 12px 0 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.setup-read-label {
+  color: #e8b98a;
+  font-weight: 700;
+}
+.setup-read .muted {
+  margin: 0;
+  line-height: 1.45;
+}
+.setup-read-breakdown { border-left-color: #e0715a; }
+.setup-read-failed-breakout { border-left-color: #e0715a; }
+.setup-read-extended { border-left-color: #d8b45f; }
+.setup-read-compression { border-left-color: #6fb3d8; }
+.setup-read-no-trend { border-left-color: var(--muted); }

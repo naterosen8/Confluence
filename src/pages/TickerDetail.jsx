@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
 import { getSeries, hasRealData, screenerDirectionCheck } from '../lib/dataProvider'
 import { computeSignals } from '../lib/indicators'
+import { readSetup } from '../lib/setupRead'
 import { backtestTicker, backtestByScore, bestAvailableStat, mostRecentEvent, SIGNAL_LABELS } from '../lib/backtest'
 import { pollLivePrices } from '../lib/livePrice'
 import Sparkline from '../components/Sparkline'
@@ -12,6 +13,7 @@ import ShareCard from '../components/ShareCard'
 import LeverageStudy from '../components/LeverageStudy'
 import BalanceSheetValue from '../components/BalanceSheetValue'
 import ScoreBreakdown from '../components/ScoreBreakdown'
+import SetupRead from '../components/SetupRead'
 import ConfluencePanel from '../components/ConfluencePanel'
 import Explain from '../components/Explain'
 import SimulateTradeForm from '../components/SimulateTradeForm'
@@ -69,6 +71,7 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
   const closes = bars.map((b) => b.close)
   const spyBars = getSeries('SPY')
   const signals = useMemo(() => computeSignals(bars), [bars])
+  const setup_read = useMemo(() => readSetup(bars, signals), [bars, signals])
   const backtest = useMemo(() => backtestTicker(bars), [bars])
   const scoreBacktest = useMemo(() => backtestByScore(bars, spyBars), [bars, spyBars])
   const setup = useMemo(() => bestAvailableStat(bars, spyBars), [bars, spyBars])
@@ -182,6 +185,8 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
       )}
 
       {chapter.key === 'signals' && (<>
+      <SetupRead setup={setup_read} />
+
       <Section title={<Explain term="confluenceScore">What's driving this (technical detail)</Explain>}>
         <ScoreBreakdown signals={signals} />
         {signals.notes.length > 0 && (
