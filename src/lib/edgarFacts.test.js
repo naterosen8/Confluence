@@ -132,3 +132,122 @@ describe('parseCompanyFacts', () => {
     expect(parseCompanyFacts(null)).toBeNull()
   })
 })
+
+// Both of these shapes are real: XOM came back with 2 quarters where every
+// other company had 12, and META has produced no fundamental layer at all
+// since the feature was added.
+describe('concept selection across a fallback chain', () => {
+  it('does not lose ten quarters to a sparse higher-priority concept', () => {
+    // StockholdersEquity is preferred, but here it exists in only one filing
+    // while the noncontrolling-interest variant covers both periods. Taking
+    // the first non-empty tag drops the period it cannot answer.
+    const f = facts({
+      Liabilities: undefined,
+      StockholdersEquity: usd([e('2024-03-31', 2100)]),
+      StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest: usd([
+        e('2023-12-31', 2000),
+        e('2024-03-31', 2100),
+      ]),
+    })
+    delete f.facts['us-gaap'].Liabilities
+    const r = parseCompanyFacts(f)
+    expect(r.quarters.map((q) => q.asOf)).toEqual(['2023-12-31', '2024-03-31'])
+    expect(r.quarters[0].equity).toBe(2000)
+  })
+
+  it('still prefers the higher-priority concept when it covers everything', () => {
+    // Coverage is a tie-breaker, never a reason to swap in a semantically
+    // different concept that happens to have more rows.
+    const f = facts({
+      StockholdersEquity: usd([e('2023-12-31', 2000), e('2024-03-31', 2100)]),
+      StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest: usd([
+        e('2023-06-30', 1900),
+        e('2023-09-30', 1950),
+        e('2023-12-31', 9999),
+        e('2024-03-31', 9999),
+      ]),
+    })
+    const r = parseCompanyFacts(f)
+    expect(r.quarters.map((q) => q.equity)).toEqual([2000, 2100])
+  })
+
+  it('picks the revenue concept that covers the periods, not the first one present', () => {
+    const q = (end, start, val) => e(end, val, { start })
+    const f = facts({
+      StockholdersEquity: usd([e('2023-12-31', 2000), e('2024-03-31', 2100)]),
+      // Present but sparse — a bank tagging only part of its revenue this way.
+      RevenueFromContractWithCustomerExcludingAssessedTax: usd([q('2024-03-31', '2024-01-01', 10)]),
+      RevenuesNetOfInterestExpense: usd([
+        q('2023-12-31', '2023-10-01', 400),
+        q('2024-03-31', '2024-01-01', 420),
+      ]),
+    })
+    const r = parseCompanyFacts(f)
+    expect(r.quarters.map((x) => x.revenue)).toEqual([400, 420])
+  })
+})
+
+describe('multi-class filers with no undimensioned share count', () => {
+  // companyfacts carries only facts with no dimensional breakdown, so a filer
+  // reporting its cover-page count per share class has no consolidated count
+  // in this API at all. Every quarter was dropped for a null share count.
+  const multiClass = () => {
+    const f = facts({
+      StockholdersEquity: usd([e('2023-12-31', 2000), e('2024-03-31', 2100)]),
+      WeightedAverageNumberOfDilutedSharesOutstanding: sh([
+        e('2023-12-31', 2500, { start: '2023-10-01' }),
+        e('2024-03-31', 2490, { start: '2024-01-01' }),
+      ]),
+    })
+    delete f.facts.dei
+    return f
+  }
+
+  it('falls back to weighted-average shares rather than dropping every quarter', () => {
+    const r = parseCompanyFacts(multiClass())
+    expect(r.quarters).toHaveLength(2)
+    expect(r.quarters.map((q) => q.shares)).toEqual([2500, 2490])
+  })
+
+  it('prefers the cover-page count whenever one exists', () => {
+    // The weighted average is an average over the period, not a count at the
+    // end of it, so it must never displace a real cover-page figure.
+    const f = facts({
+      StockholdersEquity: usd([e('2023-12-31', 2000), e('2024-03-31', 2100)]),
+      WeightedAverageNumberOfDilutedSharesOutstanding: sh([e('2023-12-31', 9999), e('2024-03-31', 9999)]),
+    })
+    expect(parseCompanyFacts(f).quarters.every((q) => q.shares === 1000)).toBe(true)
+  })
+})
+
+describe('diagnoseCompanyFacts', () => {
+  it('names the stage that failed instead of reporting a bare miss', async () => {
+    const { diagnoseCompanyFacts } = await import('./edgarFacts')
+    const f = facts({ StockholdersEquity: usd([e('2023-12-31', 2000), e('2024-03-31', 2100)]) })
+    delete f.facts.dei
+    delete f.facts['us-gaap'].Liabilities
+    const d = diagnoseCompanyFacts(f)
+    expect(d.reason).toBe('every period dropped')
+    expect(d.droppedNoShares).toBe(2)
+    expect(d.concepts.shares).toBeNull()
+
+    expect(diagnoseCompanyFacts({ facts: { 'us-gaap': {} } }).reason).toMatch(/no Assets concept/)
+    expect(diagnoseCompanyFacts(null).reason).toMatch(/no facts/)
+  })
+
+  it('reports the chosen concept and its coverage on a healthy filer', async () => {
+    const { diagnoseCompanyFacts } = await import('./edgarFacts')
+    const d = diagnoseCompanyFacts(facts())
+    expect(d.reason).toBeNull()
+    expect(d.kept).toBe(2)
+    expect(d.concepts.assets).toBe('Assets')
+    expect(d.concepts.liabilities).toBe('Liabilities (2/2)')
+  })
+})
+
+describe('parseCompanyFacts output shape', () => {
+  it('keeps diagnostics out of the committed JSON', () => {
+    const r = parseCompanyFacts(facts())
+    expect(Object.keys(r).sort()).toEqual(['cik', 'entityName', 'quarters'])
+  })
+})

@@ -11,7 +11,7 @@
 // User-Agent and stay under ~10 requests/second. SEC_CONTACT should be an
 // email; the request still works without one but is the polite thing to set.
 import fs from 'fs'
-import { parseCompanyFacts } from '../src/lib/edgarFacts.js'
+import { parseCompanyFacts, diagnoseCompanyFacts } from '../src/lib/edgarFacts.js'
 import { TICKERS } from '../src/lib/tickers.js'
 
 const OUT_PATH = new URL('../public/fundamentals.json', import.meta.url)
@@ -69,16 +69,17 @@ async function main() {
       const facts = await getJson(FACTS_URL(cik))
       const parsed = parseCompanyFacts(facts)
       if (!parsed || !parsed.quarters.length) {
-        // Say which concepts the filer DOES tag. "No usable balance sheet" on
-        // its own is unactionable — META has failed this way for several runs
-        // with no way to tell why. The cause is almost always a concept name
-        // missing from a fallback chain, so printing the candidates turns a
-        // recurring mystery into a one-line fix on the next run.
-        const available = Object.keys(facts?.facts?.['us-gaap'] ?? {})
-        const candidates = available.filter((k) => /^(Assets|Liabilities|StockholdersEquity|Revenue|NetIncome)/i.test(k))
+        // Say exactly which stage failed. "No usable balance sheet" on its own
+        // is unactionable — the cause is always either a concept missing from
+        // a fallback chain or one too sparse to cover the periods, and naming
+        // which turns a recurring mystery into a one-line fix.
+        const d = diagnoseCompanyFacts(facts)
         console.error(
-          `No usable balance sheet for ${t.symbol}. ${available.length} us-gaap concepts present; ` +
-            `candidates: ${candidates.slice(0, 12).join(', ') || '(none matched)'}`
+          `No usable balance sheet for ${t.symbol}: ${d.reason}. ` +
+            `periods=${d.periods ?? 0} kept=${d.kept ?? 0} ` +
+            `droppedNoShares=${d.droppedNoShares ?? 0} droppedNoEquity=${d.droppedNoEquity ?? 0} ` +
+            `concepts=${JSON.stringify(d.concepts)}` +
+            (d.available?.length ? ` available=${d.available.slice(0, 10).join(',')}` : '')
         )
         failed++
       } else {
@@ -88,6 +89,16 @@ async function main() {
         ok++
         const q = parsed.quarters[parsed.quarters.length - 1]
         console.log(`${t.symbol}: ${parsed.quarters.length} quarters, latest ${q.asOf} equity ${q.equity}`)
+        // A partial success is the harder failure to notice: XOM came back
+        // with 2 quarters where everyone else had 12, and several filers land
+        // with no revenue at all. Both look fine in the summary line, so say
+        // which concept was chosen and how much of the period grid it covered
+        // whenever the result is short of complete.
+        const thin = parsed.quarters.length < 8 || q.revenue == null || q.netIncome == null
+        if (thin) {
+          const d = diagnoseCompanyFacts(facts)
+          console.log(`  ${t.symbol} is incomplete — periods=${d.periods} kept=${d.kept} concepts=${JSON.stringify(d.concepts)}`)
+        }
       }
     } catch (e) {
       console.error(`Failed ${t.symbol}: ${e.message}`)
