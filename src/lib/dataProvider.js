@@ -144,6 +144,36 @@ const seriesStore = {}
 // loadMarketData() has resolved.
 export function getSeries(symbol) {
   if (barStore[symbol]?.length) return barStore[symbol]
+
+  // Two very different situations reach this line, and they used to be
+  // indistinguishable to the caller.
+  //
+  // Before the first sync there is no data for anything, the whole site runs
+  // on the random walk, and it says so in the header. That is the case this
+  // fallback exists for, and it is fine.
+  //
+  // The other is a bug every time: a real snapshot is loaded, but this
+  // particular symbol's bars were never requested — because bars are fetched
+  // per symbol now, not as one file. The caller gets invented prices with no
+  // way to tell. That shipped. The macro layer called getSeries('TLT') on
+  // ticker pages that load only their own symbol plus SPY, and reported the
+  // random walk's numbers as measured conditions: "high-yield credit rose
+  // 11.5%" against a real figure of +0.2%.
+  //
+  // So in development this is loud rather than silent — it is a missing
+  // loadBars() call, and it should be found by whoever wrote it rather than
+  // by a reader wondering why credit moved 11.5%. Production keeps the old
+  // behaviour: one wrong panel is bad, a blank page is worse.
+  if (HAS_LIVE_DATA) {
+    const message =
+      `getSeries("${symbol}") fell back to generated demo bars while real market data is loaded. ` +
+      `Bars are fetched per symbol — call loadBars(["${symbol}"]) or useBars([...]) before reading it, ` +
+      `or guard with hasRealData("${symbol}"). Returning invented prices here is how mock numbers get ` +
+      `rendered as measurements.`
+    if (import.meta.env?.DEV) throw new Error(message)
+    console.warn(message)
+  }
+
   if (!seriesStore[symbol]) seriesStore[symbol] = generateMockBars(symbol)
   return seriesStore[symbol]
 }
