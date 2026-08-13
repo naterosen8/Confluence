@@ -270,3 +270,31 @@ describe('share-count basis is recorded, not hidden', () => {
     expect(r.quarters.every((q) => !('sharesBasis' in q))).toBe(true)
   })
 })
+
+describe('a filer that barely tags Assets', () => {
+  // XOM's companyfacts carries exactly two us-gaap:Assets facts across its
+  // whole history, so the period grid was two quarters long and every other
+  // concept then reported perfect coverage of it.
+  const sparseAssets = () =>
+    facts({
+      Assets: usd([e('2024-03-31', 5200)]),
+      LiabilitiesAndStockholdersEquity: usd([e('2023-12-31', 5000), e('2024-03-31', 5200)]),
+      StockholdersEquity: usd([e('2023-12-31', 2000), e('2024-03-31', 2100)]),
+    })
+
+  it('recovers the period grid from the liabilities-and-equity total', () => {
+    const r = parseCompanyFacts(sparseAssets())
+    expect(r.quarters.map((q) => q.asOf)).toEqual(['2023-12-31', '2024-03-31'])
+    // Same number by construction, so the figure itself must be unchanged.
+    expect(r.quarters.map((q) => q.assets)).toEqual([5000, 5200])
+  })
+
+  it('keeps using Assets when it is present and no less complete', () => {
+    const f = facts({
+      Assets: usd([e('2023-12-31', 5000), e('2024-03-31', 5200)]),
+      LiabilitiesAndStockholdersEquity: usd([e('2023-12-31', 1), e('2024-03-31', 2)]),
+      StockholdersEquity: usd([e('2023-12-31', 2000), e('2024-03-31', 2100)]),
+    })
+    expect(parseCompanyFacts(f).quarters.map((q) => q.assets)).toEqual([5000, 5200])
+  })
+})

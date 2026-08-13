@@ -136,7 +136,14 @@ function sumAsOf(entryLists, date) {
 }
 
 export const CONCEPTS = {
-  assets: ['Assets', 'AssetsNet'],
+  // LiabilitiesAndStockholdersEquity is not an approximation of total assets,
+  // it is the same number: a balance sheet balances, so the liabilities-and-
+  // equity total equals the asset total by construction. It earns its place
+  // because some filers tag it far more consistently than Assets — XOM's
+  // companyfacts carries exactly two Assets facts in its entire history,
+  // which is why XOM had 2 quarters where every other company had 12. Assets
+  // still wins whenever it is present and no less complete.
+  assets: ['Assets', 'AssetsNet', 'LiabilitiesAndStockholdersEquity'],
   liabilities: ['Liabilities'],
   equity: [
     'StockholdersEquity',
