@@ -7,6 +7,8 @@ import TrackRecord from './pages/TrackRecord'
 import MyTrades from './pages/MyTrades'
 import NotFound from './pages/NotFound'
 import Methodology from './pages/Methodology'
+import Feedback from './pages/Feedback'
+import FeedbackLink from './components/FeedbackLink'
 import ErrorBoundary from './components/ErrorBoundary'
 import { AuthProvider } from './context/AuthContext'
 import { loadScreener } from './lib/dataProvider'
@@ -25,6 +27,7 @@ function RoutedContent() {
         <Route path="/my-trades" element={<MyTrades />} />
         <Route path="/methodology" element={<Methodology />} />
         <Route path="/methodology/:chapter" element={<Methodology />} />
+        <Route path="/feedback" element={<Feedback />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ErrorBoundary>
@@ -54,6 +57,7 @@ export default function App() {
             <Link to="/my-trades">My trades</Link>
             <Link to="/track-record">Track record</Link>
             <Link to="/methodology">How to read this</Link>
+            <FeedbackLink>Feedback</FeedbackLink>
           </nav>
         </header>
 
@@ -61,7 +65,10 @@ export default function App() {
 
         <footer className="site-footer">
           Indicators are lagging by construction and everyone else sees the same numbers. This is a screening tool
-          to scan many tickers at once, not investment advice.
+          to scan many tickers at once, not investment advice.{' '}
+          {/* The whole site rests on its numbers being checkable, which is
+              worth nothing without a visible way to say one is wrong. */}
+          <FeedbackLink>Spotted a number that looks wrong?</FeedbackLink>
         </footer>
         <Analytics />
       </BrowserRouter>

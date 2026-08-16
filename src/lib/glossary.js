@@ -96,6 +96,14 @@ export const GLOSSARY = {
     isNot:
       'Not a probability. The session count is what already happened, not the chance the next one does. And it is optimistic: real venues close a position before equity reaches zero, and charge funding and spread on the way.',
   },
+  feedbackContext: {
+    term: 'What gets sent with your feedback',
+    basis: 'accounting',
+    what: 'The page you came from and the timestamp of the data snapshot that page was showing, attached to your message automatically.',
+    how: 'The route is taken from the link you followed here (or the previous page on this site), and the snapshot time is the one already displayed in the header. Both are shown on the form before you send, and neither is required — a report with them missing still arrives.',
+    isNot:
+      'Not identifying, and not tracking. No email, no name, no IP logging, and no record of anything you looked at beyond the one page named on the form. It exists because a report that a figure is wrong cannot be checked once the daily sync has replaced the figure — without the date, the most useful kind of feedback is also the least actionable.',
+  },
   macroRead: {
     term: 'Macro read',
     basis: 'current',
