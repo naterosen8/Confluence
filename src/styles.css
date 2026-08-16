@@ -1673,3 +1673,19 @@ table.grid {
     max-width: 100%;
   }
 }
+
+/* The report link sits under the figures it refers to — present enough to be
+   found when something looks wrong, quiet enough not to compete with them. */
+.report-line {
+  margin-top: 18px;
+}
+
+.report-line a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.report-line a:hover {
+  color: var(--accent);
+}

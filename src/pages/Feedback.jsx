@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useEnsureSession } from '../context/AuthContext'
 import { HAS_SUPABASE } from '../lib/supabaseClient'
-import { FEEDBACK_KINDS, MESSAGE_MAX, submitFeedback, listMyFeedback, validateFeedback } from '../lib/feedback'
+import { FEEDBACK_KINDS, MESSAGE_MAX, submitFeedback, listMyFeedback, validateFeedback, resolveKind } from '../lib/feedback'
 import { DATA_GENERATED_AT } from '../lib/dataProvider'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import Explain from '../components/Explain'
@@ -22,8 +22,13 @@ export default function Feedback() {
   const location = useLocation()
   const { user, loading, error: sessionError } = useEnsureSession()
 
-  const [kind, setKind] = useState('wrong-number')
-  const [message, setMessage] = useState('')
+  // A contextual link ("this number looks wrong") arrives with its category
+  // already decided. Validated against the offered list rather than trusted:
+  // router state is just history state, and a stale or hand-edited entry
+  // should not be able to put the form into a category the database will
+  // reject on submit.
+  const [kind, setKind] = useState(() => resolveKind(location.state?.kind))
+  const [message, setMessage] = useState(() => location.state?.note ?? '')
   const [contact, setContact] = useState('')
   const [status, setStatus] = useState(null)
   const [errors, setErrors] = useState({})

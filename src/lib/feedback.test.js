@@ -1,6 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
-import { validateFeedback, FEEDBACK_KINDS, MESSAGE_MIN, MESSAGE_MAX, CONTACT_MAX } from './feedback.js'
+import {
+  validateFeedback,
+  FEEDBACK_KINDS,
+  MESSAGE_MIN,
+  MESSAGE_MAX,
+  CONTACT_MAX,
+  resolveKind,
+  DEFAULT_KIND,
+} from './feedback.js'
 
 describe('validateFeedback', () => {
   const ok = { kind: 'wrong-number', message: 'UNH price-to-book looks about 3x too high.', contact: '' }
@@ -97,5 +105,25 @@ describe('client rules match the database constraints', () => {
     // RLS. Security definer is what makes this rate limit work at all.
     expect(sql).toMatch(/create or replace function feedback_recent_count[\s\S]*?security definer/)
     expect(sql).toMatch(/feedback_recent_count\(auth\.uid\(\)\) < 10/)
+  })
+})
+
+describe('resolveKind', () => {
+  // Router history state is not trusted input: entries persist across reloads,
+  // survive hand-editing, and outlive the code that wrote them. An
+  // unrecognised category must not reach the form, or the database rejects it
+  // only at submit time — after someone has written their paragraph.
+  it('accepts every offered kind', () => {
+    for (const k of FEEDBACK_KINDS) expect(resolveKind(k.key)).toBe(k.key)
+  })
+
+  it('falls back for anything else', () => {
+    for (const bad of ['urgent', '', null, undefined, 0, {}, 'WRONG-NUMBER']) {
+      expect(resolveKind(bad)).toBe(DEFAULT_KIND)
+    }
+  })
+
+  it('falls back to a kind that is actually offered', () => {
+    expect(FEEDBACK_KINDS.map((k) => k.key)).toContain(DEFAULT_KIND)
   })
 })

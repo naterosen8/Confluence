@@ -12,6 +12,7 @@ import Explain from '../components/Explain'
 import LivePrice from '../components/LivePrice'
 import { rate } from '../lib/format'
 import ScreenerFilters from '../components/ScreenerFilters'
+import FeedbackLink from '../components/FeedbackLink'
 import {
   SORTS,
   sortRows,
@@ -263,6 +264,12 @@ export default function Dashboard() {
           to see all of them again.
         </div>
       )}
+
+      <p className="muted small report-line">
+        <FeedbackLink kind="wrong-number" note="On the screener: ">
+          Spotted a number here that looks wrong?
+        </FeedbackLink>
+      </p>
     </div>
   )
 }

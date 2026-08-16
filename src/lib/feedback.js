@@ -43,6 +43,18 @@ export const FEEDBACK_KINDS = [
 
 const KIND_KEYS = new Set(FEEDBACK_KINDS.map((k) => k.key))
 
+export const DEFAULT_KIND = 'wrong-number'
+
+// Contextual links ("this number looks wrong") arrive with a category already
+// chosen, carried in router history state. That is not trusted input: history
+// entries persist across reloads, survive edits, and outlive the code that
+// wrote them. An unrecognised value falls back rather than putting the form
+// into a category the database would reject only at submit time — after
+// someone has written their paragraph.
+export function resolveKind(kind) {
+  return KIND_KEYS.has(kind) ? kind : DEFAULT_KIND
+}
+
 // Returns { ok, errors: { field: message } }. Trimmed values come back on the
 // result so the caller submits exactly what was validated rather than
 // re-deriving it and possibly differing.

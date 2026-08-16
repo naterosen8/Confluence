@@ -24,6 +24,7 @@ import { pct, rate, price } from '../lib/format'
 import { directionBanner } from '../lib/signalValidation'
 import { TICKER_CHAPTERS, chapterFor, chapterNeighbours } from '../lib/chapters'
 import { ChapterNav, ChapterHead, ChapterPager, useChapterKeys } from '../components/ChapterNav'
+import FeedbackLink from '../components/FeedbackLink'
 
 export default function TickerDetail() {
   const { symbol, chapter } = useParams()
@@ -397,6 +398,16 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
         />
       </Section>
       )}
+
+      {/* Next to the figures rather than only in the nav. The distance
+          between noticing a wrong number and reporting it is where nearly all
+          of this kind of feedback is lost, and a link here opens the form with
+          the category chosen and this page already attached. */}
+      <p className="muted small report-line">
+        <FeedbackLink kind="wrong-number" note={`On ${symbol} (${chapter.label}): `}>
+          Something on this page look wrong?
+        </FeedbackLink>
+      </p>
 
       <ChapterPager chapters={TICKER_CHAPTERS} current={chapter.key} hrefFor={hrefFor} />
     </div>

@@ -129,6 +129,21 @@ That report is also the one most likely to be unanswerable by the time it is rea
 
 Same Supabase project and same anonymous identity as the simulator, its own table. Insert and select-own only — no update or delete policy, deliberately: a report is a record of what a page said at a moment, and one that can be rewritten afterwards is not one. Rate limited to 10 per hour per identity through a `security definer` function, because a policy that selects from the table it guards recurses through its own RLS. Validation bounds live in `lib/feedback.js` and are asserted against the SQL constraints in `feedback.test.js`, so the form and the database cannot drift into disagreeing about what is acceptable.
 
+### Reading what comes in
+
+RLS scopes `select` to `auth.uid() = user_id`, so submissions are only readable through the app by whoever sent them — there is deliberately no in-app inbox, because building one would mean either a policy that lets some account read everyone's rows or an admin check enforced in client-side JavaScript, and neither belongs in a static site with no server.
+
+Read them in the Supabase dashboard instead — **Table Editor → feedback**, or SQL Editor:
+
+```sql
+select created_at, kind, message, contact, page, snapshot_at
+from feedback
+order by created_at desc
+limit 50;
+```
+
+`page` and `snapshot_at` are what make a "this number is wrong" report reproducible: check out the commit whose sync produced that snapshot and the figure being disputed is the one that was on screen. Without them the report is unfalsifiable a week later, which is why they are captured rather than requested.
+
 ## Deploying
 
 Configured for Vercel (`vercel.json` has the SPA rewrite). Push to a repo, import into Vercel. Set `VITE_FINNHUB_KEY` there if using the live price overlay — no Twelve Data key needed in Vercel at all, since the browser never calls Twelve Data.
