@@ -113,6 +113,14 @@ Historical P/B uses the book value actually reported for each quarter against th
 
 Backed by [Supabase](https://supabase.com) (free tier) — Postgres for storage, anonymous auth (a real account created silently, no email/password/click required — see `AuthContext.ensureSession`). No custom backend: the browser talks to Supabase directly, and row-level security (`supabase/schema.sql`) enforces that a user can only ever read or write their own trades — that's a database-level guarantee, not application code. The tradeoff of skipping email: an anonymous identity lives in the browser that created it, so trades don't follow you to a different device. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (browser-side, safe to expose — see `.env.example`) to enable; without them the simulator and the feedback form each show a "not set up yet" message instead of breaking. Requires **Authentication → Sign In / Providers → Anonymous Sign-Ins** enabled in the Supabase dashboard (off by default).
 
+## Screener sorting and filtering
+
+Every column sorts, and the table filters by text (symbol or name), instrument type, chart setup, and confluence lean, plus a "has flags" toggle. Values within a facet are OR, separate facets are AND, and the facets only offer states something is actually in — a filter for a structure nothing is currently in produces an empty table that reads as a broken page.
+
+Two rules worth keeping if this is edited. Columns sort by **what the cell displays**: the Edge column shows a win rate, so it sorts by win rate rather than by the signed `edge` behind it, because ordering a table by a number the reader cannot see is how it stops being trustworthy. And rows with no value sort **last in both directions** — flipping a sort should reorder the rows that have data, not swap a block of dashes from one end to the other.
+
+The whole view lives in the URL (`?q=&kind=&setup=&verdict=&flagged=&sort=rsi:desc`), like every other view on the site, so a narrowed screener can be linked and reloaded. Only non-default state is written, so an untouched screener keeps a clean URL, and changes `replace` rather than `push` so dragging a filter around does not bury the page someone arrived from. Logic is pure functions in `lib/screenerView.js` with the table as a plain consumer.
+
 ## Feedback (optional)
 
 `/feedback`, linked from the header and from the footer of every page ("Spotted a number that looks wrong?"). The report it is built for is *this figure is wrong*: a site whose only real claim is that its numbers are measured rather than asserted is worth exactly what its willingness to be corrected is worth.

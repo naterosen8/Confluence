@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
 import { screenerRows, screenerLeaderboardCheck, screenerMarketRead, HAS_LIVE_DATA, DATA_GENERATED_AT, isSnapshotStale, snapshotAgeDays } from '../lib/dataProvider'
 import { leaderboardVerdict } from '../lib/leaderboardCheck'
@@ -11,14 +11,50 @@ import VerdictBadge from '../components/VerdictBadge'
 import Explain from '../components/Explain'
 import LivePrice from '../components/LivePrice'
 import { rate } from '../lib/format'
+import ScreenerFilters from '../components/ScreenerFilters'
+import {
+  SORTS,
+  sortRows,
+  filterRows,
+  availableFacets,
+  parseParams,
+  toParams,
+  isFiltered,
+  nextSort,
+} from '../lib/screenerView'
 
 function formatSyncTime(iso) {
   if (!iso) return null
   return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
+// A header that sorts. Rendered as a real button inside the th so it is
+// reachable by keyboard and announced as pressable, with aria-sort on the th
+// itself so a screen reader can report the current ordering rather than
+// leaving it as a purely visual cue.
+function SortableTh({ sortKey, sort, onSort, term, children }) {
+  const active = sort.key === sortKey
+  const ariaSort = !active ? 'none' : sort.dir === 1 ? 'ascending' : 'descending'
+  return (
+    <th aria-sort={ariaSort} className={active ? 'th-sorted' : undefined}>
+      <span className="th-inner">
+        <button type="button" className="th-sort" onClick={() => onSort(nextSort(sort, sortKey))}>
+          <span>{children}</span>
+          <span aria-hidden="true" className="sort-caret">
+            {active ? (sort.dir === 1 ? '\u25b2' : '\u25bc') : '\u2195'}
+          </span>
+        </button>
+        {term && <Explain term={term} />}
+      </span>
+    </th>
+  )
+}
+
+const CLEARED = { query: '', kinds: [], setups: [], verdicts: [], flagged: false }
+
 export default function Dashboard() {
   const [livePrices, setLivePrices] = useState({})
+  const [searchParams, setSearchParams] = useSearchParams()
 
   useEffect(() => {
     const controller = new AbortController()
@@ -35,6 +71,24 @@ export default function Dashboard() {
   // for every visitor, computed once a day by the job that already has the
   // bars in memory. See src/lib/screener.js.
   const rows = useMemo(() => screenerRows(), [])
+
+  // Filter and sort state lives in the URL, like every other view on this
+  // site. A narrowed screener is exactly the kind of thing someone wants to
+  // send to another person or reload back into, and state held only in the
+  // component is the one view that cannot be.
+  const view = useMemo(() => parseParams(searchParams), [searchParams])
+  const facets = useMemo(() => availableFacets(rows), [rows])
+  const visibleRows = useMemo(() => sortRows(filterRows(rows, view), view.sort), [rows, view])
+
+  const setView = useCallback(
+    (next) => {
+      // replace, not push: dragging a filter around should not bury the page
+      // someone arrived from under a stack of history entries.
+      setSearchParams(toParams(next), { replace: true })
+    },
+    [setSearchParams]
+  )
+  const setSort = useCallback((sort) => setView({ ...view, sort }), [setView, view])
 
   const leaderboard = useMemo(() => screenerLeaderboardCheck(), [])
   const market = useMemo(() => screenerMarketRead(), [])
@@ -133,23 +187,36 @@ export default function Dashboard() {
       )}
 
       <h2 className="table-heading">All tracked tickers</h2>
+
+      <ScreenerFilters
+        state={view}
+        facets={facets}
+        onChange={setView}
+        shown={visibleRows.length}
+        total={rows.length}
+      />
+
       <div className="table-wrap">
       <table className="grid">
         <thead>
+          {/* The sort control and the "?" are siblings inside the cell, never
+              nested. A button inside a button is invalid markup, and it would
+              also mean every attempt to read a definition silently re-sorted
+              the table under the reader. */}
           <tr>
-            <th>Symbol</th>
-            <th><Explain term="livePrice">Price</Explain></th>
+            <SortableTh sortKey="symbol" sort={view.sort} onSort={setSort}>Symbol</SortableTh>
+            <SortableTh sortKey="price" sort={view.sort} onSort={setSort} term="livePrice">Price</SortableTh>
             <th><Explain term="sparkline">Trend</Explain></th>
-            <th><Explain term="rsi">RSI(14)</Explain></th>
-            <th><Explain term="macd">MACD</Explain></th>
-            <th><Explain term="setupRead">Setup</Explain></th>
-            <th><Explain term="flags">Flags</Explain></th>
-            <th><Explain term="edge">Edge</Explain></th>
-            <th><Explain term="verdict">Confluence</Explain></th>
+            <SortableTh sortKey="rsi" sort={view.sort} onSort={setSort} term="rsi">RSI(14)</SortableTh>
+            <SortableTh sortKey="macd" sort={view.sort} onSort={setSort} term="macd">MACD</SortableTh>
+            <SortableTh sortKey="setup" sort={view.sort} onSort={setSort} term="setupRead">Setup</SortableTh>
+            <SortableTh sortKey="flags" sort={view.sort} onSort={setSort} term="flags">Flags</SortableTh>
+            <SortableTh sortKey="edge" sort={view.sort} onSort={setSort} term="edge">Edge</SortableTh>
+            <SortableTh sortKey="verdict" sort={view.sort} onSort={setSort} term="verdict">Confluence</SortableTh>
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => {
+          {visibleRows.map((row) => {
             return (
               <tr key={row.symbol}>
                 <td>
@@ -182,6 +249,20 @@ export default function Dashboard() {
         </tbody>
       </table>
       </div>
+
+      {/* An empty table with no explanation reads as a broken page. It is a
+          real answer — nothing here is doing that right now — and saying so
+          is more useful than leaving someone to guess which filter did it. */}
+      {visibleRows.length === 0 && (
+        <div className="callout empty-state">
+          <strong>Nothing matches those filters.</strong> That is an answer rather than an error — none of the{' '}
+          {rows.length} tracked tickers is in that state today.{' '}
+          <button type="button" className="link-button" onClick={() => setView({ ...view, ...CLEARED })}>
+            Clear the filters
+          </button>{' '}
+          to see all of them again.
+        </div>
+      )}
     </div>
   )
 }
