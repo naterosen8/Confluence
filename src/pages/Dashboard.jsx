@@ -142,8 +142,15 @@ export default function Dashboard() {
       <div className="page-head">
         <h1>Screener</h1>
         <p className="muted small">
-          {TICKERS.length} tickers, each scored on the same checks and shown with the record behind them. Click any
+          {rows.length} tickers, each scored on the same checks and shown with the record behind them. Click any
           symbol for the full read.
+          {rows.length < TICKERS.length && (
+            <>
+              {' '}
+              {TICKERS.length - rows.length} more {TICKERS.length - rows.length === 1 ? 'is' : 'are'} on the tracked
+              list but have not been through a sync yet; they appear here once they have real history behind them.
+            </>
+          )}
         </p>
       </div>
 

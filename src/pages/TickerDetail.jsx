@@ -62,6 +62,31 @@ function TickerAnalysis({ symbol, meta, chapterKey }) {
       </div>
     )
   }
+
+  // Tracked, but the sync has not fetched it yet — the window between adding a
+  // symbol to the list and the next nightly run. loadBars resolves whether or
+  // not the file existed, so without this check the page would sail on into
+  // getSeries(), which hands back a generated random walk for a symbol it has
+  // no bars for. Every indicator, base rate and chart below would then be
+  // computed from invented prices and presented as this ticker's. An honest
+  // dead end is the only correct output, exactly as for an untracked symbol.
+  if (!hasRealData(symbol)) {
+    return (
+      <div>
+        <Link to="/" className="back-link">
+          ← Back to screener
+        </Link>
+        <h1>{symbol}</h1>
+        <p className="muted">{meta.name}</p>
+        <div className="callout callout-highlight">
+          <strong>No price history synced for {symbol} yet.</strong> It is on the tracked list but the daily job has
+          not fetched it — most likely it was added since the last run, which happens on weekday evenings. Nothing is
+          shown rather than something derived from placeholder data.
+        </div>
+      </div>
+    )
+  }
+
   return <TickerAnalysisBody symbol={symbol} meta={meta} chapterKey={chapterKey} />
 }
 

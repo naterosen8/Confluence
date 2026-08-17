@@ -131,6 +131,14 @@ The samples are not fully independent — the drift windows include the called o
 
 **Calls are retracted, never deleted.** When a settled bar turns an entry's verdict into a split, it would never have been logged, so it is marked `voided` in place with the reason and date and excluded from every statistic. The earlier behaviour removed the row outright, and two published crypto calls dated 2026-08-09 were lost that way — discoverable only by diffing the file against its own git history. A public accuracy record that can quietly shrink is not one. Those two entries have been restored as retracted, and three guards in `validation.test.js` now hold the line: entries must be stamped against a real bar, every void must record its reason, and the log must never have fewer entries than the last committed version.
 
+## The tracked universe
+
+89 symbols: 4 index ETFs, 75 stocks across nine sectors, 2 macro proxies, 8 crypto pairs. Chosen for liquidity and recognisability, explicitly **not** for expected performance — this site's own measurements find no edge, and picking names on a hunch about which will do well would contradict everything else it reports.
+
+The binding constraint is wall-clock, not payload. Twelve Data's free tier allows 8 requests a minute, so the price fetch costs ~7.5s per symbol — about 11 minutes at 89. The daily cap of 800 requests is not close to binding at one request per symbol per run. Past roughly 120 symbols the schedule needs splitting across two runs rather than a longer timeout. The job timeout was raised from 20 to 40 minutes accordingly: a run killed mid-fetch commits nothing at all.
+
+Adding a symbol creates a window where it is on the list but has no bars until the next weekday-evening run. Both ends handle it honestly: the screener paints from the index and so lists only what has real history (saying how many more are pending), and a ticker page for an unsynced symbol is a dead end rather than a page of indicators computed from `getSeries`'s placeholder random walk. Both sync scripts already degrade per-symbol — a bad ticker is skipped and counted, and fundamentals resolve CIKs from SEC's own mapping rather than a hardcoded table.
+
 ## Watchlist
 
 Star any row on the screener, or the symbol on a ticker page, and it collects into a watchlist you can filter to. Composes with the other filters, so "my names, and of those the ones in a pullback" is one question rather than two.

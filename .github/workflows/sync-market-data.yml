@@ -18,7 +18,11 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 8 requests/minute on the free tier means the price fetch alone is
+    # ~7.5s x the ticker count — around 11 minutes at 89 symbols. Twenty left
+    # no headroom for a slow response or a retry, and a job killed mid-fetch
+    # commits nothing at all.
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
