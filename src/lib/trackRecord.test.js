@@ -96,22 +96,83 @@ describe('repairUnresolved', () => {
     expect(log[0].verdict).toBe('leaning-up')
   })
 
-  it('removes an entry the settled bar turns into a split', () => {
-    // A split is never logged in the first place, so leaving one behind would
-    // publish a call nobody made.
+  it('voids an entry the settled bar turns into a split, without removing it', () => {
+    // A split is never logged in the first place, so leaving one live would
+    // publish a call nobody made — but deleting it lets the record shrink
+    // silently, which is worse. It is retracted in place instead.
     const log = [
       { symbol: 'AAPL', date: '2026-08-07', verdict: 'aligned-up', score: 3, price: 100.4 },
       { symbol: 'AAPL', date: '2026-08-08', verdict: 'aligned-up', score: 3, price: 101 },
     ]
     const out = repairUnresolved({ log, barsBySymbol, rescore: () => ({ verdict: 'split', score: 0 }) })
-    expect(out.log).toHaveLength(1)
-    expect(out.log[0].date).toBe('2026-08-08')
-    expect(out.repaired[0].dropped).toBe(true)
+    expect(out.log).toHaveLength(2)
+    expect(out.log.find((e) => e.date === '2026-08-07').voided?.reason).toBe('rescored-to-split')
+    expect(out.repaired[0].voided).toBe(true)
   })
 
   it('skips a symbol with no synced bars rather than throwing', () => {
     const log = [{ symbol: 'NOPE', date: '2026-08-07', verdict: 'aligned-up', score: 3, price: 1 }]
     expect(() => repairUnresolved({ log, barsBySymbol, rescore })).not.toThrow()
     expect(repairUnresolved({ log, barsBySymbol: {}, rescore }).repaired).toEqual([])
+  })
+})
+
+describe('voiding instead of deleting', () => {
+  const bars = [
+    { date: '2026-08-07', open: 10, high: 11, low: 9, close: 10, volume: 1e6 },
+    { date: '2026-08-08', open: 10, high: 11, low: 9, close: 12, volume: 1e6 },
+    { date: '2026-08-09', open: 12, high: 13, low: 11, close: 13, volume: 1e6 },
+  ]
+
+  // The behaviour this replaces deleted the row. Two published crypto calls
+  // vanished that way and the only way to find out was to diff the file
+  // against its own git history.
+  it('keeps a retracted entry in the log rather than removing it', () => {
+    const log = [{ date: '2026-08-08', symbol: 'X', verdict: 'leaning-up', score: 2, price: 99 }]
+    const out = repairUnresolved({
+      log,
+      barsBySymbol: { X: bars },
+      rescore: () => ({ verdict: 'split', score: 0 }),
+      now: new Date('2026-08-20T00:00:00Z'),
+    })
+    expect(out.log).toHaveLength(1)
+    expect(out.voided).toHaveLength(1)
+    expect(out.log[0].voided).toEqual({
+      reason: 'rescored-to-split',
+      verdictWas: 'leaning-up',
+      at: '2026-08-20',
+    })
+  })
+
+  it('does not re-examine an already-voided entry', () => {
+    // Otherwise a later bar revision could quietly bring a retracted call back
+    // into the statistics.
+    const log = [
+      { date: '2026-08-08', symbol: 'X', verdict: 'leaning-up', score: 2, price: 99, voided: { reason: 'rescored-to-split', verdictWas: 'leaning-up', at: '2026-08-11' } },
+    ]
+    const out = repairUnresolved({ log, barsBySymbol: { X: bars }, rescore: () => ({ verdict: 'aligned-up', score: 4 }) })
+    expect(out.repaired).toHaveLength(0)
+    expect(out.log[0].price).toBe(99)
+    expect(out.log[0].verdict).toBe('leaning-up')
+  })
+
+  it('still rescores an entry whose verdict survives', () => {
+    const log = [{ date: '2026-08-08', symbol: 'X', verdict: 'leaning-up', score: 2, price: 99 }]
+    const out = repairUnresolved({
+      log,
+      barsBySymbol: { X: bars },
+      rescore: () => ({ verdict: 'aligned-up', score: 4 }),
+    })
+    expect(out.voided).toHaveLength(0)
+    expect(out.log[0].voided).toBeUndefined()
+    expect(out.log[0].price).toBe(12)
+    expect(out.log[0].verdict).toBe('aligned-up')
+  })
+
+  it('never touches a settled outcome', () => {
+    const log = [{ date: '2026-08-08', symbol: 'X', verdict: 'leaning-up', score: 2, price: 99, outcome: { correct: true, returnPct: 1 } }]
+    const out = repairUnresolved({ log, barsBySymbol: { X: bars }, rescore: () => ({ verdict: 'split', score: 0 }) })
+    expect(out.voided).toHaveLength(0)
+    expect(out.log[0].price).toBe(99)
   })
 })

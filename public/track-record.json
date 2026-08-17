@@ -195,6 +195,30 @@
     }
   },
   {
+    "date": "2026-08-09",
+    "symbol": "BTC/USD",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 65234.61,
+    "voided": {
+      "reason": "stamped-against-forming-bar",
+      "verdictWas": "leaning-up",
+      "at": "2026-08-11"
+    }
+  },
+  {
+    "date": "2026-08-09",
+    "symbol": "ETH/USD",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 1926.3,
+    "voided": {
+      "reason": "stamped-against-forming-bar",
+      "verdictWas": "leaning-down",
+      "at": "2026-08-11"
+    }
+  },
+  {
     "date": "2026-08-10",
     "symbol": "AAPL",
     "verdict": "aligned-down",

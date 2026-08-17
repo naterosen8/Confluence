@@ -168,10 +168,19 @@ async function main() {
     rescore: (history) => computeSignals(history),
   })
   log = repair.log
+  if (repair.voided.length) {
+    // Loud, because this is the one operation that changes what the published
+    // record says about calls already made.
+    console.log(`Voided ${repair.voided.length} entr${repair.voided.length === 1 ? 'y' : 'ies'} (kept in the log, excluded from stats)`)
+  }
   for (const r of repair.repaired) {
     console.log(
       `Repaired ${r.symbol} ${r.date}: price ${r.from} -> ${r.to}` +
-        (r.dropped ? ' (verdict became split — entry removed)' : r.verdictFrom ? ` (verdict ${r.verdictFrom} -> rescored)` : '')
+        (r.voided
+          ? ' (verdict became split — entry VOIDED in place, kept in the log)'
+          : r.verdictFrom
+          ? ` (verdict ${r.verdictFrom} -> rescored)`
+          : '')
     )
   }
 

@@ -50,6 +50,43 @@ export function distinguishableFromChance(successes, total, confidence = 0.95) {
   }
 }
 
+// The difference between two proportions, with an interval on the difference
+// itself.
+//
+// This exists because the site's headline test was against the wrong null. A
+// hit rate is compared to 50%, as though the alternative to skill were a coin
+// flip. It is not. Over a rising market "price went up" is true most of the
+// time regardless of what any call said, so the thing an upward-leaning call
+// has to beat is the drift, not chance. A 54% hit rate against 54% drift is
+// exactly zero skill while clearing a coin-flip test looks like a pass.
+//
+// So the figure that carries the information is the gap, and a gap needs its
+// own interval — the difference of two point estimates is noisier than either
+// of them, and eyeballing whether two overlapping intervals "look different"
+// is a well-known way to get this wrong in both directions.
+//
+// Newcombe's hybrid-score method: build a Wilson interval for each proportion
+// and combine the bounds. Chosen over a normal approximation on the difference
+// for the same reason Wilson is used above — it behaves at small n, which is
+// the only regime this record has ever been in.
+export function differenceInterval(k1, n1, k2, n2, confidence = 0.95) {
+  const a = wilsonInterval(k1, n1, confidence)
+  const b = wilsonInterval(k2, n2, confidence)
+  if (!a || !b) return null
+  const point = a.point - b.point
+  const lower = point - Math.sqrt((a.point - a.lower) ** 2 + (b.upper - b.point) ** 2)
+  const upper = point + Math.sqrt((a.upper - a.point) ** 2 + (b.point - b.lower) ** 2)
+  return {
+    point,
+    lower: Math.max(-1, lower),
+    upper: Math.min(1, upper),
+    confidence,
+    // If the interval spans zero, the honest reading is that no difference has
+    // been demonstrated — however far apart the two point estimates look.
+    distinguishable: lower > 0 || upper < 0,
+  }
+}
+
 // How many independent occurrences would be needed before a win rate this far
 // from 50% could be distinguished from chance. Answers "how much more data
 // would settle this?" instead of leaving a thin sample looking merely

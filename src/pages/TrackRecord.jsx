@@ -51,7 +51,7 @@ export default function TrackRecord() {
 
   // Scored by band direction, which resolves both the current keys and the
   // pre-rename labels still present in the logged history — done by the job.
-  const { overall, up: bullish, down: bearish, upBaseline, downBaseline, recent } = summary
+  const { overall, up: bullish, down: bearish, upBaseline, downBaseline, upGap, downGap, recent } = summary
   const pending = { length: summary.pendingCount }
 
   return (
@@ -111,28 +111,21 @@ export default function TrackRecord() {
               term="driftBaseline"
               label="Upward-leaning calls"
               value={bullish ? `${rate(bullish.winRate)} (N=${bullish.total})` : '—'}
-              note={
-                bullish && upBaseline != null
-                  ? `Price rose in ${upBaseline.toFixed(0)}% of these windows regardless — edge ${
-                      bullish.winRate - upBaseline >= 0 ? '+' : ''
-                    }${(bullish.winRate - upBaseline).toFixed(1)} pts`
-                  : null
-              }
+              note={<GapNote baseline={upBaseline} gap={upGap} rose />}
             />
             <Stat
               term="driftBaseline"
               label="Downward-leaning calls"
               value={bearish ? `${rate(bearish.winRate)} (N=${bearish.total})` : '—'}
-              note={
-                bearish && downBaseline != null
-                  ? `Price fell in ${downBaseline.toFixed(0)}% of these windows regardless — edge ${
-                      bearish.winRate - downBaseline >= 0 ? '+' : ''
-                    }${(bearish.winRate - downBaseline).toFixed(1)} pts`
-                  : null
-              }
+              note={<GapNote baseline={downBaseline} gap={downGap} />}
             />
             <Stat term="forwardWindow" label="Pending resolution" value={pending.length} />
+            {summary.voidedCount > 0 && (
+              <Stat term="voidedCall" label="Retracted calls" value={summary.voidedCount} />
+            )}
           </div>
+
+          <GapVerdict gap={upGap} />
 
           <div className="callout impact-note">
             <Explain term="driftBaseline">
@@ -141,8 +134,8 @@ export default function TrackRecord() {
             Over a period when prices rose in
             most five-session windows, an upward-leaning call is right most of the time without any skill being
             involved. The only number that means anything here is the gap between the hit rate and the baseline shown
-            beside it — and on a sample this size that gap needs to be large before it is distinguishable from chance
-            at all.
+            beside it, and that gap carries its own uncertainty — wider than either rate it is built from, which is why
+            two numbers that look far apart routinely are not.
           </div>
 
           <Section
@@ -189,6 +182,56 @@ export default function TrackRecord() {
           </Section>
         </>
       )}
+    </div>
+  )
+}
+
+// The gap, with the interval that decides whether it means anything. A bare
+// "edge +10.0 pts" is the exact overclaim the callout below warns against —
+// on ten calls that number is compatible with a substantial edge, with none,
+// and with the opposite.
+function GapNote({ baseline, gap, rose }) {
+  if (baseline == null) return null
+  const verb = rose ? 'rose' : 'fell'
+  if (!gap) return <>Price {verb} in {baseline.toFixed(0)}% of these windows regardless.</>
+  const sign = gap.points >= 0 ? '+' : '−'
+  return (
+    <>
+      Price {verb} in {baseline.toFixed(0)}% of these windows regardless — gap{' '}
+      <Explain term="gapInterval">
+        {sign}
+        {Math.abs(gap.points).toFixed(1)} pts, 95% range {gap.low.toFixed(0)} to {gap.high.toFixed(0)}
+      </Explain>
+      {!gap.distinguishable && ' · spans zero'}
+    </>
+  )
+}
+
+// The one sentence the whole page exists to produce, stated rather than left
+// for the reader to assemble out of four stat tiles.
+function GapVerdict({ gap }) {
+  if (!gap) return null
+  if (gap.distinguishable) {
+    return (
+      <div className="callout callout-highlight">
+        <strong>
+          Upward-leaning calls are beating the drift by {gap.points.toFixed(1)} points on {gap.calls} calls.
+        </strong>{' '}
+        The 95% range on that gap is {gap.low.toFixed(0)} to {gap.high.toFixed(0)} points and does not include zero, so
+        on this sample the difference is not attributable to chance alone. It is still a small sample, the windows
+        overlap, and nothing here says the next call is more likely to be right.
+      </div>
+    )
+  }
+  return (
+    <div className="callout callout-highlight">
+      <strong>No edge has been demonstrated.</strong> Upward-leaning calls hit{' '}
+      {((gap.hits / gap.calls) * 100).toFixed(0)}% against a drift of{' '}
+      {((gap.drifted / gap.windows) * 100).toFixed(0)}% — a gap of {gap.points >= 0 ? '+' : '−'}
+      {Math.abs(gap.points).toFixed(1)} points whose 95% range runs from {gap.low.toFixed(0)} to{' '}
+      {gap.high.toFixed(0)}. That range includes zero, so this record is so far consistent with the calls carrying no
+      information at all. {gap.calls} resolved call{gap.calls === 1 ? '' : 's'} is not enough to say otherwise either
+      way.
     </div>
   )
 }

@@ -54,14 +54,28 @@ export function utcToday(now = new Date()) {
 //
 // `rescore` is passed history truncated to the entry's own bar, so the
 // re-derived verdict carries no look-ahead. If the settled bar turns the
-// verdict to a split, the entry would never have been logged at all and is
-// reported for removal rather than left behind as a call nobody made.
-export function repairUnresolved({ log, barsBySymbol, rescore }) {
+// verdict to a split, the entry would never have been logged at all — it is
+// marked void IN PLACE rather than deleted.
+//
+// Deleting was the original behaviour and it was wrong. Two crypto calls
+// seeded on 2026-08-09 were removed by a later sync, and the only way to
+// discover that was to diff the file against its own history: the log simply
+// had two fewer rows than it was seeded with, with nothing saying so. A
+// public accuracy record that can quietly shrink is not an accuracy record,
+// and "nothing is removed after the fact" was precisely the claim this log
+// was built to support. A voided entry stays visible, carries the reason it
+// was voided, and is excluded from the statistics — which is the difference
+// between amending a record and editing it.
+export function repairUnresolved({ log, barsBySymbol, rescore, now = new Date() }) {
   const repaired = []
-  const drop = []
+  const voided = []
 
   for (const entry of log) {
     if (entry.outcome) continue
+    // Already voided by an earlier run. Voiding is terminal — re-examining it
+    // every sync would let a later bar revision quietly bring a retracted call
+    // back into the statistics.
+    if (entry.voided) continue
     const bars = barsBySymbol?.[entry.symbol]
     if (!bars) continue
     const index = bars.findIndex((b) => b.date === entry.date)
@@ -76,8 +90,14 @@ export function repairUnresolved({ log, barsBySymbol, rescore }) {
     if (rescore) {
       const scored = rescore(bars.slice(0, index + 1))
       if (scored.verdict === 'split') {
-        drop.push(entry)
-        change.dropped = true
+        // Kept in the log, marked, and excluded from the statistics.
+        entry.voided = {
+          reason: 'rescored-to-split',
+          verdictWas: entry.verdict,
+          at: now.toISOString().slice(0, 10),
+        }
+        change.voided = true
+        voided.push(entry)
       } else {
         change.verdictFrom = entry.verdict
         entry.verdict = scored.verdict
@@ -87,5 +107,5 @@ export function repairUnresolved({ log, barsBySymbol, rescore }) {
     repaired.push(change)
   }
 
-  return { repaired, log: drop.length ? log.filter((e) => !drop.includes(e)) : log }
+  return { repaired, voided, log }
 }

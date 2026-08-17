@@ -104,6 +104,22 @@ export const GLOSSARY = {
     isNot:
       'Not identifying, and not tracking. No email, no name, no IP logging, and no record of anything you looked at beyond the one page named on the form. It exists because a report that a figure is wrong cannot be checked once the daily sync has replaced the figure — without the date, the most useful kind of feedback is also the least actionable.',
   },
+  gapInterval: {
+    term: 'Gap and its range',
+    basis: 'measured',
+    what: 'The difference between a directional hit rate and the drift over the same windows, with a 95% range on the difference itself.',
+    how: "Newcombe's hybrid-score method: a Wilson interval is built for each rate and the bounds are combined. The interval on a difference is wider than the interval on either rate it is built from, which is why two rates that look far apart are often not distinguishable at all.",
+    isNot:
+      'Not a test against 50%. A coin flip is the wrong alternative to skill — over a rising market an upward-leaning call is right most of the time with no skill involved, so the thing to beat is the drift. If the range spans zero, no difference has been shown, however far apart the two rates look. The samples are also not fully independent: the drift windows include the called ones and overlapping forward windows are correlated, both of which make the true range wider than the one shown.',
+  },
+  voidedCall: {
+    term: 'Retracted call',
+    basis: 'accounting',
+    what: 'A logged call the record has withdrawn, kept visible and excluded from every statistic.',
+    how: 'When a provider settles a bar the entry was stamped against, the verdict is recomputed from history truncated to that bar. If it becomes a split, the call would never have been logged, so it is marked void in place with the reason and the date rather than deleted.',
+    isNot:
+      'Not a deletion, and not a correction of a result. Settled outcomes are never touched. Earlier versions removed these rows outright, which meant the log could shrink with nothing recording that it had — the two calls dated 2026-08-09 were lost that way and have been restored as retracted.',
+  },
   macroRead: {
     term: 'Macro read',
     basis: 'current',

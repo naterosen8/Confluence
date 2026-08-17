@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
+import { execSync } from 'node:child_process'
 import { readCommittedBars } from './testBars.js'
 import path from 'node:path'
 import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries, computeSignals } from './indicators'
@@ -319,6 +320,12 @@ d('track record entries are stamped so they can actually resolve', () => {
   it('every entry points at a real bar whose close is the logged price', () => {
     const broken = []
     for (const e of log) {
+      // A voided entry is a retracted call, and mis-stamping is the documented
+      // reason it was retracted — flagging it here would mean the guard could
+      // never go green while the record honestly reports its own retractions.
+      // Not a loophole: the next test requires every void to carry a reason,
+      // so nothing can be quietly voided to silence this one.
+      if (e.voided) continue
       const series = bars[e.symbol]
       if (!series) continue
       const bar = series.find((b) => b.date === e.date)
@@ -330,6 +337,36 @@ d('track record entries are stamped so they can actually resolve', () => {
     }
     if (broken.length) console.log('\nMis-stamped track-record entries:\n  ' + broken.join('\n  '))
     expect(broken).toEqual([])
+  })
+
+  // Voiding is the one operation that changes what the record says about calls
+  // already published, so every void has to be accountable.
+  it('every retracted entry says why, and keeps its original verdict', () => {
+    const bad = []
+    for (const e of log) {
+      if (!e.voided) continue
+      if (!e.voided.reason) bad.push(`${e.symbol} ${e.date}: voided with no reason`)
+      if (!e.voided.at) bad.push(`${e.symbol} ${e.date}: voided with no date`)
+      if (!e.voided.verdictWas) bad.push(`${e.symbol} ${e.date}: voided without recording the original verdict`)
+      if (e.outcome) bad.push(`${e.symbol} ${e.date}: voided but carries a settled outcome`)
+    }
+    expect(bad).toEqual([])
+  })
+
+  // The log may be amended but must never shrink. Deleting a published call
+  // once cost two crypto entries, discoverable only by diffing the file
+  // against its own git history.
+  it('never has fewer entries than the last committed version', () => {
+    let previous
+    try {
+      previous = JSON.parse(execSync('git show HEAD:public/track-record.json', { encoding: 'utf8' }))
+    } catch {
+      return // no committed version to compare against yet
+    }
+    expect(log.length).toBeGreaterThanOrEqual(previous.length)
+    const now = new Set(log.map((e) => `${e.symbol}|${e.date}`))
+    const missing = previous.map((e) => `${e.symbol}|${e.date}`).filter((k) => !now.has(k))
+    expect(missing).toEqual([])
   })
 })
 
