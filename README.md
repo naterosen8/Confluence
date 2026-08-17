@@ -113,6 +113,14 @@ Historical P/B uses the book value actually reported for each quarter against th
 
 Backed by [Supabase](https://supabase.com) (free tier) — Postgres for storage, anonymous auth (a real account created silently, no email/password/click required — see `AuthContext.ensureSession`). No custom backend: the browser talks to Supabase directly, and row-level security (`supabase/schema.sql`) enforces that a user can only ever read or write their own trades — that's a database-level guarantee, not application code. The tradeoff of skipping email: an anonymous identity lives in the browser that created it, so trades don't follow you to a different device. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (browser-side, safe to expose — see `.env.example`) to enable; without them the simulator and the feedback form each show a "not set up yet" message instead of breaking. Requires **Authentication → Sign In / Providers → Anonymous Sign-Ins** enabled in the Supabase dashboard (off by default).
 
+## What every base rate tests against
+
+Win rates on ticker pages are compared to **that instrument's own drift** over the same forward window, not to 50%. A coin flip is the wrong alternative to a signal: a stock that rose in 61% of all five-session windows makes a signal "winning" 65% of the time look like an edge when it is carrying no information about that stock at all.
+
+The measurement when this replaced the coin-flip test: **8 of 96 published base rates claimed to be distinguishable from chance, and 1 of those 8 survived being compared to its own drift.** Seven published claims were artifacts of the null, not findings.
+
+`distinguishable` now means distinguishable from drift, and the coin-flip verdict is kept under `distinguishableFromCoinFlip` so nothing can read one believing it is the other. Deviation counts in both directions — a setup that reliably lands *below* its drift is as much a measurement as one above it, and calling only the upside an edge would put a thumb on the scale.
+
 ## What the track record tests against
 
 The hit rate is compared to the **drift over the same windows**, not to 50%. A coin flip is the wrong alternative to skill: over a period when prices rose in most five-session windows, an upward-leaning call is right most of the time with no skill involved, so a 54% hit rate against 54% drift is exactly zero edge while clearing a coin-flip test looks like a pass.

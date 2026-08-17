@@ -140,3 +140,49 @@ describe('mostRecentEvent', () => {
     }
   })
 })
+
+describe('base rates are tested against drift, not a coin flip', () => {
+  // A rising series: nearly every forward window is a win, so a signal that
+  // "wins" 90% of the time is carrying no information about this instrument.
+  const rising = Array.from({ length: 400 }, (_, i) => {
+    const c = 100 * (1 + i * 0.002)
+    return { date: `d${i}`, open: c, high: c * 1.01, low: c * 0.99, close: c, volume: 1e6 }
+  })
+
+  it('reports the instrument drift alongside every base rate', async () => {
+    const { backtestTicker } = await import('./backtest.js')
+    const bt = backtestTicker(rising)
+    expect(bt.drift).toBeGreaterThan(90)
+    for (const key of ['macdBullishCross', 'macdBearishCross', 'rsiExitOversold', 'rsiEnterOverbought']) {
+      if (!bt[key]?.sampleSize) continue
+      expect(bt[key].drift, key).toBeCloseTo(bt.drift, 6)
+    }
+  })
+
+  it('does not call a win rate an edge when the instrument delivers it anyway', async () => {
+    const { backtestTicker } = await import('./backtest.js')
+    const bt = backtestTicker(rising)
+    for (const key of ['macdBullishCross', 'macdBearishCross', 'rsiExitOversold', 'rsiEnterOverbought']) {
+      const s = bt[key]
+      if (!s?.sampleSize) continue
+      // Everything wins on a monotonic series, so nothing can beat the drift.
+      expect(s.distinguishable, `${key} claims an edge over a ${bt.drift.toFixed(0)}% drift`).toBe(false)
+    }
+  })
+
+  it('keeps the coin-flip verdict under its own name so the two cannot be confused', async () => {
+    const { backtestTicker } = await import('./backtest.js')
+    const s = Object.values(backtestTicker(rising)).find((v) => v?.sampleSize > 10)
+    // On this series the win rate is far from 50% but equal to drift: the two
+    // verdicts must disagree, which is the whole point of separating them.
+    expect(s.distinguishableFromCoinFlip).toBe(true)
+    expect(s.distinguishable).toBe(false)
+  })
+
+  it('computes the drift baseline over every window, not just signal windows', async () => {
+    const { driftBaseline } = await import('./backtest.js')
+    const closes = [1, 2, 3, 2, 1]
+    // Windows of 2: (1->3) up, (2->2) flat, (3->1) down => 1 win of 3.
+    expect(driftBaseline(closes, 2)).toEqual({ wins: 1, total: 3 })
+  })
+})

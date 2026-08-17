@@ -299,10 +299,10 @@ export const GLOSSARY = {
   driftBaseline: {
     term: 'Drift baseline',
     basis: 'measured',
-    what: 'How often price moved that direction anyway, across exactly the same resolved windows.',
-    how: 'The share of the same windows where price simply rose (for upward-leaning calls) or fell (for downward-leaning ones), ignoring what the call said.',
+    what: 'How often price moved that direction anyway — for a logged call, across the same resolved windows; for a signal, across every window in that instrument\u2019s history.',
+    how: 'The share of windows where price simply rose or fell over the same forward horizon, ignoring what the signal or the call said. On a ticker page this is the whole series, not only the sessions the signal fired on.',
     isNot:
-      'Not a benchmark that has to be beaten by much to be luck. On a sample this size the gap has to be large before it is distinguishable from chance at all — a few points either way is noise.',
+      'Not an optional extra comparison — it is the one the verdict rests on. A win rate measured against 50% tests a signal against a coin flip, which is the wrong alternative: a stock that rose in 61% of all five-session windows makes a 65% signal look like an edge and it is not. When this replaced the coin-flip test, 8 of 96 published base rates claimed to be distinguishable from chance and 1 of those 8 survived. Beating it by a few points is still noise: the gap carries its own range, and that range is wider than either rate behind it.',
   },
   scoreCorrelation: {
     term: 'Score-to-return correlation',

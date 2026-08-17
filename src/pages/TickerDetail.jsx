@@ -135,9 +135,17 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
                 glossary test that checks every term= actually resolves. */}
             <Explain term="winRate">
               {setup.stat
-                ? setup.stat.distinguishable
-                  ? `Historically ${setup.stat.winRate.toFixed(0)}% won over ${setup.stat.sampleSize} similar setups`
-                  : `Historically ${setup.stat.winRate.toFixed(0)}% over ${setup.stat.sampleSize} setups — not distinguishable from chance`
+                ? setup.stat.drift == null
+                  ? `Historically ${setup.stat.winRate.toFixed(0)}% over ${setup.stat.sampleSize} similar setups`
+                  : setup.stat.distinguishable
+                  ? // Either direction counts. A setup that reliably lands
+                    // BELOW the drift is as much a measurement as one above
+                    // it, and calling only the upside "an edge" would put a
+                    // thumb on the scale.
+                    `Historically ${setup.stat.winRate.toFixed(0)}% over ${setup.stat.sampleSize} similar setups, against ${setup.stat.drift.toFixed(0)}% for this ticker generally — ${
+                      setup.stat.gap >= 0 ? 'above' : 'below'
+                    } its own drift by ${Math.abs(setup.stat.gap).toFixed(0)} points`
+                  : `Historically ${setup.stat.winRate.toFixed(0)}% over ${setup.stat.sampleSize} setups, against ${setup.stat.drift.toFixed(0)}% for this ticker generally — not distinguishable from its own drift`
                 : 'No comparable history yet for this setup'}
             </Explain>
           </span>
@@ -454,9 +462,26 @@ function BacktestCard({ label, result, active }) {
               <span className="muted small">
                 <Explain term="confidenceInterval">95% range</Explain>
               </span>
-              <span className={result.distinguishable ? '' : 'muted small'}>
+              <span className={result.distinguishableFromCoinFlip ? '' : 'muted small'}>
                 {result.winRateLow.toFixed(0)}–{rate(result.winRateHigh)}
-                {!result.distinguishable && ' · spans 50%'}
+                {!result.distinguishableFromCoinFlip && ' · spans 50%'}
+              </span>
+            </div>
+          )}
+          {/* The row the verdict actually rests on. A win rate only means
+              something against the rate this instrument delivers anyway, and
+              that comparison used to be missing entirely — the card tested
+              against 50% and called the result an edge. */}
+          {result.drift != null && (
+            <div className="backtest-row">
+              <span className="muted small">
+                <Explain term="driftBaseline">vs. drift</Explain>
+              </span>
+              <span className={result.distinguishable ? '' : 'muted small'}>
+                {rate(result.drift)} baseline · gap {result.gap >= 0 ? '+' : '−'}
+                {Math.abs(result.gap).toFixed(1)}
+                {result.gapLow != null && ` (${result.gapLow.toFixed(0)} to ${result.gapHigh.toFixed(0)})`}
+                {!result.distinguishable && ' · spans zero'}
               </span>
             </div>
           )}

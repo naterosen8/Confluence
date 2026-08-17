@@ -73,7 +73,11 @@ export function buildScreenerRow({ ticker, bars, spyBars }) {
           winRate: round(stat.winRate, 2),
           sampleSize: stat.sampleSize,
           avgReturn: round(stat.avgReturn, 4),
+          // Distinguishable from the ticker's own drift, not from a coin
+          // flip. See summarize() in backtest.js.
           distinguishable: Boolean(stat.distinguishable),
+          drift: stat.drift ?? null,
+          gap: stat.gap ?? null,
           source: setup.source,
         }
       : null,

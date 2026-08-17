@@ -1,42 +1,85 @@
 import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries } from './indicators.js'
-import { distinguishableFromChance, independentCount } from './stats.js'
+import { distinguishableFromChance, differenceInterval, independentCount } from './stats.js'
 
 // How many sessions forward every base rate in this file looks. Exported so
 // the UI can name the window ("over the next 5 sessions") without a third
 // copy of the number drifting out of sync with the engine.
 export const FORWARD_DAYS = 5
 
-function summarize(occurrences) {
+// `baseline` is the same instrument's own drift over the same forward window:
+// { wins, total } across every window in the series, not just the ones the
+// signal fired on.
+//
+// It is required, and it changed what `distinguishable` means. This used to
+// test the win rate against 50%, which is the wrong null and flatters every
+// figure on the site. A stock that rose in 61% of all five-session windows
+// makes a signal that "wins" 65% of the time look like an edge against a coin
+// flip and like nothing at all against the stock itself. Measured across the
+// tracked universe when this was changed: 8 of 96 published base rates
+// claimed to be distinguishable from chance, and exactly 1 of those 8
+// survived being compared to its own drift instead.
+//
+// So `distinguishable` now means distinguishable from drift. The coin-flip
+// interval is still reported — it is what the win rate's own uncertainty
+// looks like — but it is no longer what the verdict rests on.
+function summarize(occurrences, baseline) {
   if (occurrences.length === 0) return { sampleSize: 0 }
   const returns = occurrences.map((o) => o.return)
   const wins = returns.filter((r) => r > 0).length
   // A win rate without its uncertainty is the single most misleading number
   // this app can print: 60% over 10 occurrences and 60% over 400 are entirely
-  // different claims, and only one of them is distinguishable from a coin
-  // flip. Every summary now carries the interval and that verdict.
+  // different claims.
   const ci = distinguishableFromChance(wins, occurrences.length)
   // Overlapping forward windows mean the raw count overstates the evidence.
   const indices = occurrences.map((o) => o.index).filter((i) => i != null)
+
+  // The gap against drift, with an interval on the gap itself. Two rates that
+  // look far apart frequently are not: the interval on a difference is wider
+  // than the interval on either rate behind it.
+  const gapCi =
+    baseline && baseline.total
+      ? differenceInterval(wins, occurrences.length, baseline.wins, baseline.total)
+      : null
+
   return {
     sampleSize: occurrences.length,
     independentSample: indices.length ? independentCount(indices, FORWARD_DAYS) : null,
     winRate: (wins / occurrences.length) * 100,
     winRateLow: ci ? ci.lower * 100 : null,
     winRateHigh: ci ? ci.upper * 100 : null,
-    distinguishable: ci ? ci.distinguishable : false,
+    // Kept under its old name so nothing silently reads a coin-flip verdict
+    // believing it is a drift one.
+    distinguishableFromCoinFlip: ci ? ci.distinguishable : false,
+    drift: baseline && baseline.total ? (baseline.wins / baseline.total) * 100 : null,
+    gap: gapCi ? gapCi.point * 100 : null,
+    gapLow: gapCi ? gapCi.lower * 100 : null,
+    gapHigh: gapCi ? gapCi.upper * 100 : null,
+    distinguishable: gapCi ? gapCi.distinguishable : false,
     avgReturn: (returns.reduce((a, b) => a + b, 0) / returns.length) * 100,
     bestReturn: Math.max(...returns) * 100,
     worstReturn: Math.min(...returns) * 100,
   }
 }
 
-function forwardReturns(closes, eventIndices, forwardDays) {
+// Drift over every forward window in the series — the rate a signal has to
+// beat to be carrying any information at all.
+export function driftBaseline(closes, forwardDays) {
+  let wins = 0
+  let total = 0
+  for (let i = 0; i + forwardDays < closes.length; i++) {
+    total++
+    if (closes[i + forwardDays] > closes[i]) wins++
+  }
+  return { wins, total }
+}
+
+function forwardReturns(closes, eventIndices, forwardDays, baseline) {
   const occurrences = []
   for (const i of eventIndices) {
     if (i + forwardDays >= closes.length) continue
     occurrences.push({ index: i, return: (closes[i + forwardDays] - closes[i]) / closes[i] })
   }
-  return summarize(occurrences)
+  return summarize(occurrences, baseline ?? driftBaseline(closes, forwardDays))
 }
 
 // Detects the *event* (histogram flips sign), not the ongoing state — so a
@@ -81,13 +124,18 @@ export function backtestTicker(bars, { forwardDays = FORWARD_DAYS } = {}) {
   const closes = bars.map((b) => b.close)
   const { bullish, bearish } = findMacdCrosses(closes)
   const { exitOversold, enterOverbought } = findRsiEvents(closes)
+  // Computed once for the instrument, not per signal: the baseline is a
+  // property of the series, and recomputing it per call would be the same
+  // number four times.
+  const baseline = driftBaseline(closes, forwardDays)
 
   return {
     forwardDays,
-    macdBullishCross: forwardReturns(closes, bullish, forwardDays),
-    macdBearishCross: forwardReturns(closes, bearish, forwardDays),
-    rsiExitOversold: forwardReturns(closes, exitOversold, forwardDays),
-    rsiEnterOverbought: forwardReturns(closes, enterOverbought, forwardDays),
+    drift: baseline.total ? (baseline.wins / baseline.total) * 100 : null,
+    macdBullishCross: forwardReturns(closes, bullish, forwardDays, baseline),
+    macdBearishCross: forwardReturns(closes, bearish, forwardDays, baseline),
+    rsiExitOversold: forwardReturns(closes, exitOversold, forwardDays, baseline),
+    rsiEnterOverbought: forwardReturns(closes, enterOverbought, forwardDays, baseline),
   }
 }
 
@@ -159,8 +207,17 @@ export function backtestByScore(bars, spyBars, { forwardDays = FORWARD_DAYS } = 
     if (regime && currentRegime && regime === currentRegime) bucket.regimeMatched.push({ return: ret, index: i })
   }
 
+  // Same instrument-level baseline for every bucket. A score bucket has to
+  // beat the stock's own drift, not a coin flip — otherwise the top bucket of
+  // a stock that rose most weeks looks predictive purely because the stock
+  // rose most weeks.
+  const bucketBaseline = driftBaseline(closes, forwardDays)
   const rows = [...buckets.entries()]
-    .map(([score, occ]) => ({ score, all: summarize(occ.all), regimeMatched: summarize(occ.regimeMatched) }))
+    .map(([score, occ]) => ({
+      score,
+      all: summarize(occ.all, bucketBaseline),
+      regimeMatched: summarize(occ.regimeMatched, bucketBaseline),
+    }))
     .sort((a, b) => b.score - a.score)
 
   return {
