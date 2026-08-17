@@ -123,26 +123,28 @@ export function parseParams(params) {
     setups: list('setup'),
     verdicts: list('verdict'),
     flagged: get('flagged') === '1',
+    watchlistOnly: get('watch') === '1',
     sort: SORTS[key] ? { key, dir: dirRaw === 'desc' ? -1 : 1 } : DEFAULT_SORT,
   }
 }
 
 // Only non-default state is written, so an untouched screener keeps a clean
 // URL and the back button does not walk through a trail of identical views.
-export function toParams({ query, kinds, setups, verdicts, flagged, sort }) {
+export function toParams({ query, kinds, setups, verdicts, flagged, watchlistOnly, sort }) {
   const p = new URLSearchParams()
   if (query?.trim()) p.set('q', query.trim())
   const lists = { kind: kinds, setup: setups, verdict: verdicts }
   for (const k of LIST_KEYS) if (lists[k]?.length) p.set(k, lists[k].join(','))
   if (flagged) p.set('flagged', '1')
+  if (watchlistOnly) p.set('watch', '1')
   if (sort && (sort.key !== DEFAULT_SORT.key || sort.dir !== DEFAULT_SORT.dir)) {
     p.set('sort', `${sort.key}:${sort.dir === -1 ? 'desc' : 'asc'}`)
   }
   return p
 }
 
-export function isFiltered({ query, kinds, setups, verdicts, flagged }) {
-  return Boolean(query?.trim() || kinds?.length || setups?.length || verdicts?.length || flagged)
+export function isFiltered({ query, kinds, setups, verdicts, flagged, watchlistOnly }) {
+  return Boolean(query?.trim() || kinds?.length || setups?.length || verdicts?.length || flagged || watchlistOnly)
 }
 
 // Clicking the active column flips it; clicking a new one starts at whichever

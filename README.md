@@ -131,6 +131,14 @@ The samples are not fully independent — the drift windows include the called o
 
 **Calls are retracted, never deleted.** When a settled bar turns an entry's verdict into a split, it would never have been logged, so it is marked `voided` in place with the reason and date and excluded from every statistic. The earlier behaviour removed the row outright, and two published crypto calls dated 2026-08-09 were lost that way — discoverable only by diffing the file against its own git history. A public accuracy record that can quietly shrink is not one. Those two entries have been restored as retracted, and three guards in `validation.test.js` now hold the line: entries must be stamped against a real bar, every void must record its reason, and the log must never have fewer entries than the last committed version.
 
+## Watchlist
+
+Star any row on the screener, or the symbol on a ticker page, and it collects into a watchlist you can filter to. Composes with the other filters, so "my names, and of those the ones in a pullback" is one question rather than two.
+
+Stored in `localStorage`, not the database, deliberately: a watchlist is a preference and not a record. It works on the first visit with no account, no anonymous identity minted, no network round trip before the star responds, and nothing about it is worth putting behind row-level security. The cost — it does not follow you to another device — is the same trade the simulator already makes, and the page says so rather than hiding it. Reads and writes are wrapped because storage *throws* in Safari private mode and when a browser blocks site data; a watchlist that fails to persist is a far smaller problem than a screener that fails to render. Cross-tab `storage` events keep two open tabs from disagreeing about what is starred.
+
+`filterToWatchlist` is strict: an empty watchlist matches nothing. Treating it as "no filter" leaves the chip visibly active with all 24 tickers still listed, which reads as broken — that was a real bug, caught in a browser doing exactly that. The page distinguishes "nothing starred yet" from "starred names, none of which match the other filters" and says which.
+
 ## Screener sorting and filtering
 
 Every column sorts, and the table filters by text (symbol or name), instrument type, chart setup, and confluence lean, plus a "has flags" toggle. Values within a facet are OR, separate facets are AND, and the facets only offer states something is actually in — a filter for a structure nothing is currently in produces an empty table that reads as a broken page.

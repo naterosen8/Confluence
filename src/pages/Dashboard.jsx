@@ -13,6 +13,7 @@ import LivePrice from '../components/LivePrice'
 import { rate } from '../lib/format'
 import ScreenerFilters from '../components/ScreenerFilters'
 import FeedbackLink from '../components/FeedbackLink'
+import { useWatchlist, filterToWatchlist } from '../lib/watchlist'
 import {
   SORTS,
   sortRows,
@@ -51,7 +52,22 @@ function SortableTh({ sortKey, sort, onSort, term, children }) {
   )
 }
 
-const CLEARED = { query: '', kinds: [], setups: [], verdicts: [], flagged: false }
+function StarButton({ symbol, starred, onToggle }) {
+  return (
+    <button
+      type="button"
+      className={`star${starred ? ' star-on' : ''}`}
+      aria-pressed={starred}
+      aria-label={starred ? `Remove ${symbol} from watchlist` : `Add ${symbol} to watchlist`}
+      onClick={() => onToggle(symbol)}
+      title={starred ? 'On your watchlist' : 'Add to watchlist'}
+    >
+      {starred ? '\u2605' : '\u2606'}
+    </button>
+  )
+}
+
+const CLEARED = { query: '', kinds: [], setups: [], verdicts: [], flagged: false, watchlistOnly: false }
 
 export default function Dashboard() {
   const [livePrices, setLivePrices] = useState({})
@@ -77,9 +93,16 @@ export default function Dashboard() {
   // site. A narrowed screener is exactly the kind of thing someone wants to
   // send to another person or reload back into, and state held only in the
   // component is the one view that cannot be.
+  const watchlist = useWatchlist()
   const view = useMemo(() => parseParams(searchParams), [searchParams])
   const facets = useMemo(() => availableFacets(rows), [rows])
-  const visibleRows = useMemo(() => sortRows(filterRows(rows, view), view.sort), [rows, view])
+  const visibleRows = useMemo(() => {
+    const filtered = filterRows(rows, view)
+    // Composed with the other filters rather than replacing them: "my names,
+    // and of those the ones in a pullback" is the question this is for.
+    const scoped = view.watchlistOnly ? filterToWatchlist(filtered, watchlist.symbols) : filtered
+    return sortRows(scoped, view.sort)
+  }, [rows, view, watchlist.symbols])
 
   const setView = useCallback(
     (next) => {
@@ -195,6 +218,7 @@ export default function Dashboard() {
         onChange={setView}
         shown={visibleRows.length}
         total={rows.length}
+        watchCount={watchlist.count}
       />
 
       <div className="table-wrap">
@@ -205,6 +229,7 @@ export default function Dashboard() {
               also mean every attempt to read a definition silently re-sorted
               the table under the reader. */}
           <tr>
+            <th><span className="visually-hidden">Watchlist</span></th>
             <SortableTh sortKey="symbol" sort={view.sort} onSort={setSort}>Symbol</SortableTh>
             <SortableTh sortKey="price" sort={view.sort} onSort={setSort} term="livePrice">Price</SortableTh>
             <th><Explain term="sparkline">Trend</Explain></th>
@@ -219,7 +244,10 @@ export default function Dashboard() {
         <tbody>
           {visibleRows.map((row) => {
             return (
-              <tr key={row.symbol}>
+              <tr key={row.symbol} className={watchlist.has(row.symbol) ? 'row-watched' : undefined}>
+                <td className="star-cell">
+                  <StarButton symbol={row.symbol} starred={watchlist.has(row.symbol)} onToggle={watchlist.toggle} />
+                </td>
                 <td>
                   <Link to={`/ticker/${encodeURIComponent(row.symbol)}`} className="symbol-link">
                     <strong>{row.symbol}</strong>
@@ -254,16 +282,25 @@ export default function Dashboard() {
       {/* An empty table with no explanation reads as a broken page. It is a
           real answer — nothing here is doing that right now — and saying so
           is more useful than leaving someone to guess which filter did it. */}
-      {visibleRows.length === 0 && (
-        <div className="callout empty-state">
-          <strong>Nothing matches those filters.</strong> That is an answer rather than an error — none of the{' '}
-          {rows.length} tracked tickers is in that state today.{' '}
-          <button type="button" className="link-button" onClick={() => setView({ ...view, ...CLEARED })}>
-            Clear the filters
-          </button>{' '}
-          to see all of them again.
-        </div>
-      )}
+      {visibleRows.length === 0 &&
+        (view.watchlistOnly && watchlist.count === 0 ? (
+          // An empty watchlist is not a failed filter, and telling someone to
+          // "clear the filters" when the real answer is "you have not starred
+          // anything yet" sends them looking for a bug that is not there.
+          <div className="callout empty-state">
+            <strong>Your watchlist is empty.</strong> Star any row with the ☆ beside its symbol and it will collect
+            here. Kept in this browser only — no account, and it does not follow you to another device.
+          </div>
+        ) : (
+          <div className="callout empty-state">
+            <strong>Nothing matches those filters.</strong> That is an answer rather than an error — none of the{' '}
+            {rows.length} tracked tickers is in that state today.{' '}
+            <button type="button" className="link-button" onClick={() => setView({ ...view, ...CLEARED })}>
+              Clear the filters
+            </button>{' '}
+            to see all of them again.
+          </div>
+        ))}
 
       <p className="muted small report-line">
         <FeedbackLink kind="wrong-number" note="On the screener: ">

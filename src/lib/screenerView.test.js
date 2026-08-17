@@ -149,13 +149,14 @@ describe('URL round-trip', () => {
       setups: ['pullback'],
       verdicts: ['aligned-up'],
       flagged: true,
+      watchlistOnly: false,
       sort: { key: 'rsi', dir: -1 },
     }
     expect(roundTrip(state)).toEqual(state)
   })
 
   it('writes nothing for an untouched screener', () => {
-    const clean = { query: '', kinds: [], setups: [], verdicts: [], flagged: false, sort: DEFAULT_SORT }
+    const clean = { query: '', kinds: [], setups: [], verdicts: [], flagged: false, watchlistOnly: false, sort: DEFAULT_SORT }
     expect(toParams(clean).toString()).toBe('')
   })
 
@@ -166,6 +167,7 @@ describe('URL round-trip', () => {
       setups: [],
       verdicts: [],
       flagged: false,
+      watchlistOnly: false,
       sort: DEFAULT_SORT,
     })
   })

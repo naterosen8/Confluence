@@ -22,7 +22,7 @@ function toggle(list, key) {
   return list.includes(key) ? list.filter((k) => k !== key) : [...list, key]
 }
 
-export default function ScreenerFilters({ state, facets, onChange, shown, total }) {
+export default function ScreenerFilters({ state, facets, onChange, shown, total, watchCount }) {
   const set = (patch) => onChange({ ...state, ...patch })
 
   return (
@@ -45,6 +45,17 @@ export default function ScreenerFilters({ state, facets, onChange, shown, total 
       </div>
 
       <div className="facet-groups">
+        <div className="facet-group">
+          <span className="muted small facet-label">Yours</span>
+          <Chip
+            active={state.watchlistOnly}
+            onClick={() => set({ watchlistOnly: !state.watchlistOnly })}
+            title={watchCount ? `${watchCount} starred` : 'Star a row to start a watchlist'}
+          >
+            Watchlist{watchCount ? ` (${watchCount})` : ''}
+          </Chip>
+        </div>
+
         <div className="facet-group">
           <span className="muted small facet-label">Type</span>
           {facets.kinds.map((k) => (

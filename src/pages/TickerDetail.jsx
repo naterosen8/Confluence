@@ -25,6 +25,7 @@ import { directionBanner } from '../lib/signalValidation'
 import { TICKER_CHAPTERS, chapterFor, chapterNeighbours } from '../lib/chapters'
 import { ChapterNav, ChapterHead, ChapterPager, useChapterKeys } from '../components/ChapterNav'
 import FeedbackLink from '../components/FeedbackLink'
+import { useWatchlist } from '../lib/watchlist'
 
 export default function TickerDetail() {
   const { symbol, chapter } = useParams()
@@ -65,6 +66,7 @@ function TickerAnalysis({ symbol, meta, chapterKey }) {
 }
 
 function TickerAnalysisBody({ symbol, meta, chapterKey }) {
+  const watchlist = useWatchlist()
   const chapter = chapterFor(chapterKey)
   const { index } = chapterNeighbours(chapter.key)
   useDocumentTitle(`${symbol} — ${chapter.label}`)
@@ -117,7 +119,20 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
 
       <div className="detail-header">
         <div>
-          <h1>{symbol}</h1>
+          {/* Starring belongs here as much as on the screener: this is the
+              page where someone decides a name is worth following. */}
+          <h1 className="detail-title">
+            <button
+              type="button"
+              className={`star star-lg${watchlist.has(symbol) ? ' star-on' : ''}`}
+              aria-pressed={watchlist.has(symbol)}
+              aria-label={watchlist.has(symbol) ? `Remove ${symbol} from watchlist` : `Add ${symbol} to watchlist`}
+              onClick={() => watchlist.toggle(symbol)}
+            >
+              {watchlist.has(symbol) ? '\u2605' : '\u2606'}
+            </button>
+            {symbol}
+          </h1>
           <p className="muted">{meta.name}</p>
         </div>
         {/* The badge is only what the indicators read right now. Shown alone
