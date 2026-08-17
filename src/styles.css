@@ -1689,3 +1689,11 @@ table.grid {
 .report-line a:hover {
   color: var(--accent);
 }
+
+/* A retracted call is still part of the record, so it is legible rather than
+   hidden — dimmed and struck to read as withdrawn without vanishing. */
+.row-voided td:nth-child(2) {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  color: var(--muted);
+}

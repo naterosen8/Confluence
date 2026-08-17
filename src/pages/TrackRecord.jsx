@@ -180,6 +180,46 @@ export default function TrackRecord() {
               </table>
             </div>
           </Section>
+
+          {summary.voided?.length > 0 && (
+            <Section title={`Retracted calls (${summary.voidedCount})`}>
+              <p className="muted small">
+                Calls the log has withdrawn. When a provider settles the bar an entry was stamped against, the verdict
+                is recomputed from history truncated to that bar; if it becomes a split, the call would never have been
+                logged. These are kept here and excluded from every figure above — an earlier version deleted them
+                outright, which meant the record could shrink with nothing saying so.
+              </p>
+              <div className="table-wrap">
+                <table className="grid">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Symbol</th>
+                      <th>Verdict as logged</th>
+                      <th><Explain term="voidedCall">Why retracted</Explain></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {summary.voided.map((e) => (
+                      <tr key={`${e.symbol}-${e.date}`} className="row-voided">
+                        <td>{e.date}</td>
+                        <td>{e.symbol}</td>
+                        <td className="muted">{leanByKey(e.voided.verdictWas ?? e.verdict)?.short ?? e.verdict}</td>
+                        <td className="muted small">
+                          {e.voided.reason === 'rescored-to-split'
+                            ? 'Settled bar turned the verdict to a split'
+                            : e.voided.reason === 'stamped-against-forming-bar'
+                            ? 'Stamped against a bar that was still forming'
+                            : e.voided.reason}
+                          {e.voided.at && ` · ${e.voided.at}`}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Section>
+          )}
         </>
       )}
     </div>
