@@ -150,7 +150,24 @@ export function readSetup(bars, signals) {
   })
   if (!pattern) return null
 
-  const invalidation = pattern.invalidatedBy(ctx) ?? null
+  // Every read must name what would break it — that falsifiability is the
+  // only reason a description like this is worth more than an opinion. A
+  // pattern's own invalidation depends on structure it may not have: BAC hit
+  // the compression pattern with no swing levels detected and shipped a read
+  // with `invalidation: null`, which went unnoticed for as long as it did only
+  // because that combination never occurred in the original two dozen tickers.
+  //
+  // So the fallback lives here rather than in each pattern: a move of more
+  // than one average daily range from here, in either direction, is always a
+  // meaningful departure from what the read describes, whatever the read was.
+  const invalidation =
+    pattern.invalidatedBy(ctx) ??
+    (atr > 0 && price > 0
+      ? {
+          level: null,
+          text: `any close more than $${round2(atr)} from $${round2(price)} — one average daily range, either way`,
+        }
+      : { level: null, text: 'any move large enough to change the structure described above' })
 
   return {
     key: pattern.key,

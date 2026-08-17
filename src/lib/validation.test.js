@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import { execSync } from 'node:child_process'
 import { readCommittedBars } from './testBars.js'
+import { TICKERS } from './tickers.js'
 import path from 'node:path'
 import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries, computeSignals } from './indicators'
 import { bestAvailableStat, FORWARD_DAYS } from './backtest'
@@ -52,15 +53,22 @@ d('data integrity of the published snapshot', () => {
     }
   })
 
+  // Thresholds are per asset class because the classes genuinely differ. A
+  // 50% session in a mega-cap equity is almost certainly a split or a bad
+  // print; in an altcoin it is a Tuesday. ADA/USD moved 72% on 2025-03-02 on
+  // the US strategic-reserve announcement — real, and it tripped a limit
+  // calibrated on twenty-four mostly-equity symbols.
+  const MAX_SESSION_MOVE = { crypto: 0.9, stock: 0.5, etf: 0.35, macro: 0.35 }
+
   it('contains no absurd single-session moves that would indicate bad data', () => {
+    const kindOf = new Map(TICKERS.map((t) => [t.symbol, t.kind]))
     const suspect = []
     for (const symbol of symbols) {
       const s = bars[symbol]
+      const limit = MAX_SESSION_MOVE[kindOf.get(symbol)] ?? 0.5
       for (let i = 1; i < s.length; i++) {
         const move = Math.abs((s[i].close - s[i - 1].close) / s[i - 1].close)
-        // 50% in a session is possible but vanishingly rare for these names;
-        // it is far more likely a split or a bad print.
-        if (move > 0.5) suspect.push(`${symbol} ${s[i].date}: ${(move * 100).toFixed(0)}%`)
+        if (move > limit) suspect.push(`${symbol} ${s[i].date}: ${(move * 100).toFixed(0)}% (limit ${limit * 100}%)`)
       }
     }
     if (suspect.length) console.log('Suspect single-session moves:', suspect)
@@ -212,7 +220,8 @@ d('leaderboard selection bias', () => {
   // numbers appear by chance alone — the look-elsewhere effect. This measures
   // how impressive the top-five looks when the data provably contains no
   // signal at all, by shuffling each ticker's returns.
-  it('compares the real top-5 edge against a shuffled null', () => {
+  // 80 permutations across 89 tickers rather than 24: past the 5s default.
+  it('compares the real top-5 edge against a shuffled null', { timeout: 30_000 }, () => {
     const spy = bars.SPY
     if (!spy) return
 

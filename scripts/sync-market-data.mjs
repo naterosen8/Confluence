@@ -66,14 +66,32 @@ async function fetchBars(symbol) {
   return data.values
     .slice()
     .reverse()
-    .map((v) => ({
-      date: v.datetime,
-      open: round4(parseFloat(v.open)),
-      high: round4(parseFloat(v.high)),
-      low: round4(parseFloat(v.low)),
-      close: round4(parseFloat(v.close)),
-      volume: Math.round(parseFloat(v.volume) || 0),
-    }))
+    .map((v) => {
+      const open = round4(parseFloat(v.open))
+      const close = round4(parseFloat(v.close))
+      // The provider occasionally ships a bar whose high is below its open, or
+      // whose low is above it — DE and GM both did on 2023-06-05. That is not
+      // a price anything traded at, it is impossible, and it silently poisons
+      // everything downstream: true range comes out negative, ATR shrinks, and
+      // every band and liquidation distance built on ATR is wrong for the next
+      // fourteen sessions.
+      //
+      // Which side is wrong cannot be known from here, so the repair is the
+      // minimal one that makes the bar self-consistent: widen the extremes to
+      // contain the open and close rather than invent a price nobody reported.
+      // Dropping the bar instead would leave a hole in a date-indexed series
+      // that resolution and repair both key on.
+      const high = round4(Math.max(parseFloat(v.high), open, close))
+      const low = round4(Math.min(parseFloat(v.low), open, close))
+      return {
+        date: v.datetime,
+        open,
+        high,
+        low,
+        close,
+        volume: Math.round(parseFloat(v.volume) || 0),
+      }
+    })
 }
 
 function loadJson(path, fallback) {
@@ -187,6 +205,12 @@ async function main() {
   let resolvedCount = 0
   for (const entry of log) {
     if (entry.outcome) continue
+    // A retracted call must not acquire a settled outcome. It was withdrawn
+    // because it was never a call anybody made, so resolving it produces a
+    // row that is simultaneously "we take this back" and "here is how it
+    // turned out" — and the statistics exclude it either way, so the outcome
+    // is contradiction with no upside.
+    if (entry.voided) continue
     const bars = barsBySymbol[entry.symbol]
     if (!bars) continue
     const loggedIndex = bars.findIndex((b) => b.date === entry.date)
