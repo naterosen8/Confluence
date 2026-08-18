@@ -46,6 +46,13 @@ export const TICKER_CHAPTERS = [
       "What the company's own filings say it is worth, against what the market is paying. Updated four times a year, so it moves on a different clock from everything else here.",
   },
   {
+    key: 'risk',
+    label: 'Risk',
+    basis: 'measured',
+    blurb:
+      'The only page here that gives instructions. What size this instrument has already gone through, where a stop stops being a stop, how far under water holding it goes, and how long it takes to come back — all measured from its own history, none of it a view on direction.',
+  },
+  {
     key: 'what-if',
     label: 'What-if',
     basis: 'hypothetical',

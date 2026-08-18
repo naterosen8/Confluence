@@ -261,6 +261,7 @@ export default function Dashboard() {
             <SortableTh sortKey="setup" sort={view.sort} onSort={setSort} term="setupRead">Setup</SortableTh>
             <SortableTh sortKey="flags" sort={view.sort} onSort={setSort} term="flags">Flags</SortableTh>
             <SortableTh sortKey="edge" sort={view.sort} onSort={setSort} term="edge">Edge</SortableTh>
+            <SortableTh sortKey="safeLeverage" sort={view.sort} onSort={setSort} term="riskRead">Max size</SortableTh>
             <SortableTh sortKey="verdict" sort={view.sort} onSort={setSort} term="verdict">Confluence</SortableTh>
           </tr>
         </thead>
@@ -291,6 +292,12 @@ export default function Dashboard() {
                 <td className="muted small">{row.flags.length ? row.flags.join(', ') : '—'}</td>
                 <td className="muted small">
                   {row.stat ? `${rate(row.stat.winRate)} (N=${row.stat.sampleSize})` : '—'}
+                </td>
+                {/* The size this instrument has already gone through. Low
+                    numbers are the signal here, which is why the column sorts
+                    ascending first. */}
+                <td className={row.risk?.safeLeverage != null && row.risk.safeLeverage <= 3 ? 'size-tight' : undefined}>
+                  {row.risk?.safeLeverage != null ? `${row.risk.safeLeverage}x` : '—'}
                 </td>
                 <td>
                   <VerdictBadge verdict={row.verdict} bullishPoints={row.bullishPoints} bearishPoints={row.bearishPoints} />

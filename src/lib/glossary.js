@@ -144,6 +144,14 @@ export const GLOSSARY = {
     isNot:
       'Not a worst case. The last 250 entries do not bound the next 250. It is also unlevered: at 10x every figure here multiplies by ten, so a 4% adverse excursion is 40% of the stake and a 10% one is the whole position.',
   },
+  recoveryRead: {
+    term: 'Time to recovery',
+    basis: 'measured',
+    what: 'Once a position closed a full daily range under water, how many sessions it took to touch the entry price again — and how often it never did.',
+    how: 'Every entry over the last 250 sessions is walked forward 60 sessions. The clock starts at the first bar that CLOSED at least one ATR under water, not the first intraday dip — measuring the low made half of some instruments\u2019 drawdowns \u201crecover in zero sessions\u201d, which is a wick inside a session rather than anything a holder lives through. Recovery is price touching the entry level again from the next session onward.',
+    isNot:
+      'Not a promise that it comes back. The figure that matters most here is the share that had still not recovered after 60 sessions — on some instruments that is more than a third. It counts sessions rather than calendar days and ignores funding, so a leveraged position waiting out a drawdown is paying for the wait even when price does return.',
+  },
   macroRead: {
     term: 'Macro read',
     basis: 'current',

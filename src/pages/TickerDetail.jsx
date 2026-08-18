@@ -26,7 +26,7 @@ import { TICKER_CHAPTERS, chapterFor, chapterNeighbours } from '../lib/chapters'
 import { ChapterNav, ChapterHead, ChapterPager, useChapterKeys } from '../components/ChapterNav'
 import FeedbackLink from '../components/FeedbackLink'
 import { useWatchlist } from '../lib/watchlist'
-import { riskRead, stopRead, drawdownRead } from '../lib/riskRead'
+import { riskRead, stopRead, drawdownRead, recoveryRead } from '../lib/riskRead'
 import PlainRead from '../components/PlainRead'
 
 export default function TickerDetail() {
@@ -108,6 +108,10 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
     [bars, symbol]
   )
   const drawdown = useMemo(() => drawdownRead({ bars, symbol }), [bars, symbol])
+  const recovery = useMemo(
+    () => recoveryRead({ bars, symbol, atr: atrSeries(bars, 14).at(-1) }),
+    [bars, symbol]
+  )
   const backtest = useMemo(() => backtestTicker(bars), [bars])
   const scoreBacktest = useMemo(() => backtestByScore(bars, spyBars), [bars, spyBars])
   const setup = useMemo(() => bestAvailableStat(bars, spyBars), [bars, spyBars])
@@ -426,10 +430,16 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
 
       )}
 
-      {chapter.key === 'what-if' && (<>
-      {/* Deliberately above the simulator rather than below it. This is the
-          one thing on the site that can be said as an instruction, and the
-          moment to read it is before choosing a size, not after. */}
+      {chapter.key === 'risk' && (<>
+      <div className="callout">
+        Everything below is measured from {symbol}'s own last 250 sessions. It is the one part of this site stated as
+        instructions, because size, stop distance, drawdown and recovery time are facts about how this instrument has
+        already behaved — not guesses about what it does next. There is deliberately nothing here about whether to
+        take a position, or in which direction.
+      </div>
+
+      {/* Ordered the way the decisions actually get made: how big, where it is
+          wrong, what holding it feels like, and how long that lasts. */}
       {risk && (
         <PlainRead term="riskRead" tone={risk.safeLeverage == null || risk.safeLeverage < 3 ? 'down' : undefined}
           headline={risk.headline} caveat={risk.caveat}>
@@ -437,10 +447,6 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
         </PlainRead>
       )}
 
-      {/* Ordered the way the decisions are actually made: how big, then where
-          it is wrong, then what holding it will feel like. All three are
-          measurements of this instrument's own past, which is why they can be
-          stated as instructions when nothing about direction can. */}
       {stop && (
         <PlainRead term="stopRead" headline={stop.headline} caveat={stop.caveat}>
           {stop.read}
@@ -453,6 +459,15 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
         </PlainRead>
       )}
 
+      {recovery && (
+        <PlainRead term="recoveryRead" tone={recovery.neverRecoveredPct >= 25 ? 'down' : undefined}
+          headline={recovery.headline} caveat={recovery.caveat}>
+          {recovery.read}
+        </PlainRead>
+      )}
+      </>)}
+
+      {chapter.key === 'what-if' && (<>
       <Section title={<Explain term="simulatedTrade">Simulate a trade</Explain>}>
         <SimulateTradeForm symbol={symbol} currentPrice={liveQuote?.price ?? signals.price} />
       </Section>

@@ -133,7 +133,21 @@ The samples are not fully independent — the drift windows include the called o
 
 ## Where the site does give direct advice
 
-On one question, and deliberately only one: **size**.
+Its own chapter — **Risk**, on every ticker page — and a `Max size` column on the screener so 89 instruments can be scanned for the ones that have already gone through a position. Four reads, in the order the decisions get made.
+
+**Survivable size.** A position opened at every one of the last 250 sessions, at each rung the simulator offers, walked forward. The largest rung that lost none of them. SOL/USD 2×, TSLA 3×, NVDA 5×, SPY 10×.
+
+**Stop distance.** How often a stop at each ATR multiple would have fired — and, the number nobody computes, how often it would have closed a position that ended profitable anyway. On SPY a 0.5 ATR stop was hit on 69% of holds and took out **half the winners**; 2 ATR cuts that to 6%.
+
+**Drawdown while held.** What a win rate cannot say: the path. Median, worst decile, deepest — and separately for the entries that finished in profit, because a position sized so the median winner's drawdown is intolerable gets closed at the bottom of half its own winners.
+
+**Time to recovery.** Once a position *closed* a full ATR under water, how many sessions until it touched entry again, and how often it never did. BTC/USD: 38% had not recovered 60 sessions later.
+
+All four measure intraday lows and highs, because that is when a stop fires and what a drawdown felt like. The recovery clock starts on a **close** under water, not an intraday dip — measuring the low made half of BTC/USD's drawdowns "recover in zero sessions", which is a wick inside a session, not something anyone holds through.
+
+
+
+On risk, and deliberately not on direction.
 
 Direction is not it. The site measured that and found nothing — base rates that do not separate from their own drift, a confluence score correlating about −0.06 with what follows, twelve survivors from eighty-seven that are mostly *under*-performers. A "buy this" derived from inputs measured to carry no information is a confident voice attached to a coin flip, and there is a 50× simulator on the next panel.
 

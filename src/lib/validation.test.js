@@ -4,7 +4,7 @@ import { execSync } from 'node:child_process'
 import { readCommittedBars } from './testBars.js'
 import { TICKERS } from './tickers.js'
 import path from 'node:path'
-import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries, computeSignals } from './indicators'
+import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries, computeSignals, atrSeries } from './indicators'
 import { bestAvailableStat, FORWARD_DAYS } from './backtest'
 import { wilsonInterval } from './stats'
 
@@ -73,6 +73,39 @@ d('data integrity of the published snapshot', () => {
     }
     if (suspect.length) console.log('Suspect single-session moves:', suspect)
     expect(suspect).toHaveLength(0)
+  })
+
+  // A wick far beyond the body is either a real liquidation cascade or a bad
+  // print, and the difference matters: VZ carried a low of $10.60 on a session
+  // that opened $40.17, which alone made a 2x position look unsurvivable and
+  // Verizon the most dangerous instrument tracked. XRP and ADA carry 8-10 ATR
+  // wicks on the same 2025-10-10 date, which is the real October 2025 cascade
+  // and must not be filtered away by a feature whose job is to show risk.
+  //
+  // So: anything past 25 ATR fails, because no market makes that. Everything
+  // between 6 and 25 is printed for a human to look at rather than silently
+  // accepted or silently removed.
+  it('has no wick beyond any plausible market event', () => {
+    const impossible = []
+    const notable = []
+    for (const symbol of symbols) {
+      const s = bars[symbol]
+      const atr = atrSeries(s, 14)
+      for (let i = 20; i < s.length; i++) {
+        const a = atr[i - 1]
+        if (!a) continue
+        const bodyLow = Math.min(s[i].open, s[i].close)
+        const bodyHigh = Math.max(s[i].open, s[i].close)
+        const below = (bodyLow - s[i].low) / a
+        const above = (s[i].high - bodyHigh) / a
+        const worst = Math.max(below, above)
+        if (worst > 25) impossible.push(`${symbol} ${s[i].date}: ${worst.toFixed(0)}x ATR beyond the body`)
+        else if (worst > 6) notable.push(`${symbol} ${s[i].date}: ${worst.toFixed(1)}x ATR`)
+      }
+    }
+    if (notable.length) console.log('Large but plausible wicks (left as-is):\n  ' + notable.join('\n  '))
+    if (impossible.length) console.log('IMPOSSIBLE wicks:\n  ' + impossible.join('\n  '))
+    expect(impossible).toEqual([])
   })
 
   it('reports how stale the snapshot is', () => {

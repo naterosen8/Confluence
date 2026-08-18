@@ -214,3 +214,87 @@ describe('drawdownRead', () => {
     }
   })
 })
+
+describe('recoveryRead', () => {
+  const bars = readCommittedBars()
+  const atrOf = async (b) => (await import('./indicators.js')).atrSeries(b, 14).at(-1)
+
+  // The bug this read shipped with first: measuring the intraday low made half
+  // of BTC/USD's drawdowns "recover in 0 sessions", because the same bar that
+  // wicked an ATR down also traded back at entry before the close. That is a
+  // wick, not a drawdown anybody holds through.
+  it('starts the clock on a CLOSE under water, never an intraday wick', async () => {
+    const { recoveryRead } = await import('./riskRead.js')
+    // Every bar closes flat and wicks 10% down: nothing ever closes under.
+    const wicky = Array.from({ length: 200 }, (_, i) => ({
+      date: `d${i}`, open: 100, high: 101, low: 90, close: 100, volume: 1e6,
+    }))
+    expect(recoveryRead({ bars: wicky, symbol: 'W', atr: 1, lookback: 100, horizon: 20 })).toBeNull()
+  })
+
+  it('never reports a zero-session recovery', async () => {
+    const { recoveryRead } = await import('./riskRead.js')
+    for (const t of TICKERS) {
+      const b = bars[t.symbol]
+      if (!b) continue
+      const r = recoveryRead({ bars: b, symbol: t.symbol, atr: await atrOf(b) })
+      if (!r || r.recovered === 0) continue
+      expect(r.medianSessions, `${t.symbol} recovers in 0 sessions`).toBeGreaterThanOrEqual(1)
+      expect(r.p90Sessions, t.symbol).toBeGreaterThanOrEqual(r.medianSessions)
+    }
+  })
+
+  it('accounts for every drawdown as either recovered or not', async () => {
+    const { recoveryRead } = await import('./riskRead.js')
+    for (const t of TICKERS) {
+      const b = bars[t.symbol]
+      if (!b) continue
+      const r = recoveryRead({ bars: b, symbol: t.symbol, atr: await atrOf(b) })
+      if (!r) continue
+      expect(r.recovered + r.neverRecovered, t.symbol).toBe(r.wentUnder)
+    }
+  })
+
+  it('leads with the never-recovered share when it is large', async () => {
+    const { recoveryRead } = await import('./riskRead.js')
+    const r = recoveryRead({ bars: bars['BTC/USD'], symbol: 'BTC/USD', atr: await atrOf(bars['BTC/USD']) })
+    expect(r.neverRecoveredPct).toBeGreaterThan(25)
+    expect(r.headline).toMatch(/never came back/)
+  })
+
+  it('says waiting out a drawdown is not free at leverage', async () => {
+    const { recoveryRead } = await import('./riskRead.js')
+    const r = recoveryRead({ bars: bars.SPY, symbol: 'SPY', atr: await atrOf(bars.SPY) })
+    expect(r.caveat).toMatch(/funding/)
+  })
+
+  it('returns null rather than guessing without an ATR', async () => {
+    const { recoveryRead } = await import('./riskRead.js')
+    expect(recoveryRead({ bars: bars.SPY, symbol: 'SPY', atr: 0 })).toBeNull()
+  })
+})
+
+describe('risk figures in the screener index', () => {
+  it('ships one for every row of the committed index', async () => {
+    const fs = await import('node:fs')
+    const s = JSON.parse(fs.readFileSync('public/screener.json', 'utf8'))
+    const missing = s.rows.filter((r) => !r.risk).map((r) => r.symbol)
+    expect(missing).toEqual([])
+    for (const r of s.rows) {
+      expect(typeof r.risk.safeLeverage === 'number' || r.risk.safeLeverage === null, r.symbol).toBe(true)
+      if (r.risk.medianDrawdownPct != null) expect(r.risk.medianDrawdownPct, r.symbol).toBeLessThanOrEqual(0)
+    }
+  })
+
+  it('matches what recomputing from the raw bars gives', async () => {
+    const fs = await import('node:fs')
+    const { riskRead } = await import('./riskRead.js')
+    const s = JSON.parse(fs.readFileSync('public/screener.json', 'utf8'))
+    const bars = readCommittedBars()
+    for (const sym of ['SPY', 'BTC/USD', 'NVDA']) {
+      const row = s.rows.find((r) => r.symbol === sym)
+      const fresh = riskRead({ bars: bars[sym], symbol: sym })
+      expect(row.risk.safeLeverage, sym).toBe(fresh.safeLeverage)
+    }
+  })
+})

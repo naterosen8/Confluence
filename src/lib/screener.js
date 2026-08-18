@@ -4,6 +4,8 @@ import { scoreDirectionCheck } from './signalValidation.js'
 import { leaderboardCheck } from './leaderboardCheck.js'
 import { readSetup } from './setupRead.js'
 import { marketRead } from './marketRead.js'
+import { riskRead, stopRead, drawdownRead, recoveryRead } from './riskRead.js'
+import { atrSeries } from './indicators.js'
 
 // The dashboard's rows, computed once by the daily job instead of by every
 // visitor's browser.
@@ -65,6 +67,26 @@ export function buildScreenerRow({ ticker, bars, spyBars }) {
     setup: (() => {
       const r = readSetup(bars, signals)
       return r ? { key: r.key, name: r.name } : null
+    })(),
+    // The risk figures, computed here for the same reason everything else is:
+    // they need the full history, they are identical for every visitor, and
+    // scanning eighty-nine tickers for the ones this instrument has already
+    // gone through is a question only the screener can answer. Four numbers,
+    // ~40 bytes a row.
+    risk: (() => {
+      const atr = atrSeries(bars, 14).at(-1)
+      const surv = riskRead({ bars, symbol: ticker.symbol })
+      const stop = stopRead({ bars, symbol: ticker.symbol, atr })
+      const dd = drawdownRead({ bars, symbol: ticker.symbol })
+      const rec = recoveryRead({ bars, symbol: ticker.symbol, atr })
+      if (!surv && !stop && !dd && !rec) return null
+      return {
+        safeLeverage: surv?.safeLeverage ?? null,
+        stopAtr: stop?.keeper?.mult ?? null,
+        medianDrawdownPct: dd ? round(dd.medianAdversePct, 2) : null,
+        recoverySessions: rec?.medianSessions ?? null,
+        neverRecoveredPct: rec ? round(rec.neverRecoveredPct, 1) : null,
+      }
     })(),
     spark: bars.slice(-SPARK_POINTS).map((b) => round(b.close, 4)),
     edge: round(setup.edge, 4),

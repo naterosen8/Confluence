@@ -94,6 +94,56 @@ async function fetchBars(symbol) {
     })
 }
 
+// A wick so far beyond the body that no market produced it.
+//
+// Found by the risk reads: VZ's 2026-01-08 bar carries a low of $10.60 on a
+// session that opened $40.17 and closed $40.57 — a 74% intraday range that did
+// not happen, and enough on its own to "liquidate" a 2x position and make
+// Verizon look like the most dangerous instrument on the site.
+//
+// The OHLC repair above does not catch it: the bar is internally consistent
+// (low <= open, close <= high), it is just wrong. And a blanket range limit
+// would be worse than the disease — XRP and ADA both wicked 8-10 ATR down on
+// 2025-10-10, which is the real October 2025 liquidation cascade. Clamping
+// that would delete genuine risk from a feature whose entire job is to show
+// it.
+//
+// So the threshold is set where market events stop and bad prints begin. The
+// crypto wicks sit at 8-10 ATR; the VZ print at 63. Anything past 25 ATR from
+// the body is repaired to the body and logged loudly; everything below is left
+// alone and surfaced by a test instead, so a judgement call stays a judgement
+// call rather than becoming a silent filter.
+const IMPOSSIBLE_WICK_ATR = 25
+
+function repairImpossibleWicks(bars) {
+  const repairs = []
+  // Simple trailing true-range average; the indicator library is not imported
+  // here and this only needs to be the right order of magnitude.
+  let avg = null
+  for (let i = 1; i < bars.length; i++) {
+    const prev = bars[i - 1]
+    const b = bars[i]
+    const tr = Math.max(b.high - b.low, Math.abs(b.high - prev.close), Math.abs(b.low - prev.close))
+    if (avg == null) avg = tr
+    if (avg > 0) {
+      const bodyLow = Math.min(b.open, b.close)
+      const bodyHigh = Math.max(b.open, b.close)
+      if ((bodyLow - b.low) / avg > IMPOSSIBLE_WICK_ATR) {
+        repairs.push(`${b.date}: low ${b.low} -> ${bodyLow} (${((bodyLow - b.low) / avg).toFixed(0)}x typical range below the body)`)
+        b.low = bodyLow
+      }
+      if ((b.high - bodyHigh) / avg > IMPOSSIBLE_WICK_ATR) {
+        repairs.push(`${b.date}: high ${b.high} -> ${bodyHigh} (${((b.high - bodyHigh) / avg).toFixed(0)}x typical range above the body)`)
+        b.high = bodyHigh
+      }
+    }
+    // Updated after the check so a bad bar cannot inflate the baseline that
+    // would have caught it.
+    avg = avg * (13 / 14) + Math.max(b.high - b.low, Math.abs(b.high - prev.close), Math.abs(b.low - prev.close)) / 14
+  }
+  return repairs
+}
+
 function loadJson(path, fallback) {
   if (!fs.existsSync(path)) return fallback
   return JSON.parse(fs.readFileSync(path, 'utf8'))
@@ -131,7 +181,10 @@ async function main() {
 
   for (const t of TICKERS) {
     try {
-      barsBySymbol[t.symbol] = await fetchBars(t.symbol)
+      const fetched = await fetchBars(t.symbol)
+      const wickFixes = repairImpossibleWicks(fetched)
+      for (const f of wickFixes) console.log(`Repaired impossible wick on ${t.symbol} ${f}`)
+      barsBySymbol[t.symbol] = fetched
       fetchedCount++
     } catch (e) {
       // Keep yesterday's data for this symbol rather than dropping it —

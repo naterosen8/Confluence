@@ -311,3 +311,129 @@ export function drawdownRead({ bars, symbol, direction = 'long', forwardDays = F
       'Depth measured on intraday lows, so it is what the position actually reached rather than what it closed at. Leverage multiplies every figure here — at 10x a 4% adverse excursion is 40% of the stake. The last 250 entries are not a bound on the next 250.',
   }
 }
+
+// --- Time to recovery ------------------------------------------------------
+// Once this went against you, how long did it take to get back?
+//
+// The drawdown read says how deep. This says how long, which is the question
+// that actually decides whether a position gets held or closed at the worst
+// possible moment. "It came back" is worth very little if it came back in
+// forty sessions and the position was sized to be unbearable by session five.
+//
+// Measured from the moment the position first went a full ATR under water —
+// not from entry — because that is the point a person starts asking the
+// question. Recovery means price touching the entry level again, intraday,
+// since that is when the position is genuinely back to flat.
+export const RECOVERY_HORIZON = 60
+
+export function recoveryRead({
+  bars,
+  symbol,
+  atr,
+  direction = 'long',
+  lookback = 250,
+  horizon = RECOVERY_HORIZON,
+}) {
+  if (!bars?.length || !atr || atr <= 0) return null
+  const price = bars.at(-1).close
+  if (!price) return null
+  const thresholdPct = (atr * 100) / price
+
+  const start = Math.max(0, bars.length - lookback - horizon)
+  const durations = []
+  let wentUnder = 0
+  let neverBack = 0
+
+  for (let i = start; i < bars.length - 1; i++) {
+    const entry = bars[i].close
+    if (!entry) continue
+    const window = bars.slice(i + 1, i + 1 + horizon)
+    if (window.length < horizon) continue
+
+    // The first bar that CLOSED a full ATR under water.
+    //
+    // Deliberately the close and not the intraday low. Measuring the low made
+    // half of BTC/USD's drawdowns recover in "0 sessions" — the same bar that
+    // wicked an ATR down also traded back at the entry price before the bell.
+    // That is real, and it is not a drawdown anybody holds through; it is
+    // noise inside a session. The question this read exists to answer is about
+    // positions that end a day under water.
+    let sank = -1
+    for (let k = 0; k < window.length; k++) {
+      const adverse =
+        direction === 'long'
+          ? ((window[k].close - entry) * 100) / entry
+          : ((entry - window[k].close) * 100) / entry
+      if (adverse <= -thresholdPct) {
+        sank = k
+        break
+      }
+    }
+    if (sank === -1) continue
+    wentUnder++
+
+    // From the NEXT session onward, the first bar that touches the entry level
+    // again. Starting at `sank` itself would let a bar that closed under water
+    // count as having recovered on the strength of its own high.
+    let back = -1
+    for (let k = sank + 1; k < window.length; k++) {
+      const recovered = direction === 'long' ? window[k].high >= entry : window[k].low <= entry
+      if (recovered) {
+        back = k
+        break
+      }
+    }
+    if (back === -1) neverBack++
+    else durations.push(back - sank)
+  }
+
+  if (!wentUnder) return null
+
+  const sorted = [...durations].sort((a, b) => a - b)
+  const median = quantile(sorted, 0.5)
+  const p90 = quantile(sorted, 0.9)
+  const neverPct = (neverBack / wentUnder) * 100
+
+  const headline =
+    durations.length === 0
+      ? `Nothing that went a full daily range under recovered within ${horizon} sessions`
+      : neverPct >= 25
+      ? `${neverPct.toFixed(0)}% of drawdowns here never came back within ${horizon} sessions`
+      : `Typically back to break-even ${median} session${median === 1 ? '' : 's'} after going under`
+
+  const parts = [
+    `Of the last ${lookback} entries, ${wentUnder} went at least one average daily range ($${atr.toFixed(
+      2
+    )}, ${thresholdPct.toFixed(1)}%) under water.`,
+  ]
+  if (durations.length) {
+    parts.push(
+      `From that moment, half were back to the entry price within ${median} session${
+        median === 1 ? '' : 's'
+      } and nine in ten within ${p90}.`
+    )
+  }
+  parts.push(
+    neverBack === 0
+      ? `Every one of them got back to break-even inside ${horizon} sessions.`
+      : `${neverBack} of ${wentUnder} (${neverPct.toFixed(
+          0
+        )}%) had still not returned to the entry price ${horizon} sessions later — the case where "it comes back" stops being true on any timescale a position can be held at leverage.`
+  )
+
+  return {
+    symbol,
+    direction,
+    horizon,
+    thresholdPct,
+    wentUnder,
+    recovered: durations.length,
+    neverRecovered: neverBack,
+    neverRecoveredPct: neverPct,
+    medianSessions: median,
+    p90Sessions: p90,
+    headline,
+    read: parts.join(' '),
+    caveat: `Recovery is price touching the entry level again intraday, measured from the first bar a full ATR under rather than from entry. It counts sessions, not calendar days, and ignores funding — a leveraged position carries a cost every day it waits, so waiting out a drawdown is not free even when price does come back.`,
+  }
+}

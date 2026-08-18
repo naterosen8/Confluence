@@ -52,6 +52,10 @@ export const SORTS = {
   // it sorts on — not `edge`, which is signed and weighted and invisible.
   edge: { label: 'Edge', get: (r) => r.stat?.winRate ?? null, defaultDir: -1 },
   verdict: { label: 'Confluence', get: (r) => LEAN_ORDER.get(r.verdict) ?? null, defaultDir: -1 },
+  // Ascending by default: the interesting end of this column is the small
+  // numbers — the instruments that have already gone through a position at
+  // sizes people routinely use.
+  safeLeverage: { label: 'Max size', get: (r) => r.risk?.safeLeverage ?? null, defaultDir: 1 },
 }
 
 export const DEFAULT_SORT = { key: 'symbol', dir: 1 }

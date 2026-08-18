@@ -1738,3 +1738,10 @@ table.grid {
 .star-lg {
   font-size: 1.3rem;
 }
+
+/* A survivable size in the low single digits is the column's whole point —
+   marked with weight and a rule rather than colour alone. */
+.size-tight {
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 #e0715a;
+}
