@@ -26,6 +26,8 @@ import { TICKER_CHAPTERS, chapterFor, chapterNeighbours } from '../lib/chapters'
 import { ChapterNav, ChapterHead, ChapterPager, useChapterKeys } from '../components/ChapterNav'
 import FeedbackLink from '../components/FeedbackLink'
 import { useWatchlist } from '../lib/watchlist'
+import { riskRead } from '../lib/riskRead'
+import PlainRead from '../components/PlainRead'
 
 export default function TickerDetail() {
   const { symbol, chapter } = useParams()
@@ -100,6 +102,7 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
   const spyBars = getSeries('SPY')
   const signals = useMemo(() => computeSignals(bars), [bars])
   const setup_read = useMemo(() => readSetup(bars, signals), [bars, signals])
+  const risk = useMemo(() => riskRead({ bars, symbol }), [bars, symbol])
   const backtest = useMemo(() => backtestTicker(bars), [bars])
   const scoreBacktest = useMemo(() => backtestByScore(bars, spyBars), [bars, spyBars])
   const setup = useMemo(() => bestAvailableStat(bars, spyBars), [bars, spyBars])
@@ -419,6 +422,16 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
       )}
 
       {chapter.key === 'what-if' && (<>
+      {/* Deliberately above the simulator rather than below it. This is the
+          one thing on the site that can be said as an instruction, and the
+          moment to read it is before choosing a size, not after. */}
+      {risk && (
+        <PlainRead term="riskRead" tone={risk.safeLeverage == null || risk.safeLeverage < 3 ? 'down' : undefined}
+          headline={risk.headline} caveat={risk.caveat}>
+          {risk.read}
+        </PlainRead>
+      )}
+
       <Section title={<Explain term="simulatedTrade">Simulate a trade</Explain>}>
         <SimulateTradeForm symbol={symbol} currentPrice={liveQuote?.price ?? signals.price} />
       </Section>

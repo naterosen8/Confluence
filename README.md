@@ -131,6 +131,16 @@ The samples are not fully independent — the drift windows include the called o
 
 **Calls are retracted, never deleted.** When a settled bar turns an entry's verdict into a split, it would never have been logged, so it is marked `voided` in place with the reason and date and excluded from every statistic. The earlier behaviour removed the row outright, and two published crypto calls dated 2026-08-09 were lost that way — discoverable only by diffing the file against its own git history. A public accuracy record that can quietly shrink is not one. Those two entries have been restored as retracted, and three guards in `validation.test.js` now hold the line: entries must be stamped against a real bar, every void must record its reason, and the log must never have fewer entries than the last committed version.
 
+## Where the site does give direct advice
+
+On one question, and deliberately only one: **size**.
+
+Direction is not it. The site measured that and found nothing — base rates that do not separate from their own drift, a confluence score correlating about −0.06 with what follows, twelve survivors from eighty-seven that are mostly *under*-performers. A "buy this" derived from inputs measured to carry no information is a confident voice attached to a coin flip, and there is a 50× simulator on the next panel.
+
+Risk is a different question with a real answer. `lib/riskRead.js` opens a position at every one of the last 250 sessions, at each rung the simulator offers, and walks it forward — checking intraday lows and highs, so a position touched at its liquidation level counts as dead even if the bar closed back above. The largest rung that lost none of them is reported as an instruction, because it is a fact about a distribution rather than a guess about the next draw.
+
+The numbers differ enough per instrument to be worth stating: BTC/USD 3×, NVDA 5×, SPY 10×, KO 10×. The read says plainly that this is not a recommendation to use that size — it is the point past which the instrument has *already* gone through a position — and that funding, spread and slippage all make real outcomes worse than the figure shown. A test asserts this read can never acquire directional language.
+
 ## The tracked universe
 
 89 symbols: 4 index ETFs, 75 stocks across nine sectors, 2 macro proxies, 8 crypto pairs. Chosen for liquidity and recognisability, explicitly **not** for expected performance — this site's own measurements find no edge, and picking names on a hunch about which will do well would contradict everything else it reports.

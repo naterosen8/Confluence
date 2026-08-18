@@ -120,6 +120,14 @@ export const GLOSSARY = {
     isNot:
       'Not a deletion, and not a correction of a result. Settled outcomes are never touched. Earlier versions removed these rows outright, which meant the log could shrink with nothing recording that it had — the two calls dated 2026-08-09 were lost that way and have been restored as retracted.',
   },
+  riskRead: {
+    term: 'Survivable size',
+    basis: 'measured',
+    what: 'The largest leverage at which every entry point in the last 250 sessions on this ticker would have survived a five-session hold.',
+    how: "A position is opened at every one of the last 250 sessions, at 1x, 2x, 3x, 5x, 10x, 25x and 50x, and walked forward. Intraday lows and highs are checked rather than closes, so a position touched at its liquidation level counts as dead even if the bar closed back above it. The highest rung that lost none of them is reported.",
+    isNot:
+      'Not a recommendation to use that size, and not a safe level. It is the point past which this instrument has already gone through a position in the recent past — the next 250 sessions can be worse than the last. It also ignores funding, spread and slippage, all of which make real outcomes worse than this. This is the one figure here stated as an instruction, because unlike direction it is a fact about a distribution rather than a guess about the next draw.',
+  },
   macroRead: {
     term: 'Macro read',
     basis: 'current',
