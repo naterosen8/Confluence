@@ -131,6 +131,16 @@ The samples are not fully independent — the drift windows include the called o
 
 **Calls are retracted, never deleted.** When a settled bar turns an entry's verdict into a split, it would never have been logged, so it is marked `voided` in place with the reason and date and excluded from every statistic. The earlier behaviour removed the row outright, and two published crypto calls dated 2026-08-09 were lost that way — discoverable only by diffing the file against its own git history. A public accuracy record that can quietly shrink is not one. Those two entries have been restored as retracted, and three guards in `validation.test.js` now hold the line: entries must be stamped against a real bar, every void must record its reason, and the log must never have fewer entries than the last committed version.
 
+## The gate
+
+A real gate, not a dismissible banner. Nothing renders behind it, there is no close button, Escape does nothing, and a deep link to any ticker page is gated the same as the landing page. The button stays disabled until the checkbox is ticked, so entering takes one deliberate act rather than a reflexive click on the only pressable thing.
+
+It exists because of what is on the other side: a screener that says "aligned up" next to a control that goes to 50×. Caveats that arrive after someone has formed a view are worth very little.
+
+Seven points, deliberately concrete rather than legalese — a boilerplate wall gets scrolled past, and the only version that does anything is one people read. They include the two the site is most on the hook for: that its own measurements find no predictive edge, and that the simulator flatters leveraged outcomes because it charges no funding, spread or slippage.
+
+Acceptance is stored in `localStorage` with a **version**. If the terms change materially the version goes up and everyone is asked again, because consent to one set of terms is not consent to a different set. Storage failures (Safari private mode throws rather than returning null) all resolve to "ask again", never to a crash or a silent pass. A footer button re-opens the terms and withdraws the acceptance.
+
 ## Where the site does give direct advice
 
 Its own chapter — **Risk**, on every ticker page — and a `Max size` column on the screener so 89 instruments can be scanned for the ones that have already gone through a position. Four reads, in the order the decisions get made.

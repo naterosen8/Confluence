@@ -12,6 +12,9 @@ import FeedbackLink from './components/FeedbackLink'
 import ErrorBoundary from './components/ErrorBoundary'
 import { AuthProvider } from './context/AuthContext'
 import { loadScreener } from './lib/dataProvider'
+import DisclaimerGate from './components/DisclaimerGate'
+import DisclaimerDeclined from './components/DisclaimerDeclined'
+import { hasAccepted, clearAcceptance } from './lib/disclaimer'
 
 function RoutedContent() {
   const location = useLocation()
@@ -36,6 +39,11 @@ function RoutedContent() {
 
 export default function App() {
   const [dataReady, setDataReady] = useState(false)
+  // Read once at mount rather than on every render: a gate that re-evaluates
+  // storage mid-session could reappear over someone's shoulder if another tab
+  // cleared it.
+  const [accepted, setAccepted] = useState(() => hasAccepted())
+  const [declined, setDeclined] = useState(false)
 
   useEffect(() => {
     // Paint as soon as the screener index is in — a few KB — rather than
@@ -44,6 +52,17 @@ export default function App() {
     // are started in parallel so that page rarely waits either.
     loadScreener().finally(() => setDataReady(true))
   }, [])
+
+  // Nothing renders behind the gate. The site is a screener that says "aligned
+  // up" beside a control that goes to 50x, and the caveats are worth very
+  // little if they arrive after someone has already formed a view.
+  if (!accepted) {
+    return declined ? (
+      <DisclaimerDeclined onReconsider={() => setDeclined(false)} />
+    ) : (
+      <DisclaimerGate onAccept={() => setAccepted(true)} onDecline={() => setDeclined(true)} />
+    )
+  }
 
   return (
     <AuthProvider>
@@ -68,7 +87,18 @@ export default function App() {
           to scan many tickers at once, not investment advice.{' '}
           {/* The whole site rests on its numbers being checkable, which is
               worth nothing without a visible way to say one is wrong. */}
-          <FeedbackLink>Spotted a number that looks wrong?</FeedbackLink>
+          <FeedbackLink>Spotted a number that looks wrong?</FeedbackLink>{' '}
+          <button
+            type="button"
+            className="link-button"
+            onClick={() => {
+              clearAcceptance()
+              setDeclined(false)
+              setAccepted(false)
+            }}
+          >
+            Read the disclaimer again
+          </button>
         </footer>
         <Analytics />
       </BrowserRouter>

@@ -1760,3 +1760,141 @@ table.grid {
    actually use; the four position-specific ones above stay as they are. */
 .plain-read-down { border-left-color: #e0715a; }
 .plain-read-up { border-left-color: #5cbf8a; }
+
+/* --- Disclaimer gate ----------------------------------------------------- */
+
+.gate-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  overflow-y: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px 48px;
+  z-index: 100;
+}
+
+.gate {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  max-width: 640px;
+  width: 100%;
+  margin: auto;
+}
+
+.gate h1 {
+  margin: 0 0 12px;
+  font-size: 1.5rem;
+}
+
+/* Focused programmatically on open so a screen reader announces the dialog
+   before its controls; the ring would otherwise appear for a click that never
+   happened. */
+.gate h1:focus {
+  outline: none;
+}
+
+.gate-intro {
+  color: var(--muted);
+  margin: 0 0 18px;
+  line-height: 1.55;
+}
+
+.gate-points {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gate-points li {
+  position: relative;
+  padding-left: 22px;
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+/* A marker rather than a bullet glyph, so the list reads as terms being
+   agreed to rather than as prose that happens to be indented. */
+.gate-points li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.gate-agree {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.gate-agree:has(input:checked) {
+  border-color: var(--accent);
+}
+
+.gate-agree input {
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+
+.gate-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.gate .primary {
+  padding: 11px 22px;
+  background: var(--accent);
+  color: #04211d;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Disabled until the box is ticked, and visibly so — a button that looks
+   pressable but is not is worse than one that looks unavailable. */
+.gate .primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.gate-foot {
+  margin: 20px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .gate {
+    padding: 20px 18px;
+  }
+  .gate h1 {
+    font-size: 1.3rem;
+  }
+}
