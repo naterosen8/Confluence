@@ -131,6 +131,16 @@ The samples are not fully independent — the drift windows include the called o
 
 **Calls are retracted, never deleted.** When a settled bar turns an entry's verdict into a split, it would never have been logged, so it is marked `voided` in place with the reason and date and excluded from every statistic. The earlier behaviour removed the row outright, and two published crypto calls dated 2026-08-09 were lost that way — discoverable only by diffing the file against its own git history. A public accuracy record that can quietly shrink is not one. Those two entries have been restored as retracted, and three guards in `validation.test.js` now hold the line: entries must be stamped against a real bar, every void must record its reason, and the log must never have fewer entries than the last committed version.
 
+## Light and dark
+
+The tokens made this a palette swap rather than a second stylesheet. `:root[data-theme='light']` redefines the same variables; every rule already reads from them.
+
+Not an inversion. Dark surfaces get lighter as they come forward; light surfaces work the other way — page white, panels tinted — because a "raised" card brighter than white has nowhere to go, and borders do the separating that shadow does in the dark. The accent is darkened too: the teal that reads bright on near-black fails contrast against white.
+
+Three states, because "I chose dark" and "my machine is dark" are different things. Choosing *system* clears storage rather than recording a third value that would then outrank the machine, and while following the system the page tracks it live — a laptop that flips at sunset takes the site with it, no reload. An inline blocking script in `index.html` sets the attribute before first paint so a light-theme visitor never sees a flash of dark.
+
+Measured rather than eyeballed: 16.3:1 for headings and 5.3:1 for muted text against the page, both past WCAG AA.
+
 ## The gate
 
 A real gate, not a dismissible banner. Nothing renders behind it, there is no close button, Escape does nothing, and a deep link to any ticker page is gated the same as the landing page. The button stays disabled until the checkbox is ticked, so entering takes one deliberate act rather than a reflexive click on the only pressable thing.

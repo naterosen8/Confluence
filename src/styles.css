@@ -2475,3 +2475,95 @@ main {
 .glossary-entry p {
   margin: 0 0 var(--s2);
 }
+
+/* ==========================================================================
+   Light theme
+   --------------------------------------------------------------------------
+   Only the tokens change. Every rule above is written against variables, so
+   this is a palette swap rather than a second stylesheet — which is the whole
+   reason the tokens were worth extracting.
+
+   Not an inversion. Dark surfaces get lighter as they come forward; light
+   surfaces work the other way, with the page white and panels tinted, because
+   a "raised" card that is brighter than white has nowhere to go. Borders do
+   the separating work that shadow does in the dark.
+   ========================================================================== */
+:root[data-theme='light'] {
+  --bg: #ffffff;
+  --surface: #fbfcfd;
+  --panel: #f4f6f8;
+  --raised: #eef1f4;
+  --border: #dde3e9;
+  --border-strong: #c3ccd6;
+
+  --text: #10161e;
+  --text-secondary: #465262;
+  --muted: #667385;
+  --dim: #8a94a2;
+
+  /* Darkened from the dark-theme accent: the same teal that reads bright on
+     near-black fails contrast against white. */
+  --accent: #0d7d72;
+  --accent-dim: #0b6b62;
+  --accent-wash: rgba(13, 125, 114, 0.08);
+  --up: #17794a;
+  --down: #c0392b;
+  --warn: #a06a08;
+
+  --shadow: 0 1px 2px rgba(16, 22, 30, 0.06), 0 4px 14px rgba(16, 22, 30, 0.05);
+}
+
+/* The header blur sits over content and needs an opaque-enough backing in
+   light, where the default surface is nearly white. */
+:root[data-theme='light'] .site-header {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+/* Row hover was a lift out of the background in dark; in light it has to be a
+   tint or it disappears. */
+:root[data-theme='light'] .grid tbody tr:hover {
+  background: var(--panel);
+}
+
+:root[data-theme='light'] .grid td {
+  border-bottom-color: rgba(221, 227, 233, 0.9);
+}
+
+/* The primary button's text was near-black on teal, which works on the bright
+   dark-theme accent and not on the darker light-theme one. */
+:root[data-theme='light'] .gate .primary,
+:root[data-theme='light'] .feedback-form button.primary,
+:root[data-theme='light'] .button-primary {
+  color: #ffffff;
+}
+
+/* --- The control --------------------------------------------------------- */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: var(--s1) var(--s2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  white-space: nowrap;
+}
+
+.theme-toggle:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: var(--raised);
+}
+
+@media (max-width: 720px) {
+  /* The label goes, the glyph stays — the state is still announced to screen
+     readers through the accessible name. */
+  .theme-toggle-label {
+    display: none;
+  }
+}

@@ -9,6 +9,7 @@ import NotFound from './pages/NotFound'
 import Methodology from './pages/Methodology'
 import Feedback from './pages/Feedback'
 import FeedbackLink from './components/FeedbackLink'
+import ThemeToggle from './components/ThemeToggle'
 import ErrorBoundary from './components/ErrorBoundary'
 import { AuthProvider } from './context/AuthContext'
 import { loadScreener } from './lib/dataProvider'
@@ -77,6 +78,7 @@ export default function App() {
             <Link to="/track-record">Track record</Link>
             <Link to="/methodology">How to read this</Link>
             <FeedbackLink>Feedback</FeedbackLink>
+            <ThemeToggle />
           </nav>
         </header>
 

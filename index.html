@@ -39,6 +39,26 @@
     <meta name="twitter:image" content="https://confluence-self.vercel.app/og-image.png" />
   </head>
   <body>
+    <script>
+      // Inline and blocking on purpose: applied before first paint so a
+      // light-theme visitor never sees a flash of the dark palette while the
+      // bundle loads. Mirrors resolveTheme() in src/lib/theme.js.
+      (function () {
+        try {
+          var stored = localStorage.getItem('confluence.theme')
+          var theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: light)').matches
+              ? 'light'
+              : 'dark'
+          document.documentElement.setAttribute('data-theme', theme)
+          document.documentElement.style.colorScheme = theme
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark')
+        }
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
