@@ -2331,3 +2331,147 @@ main {
 .plain-read {
   max-width: 780px;
 }
+
+/* ==========================================================================
+   Methodology — a reading page, not a dashboard
+   --------------------------------------------------------------------------
+   This is the one long-form page on the site and it was set at the same
+   1050px as the screener. Prose at that width is genuinely hard to read: the
+   eye loses the line on the return sweep, which is the whole reason typography
+   has a measure. Cards, grids and tables still span the full width, because
+   they are scanned rather than read.
+   ========================================================================== */
+
+/* The container is the document, not the paragraph. Capping the paragraphs
+   alone left a 610px column stranded inside a 1050px frame, which reads as a
+   broken layout rather than as a deliberate measure. Constraining the page
+   itself centres the whole thing and lets the grids inside fill their row. */
+.methodology {
+  max-width: 740px;
+}
+
+/* Except the card grid, which is scanned rather than read and can use the
+   full width the page would otherwise waste. */
+.methodology .basis-grid {
+  width: calc(100% + var(--s6));
+  margin-left: calc(var(--s6) / -2);
+}
+
+.methodology h2 {
+  margin-top: var(--s6);
+}
+
+.methodology h3 {
+  margin-top: var(--s5);
+  margin-bottom: var(--s2);
+  font-size: 1.02rem;
+  color: var(--text);
+}
+
+.methodology p {
+  color: var(--text-secondary);
+  margin: 0 0 var(--s3);
+}
+
+/* The definition itself is the point of a glossary entry; the surrounding
+   explanation is support. They were the same size and colour. */
+.glossary-entry {
+  padding: var(--s4) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.glossary-entry h3 {
+  margin-top: 0;
+}
+
+.basis-grid {
+  gap: var(--s3);
+}
+
+/* ==========================================================================
+   Track record
+   ========================================================================== */
+
+/* Six tiles of wildly unequal content stretched to a common height, leaving
+   the simple ones mostly empty, and a seventh orphaned onto its own row. The
+   headline figures are now a uniform band; the two directional comparisons,
+   which carry a paragraph each, get their own wider pair below. */
+.record-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+
+.record-stats .stat {
+  align-items: flex-start;
+  gap: var(--s1);
+}
+
+.record-compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--s3);
+  margin-bottom: var(--s5);
+}
+
+.record-compare .stat {
+  padding: var(--s4);
+}
+
+.record-compare .stat-note {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Hit and miss as marks rather than as coloured words, so the column can be
+   scanned and so the distinction does not rest on hue alone. */
+.result-hit,
+.result-miss {
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.result-hit { color: var(--up); }
+.result-miss { color: var(--down); }
+
+/* The verdict callout above already states the conclusion and its interval;
+   this is the reasoning behind it, which is supporting text rather than a
+   second headline competing with the first. */
+.record-note {
+  max-width: 78ch;
+  margin: calc(var(--s3) * -1) 0 var(--s5);
+  padding-left: var(--s3);
+  border-left: 2px solid var(--border-strong);
+}
+
+/* A reference with seventy entries needs a way in. */
+.glossary-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin-bottom: var(--s5);
+}
+
+.glossary-filter .filter-search {
+  flex: 1;
+  max-width: none;
+}
+
+/* Single column. Definitions are prose — three paragraphs each — and two
+   364px columns made them a wall of text read in a zigzag. With a filter
+   above, the extra height costs nothing because nobody is scrolling it. */
+.glossary-list {
+  display: block;
+}
+
+.glossary-entry h4 {
+  margin: 0 0 var(--s2);
+  font-size: 0.98rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.glossary-entry p {
+  margin: 0 0 var(--s2);
+}

@@ -92,7 +92,7 @@ export default function TrackRecord() {
         </div>
       ) : (
         <>
-          <div className="stat-grid">
+          <div className="record-stats">
             <Stat term="trackRecord" label="Resolved calls" value={overall.total} />
             <Stat
               term="hitRate"
@@ -107,6 +107,15 @@ export default function TrackRecord() {
               }
             />
             <Stat term="avgReturn" label="Mean return per call" value={pct(overall.avgReturn)} />
+            <Stat term="forwardWindow" label="Pending resolution" value={pending.length} />
+            {summary.voidedCount > 0 && (
+              <Stat term="voidedCall" label="Retracted calls" value={summary.voidedCount} />
+            )}
+          </div>
+
+          {/* These two carry a paragraph each, so they get width rather than
+              being squeezed into a tile sized for a single number. */}
+          <div className="record-compare">
             <Stat
               term="driftBaseline"
               label="Upward-leaning calls"
@@ -119,24 +128,18 @@ export default function TrackRecord() {
               value={bearish ? `${rate(bearish.winRate)} (N=${bearish.total})` : '—'}
               note={<GapNote baseline={downBaseline} gap={downGap} />}
             />
-            <Stat term="forwardWindow" label="Pending resolution" value={pending.length} />
-            {summary.voidedCount > 0 && (
-              <Stat term="voidedCall" label="Retracted calls" value={summary.voidedCount} />
-            )}
           </div>
 
           <GapVerdict gap={upGap} />
 
-          <div className="callout impact-note">
+          <p className="muted small record-note">
             <Explain term="driftBaseline">
-              <strong>Read the hit rate against the drift, not against 50%.</strong>
+              Why the drift and not 50%
             </Explain>{' '}
-            Over a period when prices rose in
-            most five-session windows, an upward-leaning call is right most of the time without any skill being
-            involved. The only number that means anything here is the gap between the hit rate and the baseline shown
-            beside it, and that gap carries its own uncertainty — wider than either rate it is built from, which is why
-            two numbers that look far apart routinely are not.
-          </div>
+            — over a period when prices rose in most five-session windows, an upward-leaning call is right most of the
+            time without any skill involved. The gap carries its own uncertainty, wider than either rate it is built
+            from, which is why two numbers that look far apart routinely are not.
+          </p>
 
           <Section
             title={
@@ -152,10 +155,10 @@ export default function TrackRecord() {
                     <th>Date</th>
                     <th>Symbol</th>
                     <th><Explain term="verdict">Verdict</Explain></th>
-                    <th><Explain term="dailySnapshot">Entry price</Explain></th>
+                    <th className="num"><Explain term="dailySnapshot">Entry price</Explain></th>
                     <th><Explain term="forwardWindow">Resolved</Explain></th>
-                    <th>Exit price</th>
-                    <th><Explain term="avgReturn">Return</Explain></th>
+                    <th className="num">Exit price</th>
+                    <th className="num"><Explain term="avgReturn">Return</Explain></th>
                     <th><Explain term="hitRate">Result</Explain></th>
                   </tr>
                 </thead>
@@ -167,11 +170,18 @@ export default function TrackRecord() {
                         <strong>{e.symbol}</strong>
                       </td>
                       <td>{leanByKey(e.verdict)?.short ?? e.verdict}</td>
-                      <td>{price(e.price)}</td>
+                      <td className="num">{price(e.price)}</td>
                       <td>{e.outcome.resolvedDate}</td>
-                      <td>{price(e.outcome.exitPrice)}</td>
-                      <td>{pct(e.outcome.returnPct)}</td>
-                      <td className={e.outcome.correct ? 'top-setup-bullish' : 'top-setup-bearish'}>
+                      <td className="num">{price(e.outcome.exitPrice)}</td>
+                      {/* Deliberately not coloured by sign. Return here is the
+                          raw price move, not the call's outcome — a
+                          downward-leaning call that saw price rise shows a
+                          positive return and is a Miss. Green on that number
+                          beside a red "Miss" reads as a contradiction, and
+                          implies the move was good news when for this call it
+                          was the opposite. Hit/Miss carries the judgement. */}
+                      <td className="num">{pct(e.outcome.returnPct)}</td>
+                      <td className={e.outcome.correct ? 'result-hit' : 'result-miss'}>
                         {e.outcome.correct ? 'Hit' : 'Miss'}
                       </td>
                     </tr>

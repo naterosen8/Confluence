@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { BASIS, glossaryByBasis } from '../lib/glossary'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -16,6 +16,26 @@ export default function Methodology() {
   const { index } = chapterNeighbours(chapter.key, METHODOLOGY_CHAPTERS)
   useDocumentTitle(`How to read this — ${chapter.label}`)
   const groups = glossaryByBasis()
+
+  // Seventy definitions in a page twelve thousand pixels tall, with no way to
+  // reach one. The glossary is a reference — the whole point is looking
+  // something up — and until now that meant scrolling or using the browser's
+  // own find. Searches the definition text too, not just the name, because
+  // someone arrives wanting "the thing about stops" rather than a term.
+  const [query, setQuery] = useState('')
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return groups
+    const out = {}
+    for (const [basisKey, entries] of Object.entries(groups)) {
+      out[basisKey] = entries.filter((e) =>
+        `${e.term} ${e.what} ${e.how} ${e.isNot}`.toLowerCase().includes(q)
+      )
+    }
+    return out
+  }, [query, groups])
+  const shownCount = Object.values(matches).reduce((n, list) => n + list.length, 0)
+  const totalCount = Object.values(groups).reduce((n, list) => n + list.length, 0)
 
   const hrefFor = useCallback(
     (key) => `/methodology${key === METHODOLOGY_CHAPTERS[0].key ? '' : `/${key}`}`,
@@ -188,14 +208,17 @@ export default function Methodology() {
       </>)}
 
       {chapter.key === 'glossary' && (<>
+      <GlossaryFilter query={query} onQuery={setQuery} shown={shownCount} total={totalCount} />
+
       {ORDER.map((basisKey) => (
+        (matches[basisKey] || []).length > 0 && (
         <section className="detail-section" key={basisKey}>
           <h3>
             <span className={`explain-basis explain-basis-${basisKey}`}>{BASIS[basisKey].label}</span>
           </h3>
           <p className="muted small">{BASIS[basisKey].blurb}</p>
           <div className="glossary-list">
-            {(groups[basisKey] || []).map((entry) => (
+            {(matches[basisKey] || []).map((entry) => (
               <div className="glossary-entry" key={entry.key} id={`term-${entry.key}`}>
                 <h4>{entry.term}</h4>
                 <p>{entry.what}</p>
@@ -209,11 +232,40 @@ export default function Methodology() {
             ))}
           </div>
         </section>
+        )
       ))}
+
+      {shownCount === 0 && (
+        <div className="callout">
+          <strong>No term matches “{query}”.</strong> Definitions are searched by name and by what they mean, so a
+          plain word like “drift” or “stop” usually finds the right one.
+        </div>
+      )}
       </>)}
 
       <ChapterPager chapters={METHODOLOGY_CHAPTERS} current={chapter.key} hrefFor={hrefFor} />
 
+    </div>
+  )
+}
+
+function GlossaryFilter({ query, onQuery, shown, total }) {
+  return (
+    <div className="glossary-filter">
+      <label className="visually-hidden" htmlFor="glossary-q">
+        Search definitions
+      </label>
+      <input
+        id="glossary-q"
+        type="search"
+        className="filter-search"
+        placeholder="Search definitions…"
+        value={query}
+        onChange={(e) => onQuery(e.target.value)}
+      />
+      <span className="muted small" role="status">
+        {shown === total ? `${total} terms` : `${shown} of ${total}`}
+      </span>
     </div>
   )
 }
