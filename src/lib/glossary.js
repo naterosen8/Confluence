@@ -128,6 +128,22 @@ export const GLOSSARY = {
     isNot:
       'Not a recommendation to use that size, and not a safe level. It is the point past which this instrument has already gone through a position in the recent past — the next 250 sessions can be worse than the last. It also ignores funding, spread and slippage, all of which make real outcomes worse than this. This is the one figure here stated as an instruction, because unlike direction it is a fact about a distribution rather than a guess about the next draw.',
   },
+  stopRead: {
+    term: 'Stop distance',
+    basis: 'measured',
+    what: 'How often a stop at a given distance would have been triggered over a hold this length — and how often it would have closed a position that went on to end profitable anyway.',
+    how: "A position is opened at every one of the last 250 sessions and walked forward, tracking the deepest point it reached against itself using intraday lows and highs, because that is when a stop actually fires. Distances are measured in ATR rather than percent so they are comparable across instruments — 2% is a tight stop on an index fund and a rounding error on an altcoin. The tightest distance that keeps at least 90% of the winners is the one reported.",
+    isNot:
+      'Not a claim that a stop there is safe or that one is needed at all. It assumes the fill happens at the stop price, which a gap straight through the level does not honour, so real outcomes are worse by the size of the gap and the spread. And it says nothing about direction — only about how much ordinary movement this instrument produces over this horizon.',
+  },
+  drawdownRead: {
+    term: 'Drawdown while held',
+    basis: 'measured',
+    what: 'How far under water a position went before the hold ended, including the ones that ended profitable.',
+    how: 'The deepest adverse point of every entry over the last 250 sessions, measured on intraday lows so it reflects what the position actually reached rather than where it closed. Reported as the median, the worst decile, the single deepest, and separately for the entries that finished in profit.',
+    isNot:
+      'Not a worst case. The last 250 entries do not bound the next 250. It is also unlevered: at 10x every figure here multiplies by ten, so a 4% adverse excursion is 40% of the stake and a 10% one is the whole position.',
+  },
   macroRead: {
     term: 'Macro read',
     basis: 'current',

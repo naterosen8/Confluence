@@ -97,3 +97,120 @@ describe('riskRead', () => {
     expect(sizes.size).toBeGreaterThan(1)
   })
 })
+
+describe('excursions', () => {
+  it('measures depth on intraday lows, not closes', async () => {
+    const { excursions } = await import('./riskRead.js')
+    // Every bar closes flat but wicks 10% down. A close-based measure would
+    // report no drawdown at all; a stop would have been hit every time.
+    const wicky = Array.from({ length: 20 }, (_, i) => ({
+      date: `d${i}`, open: 100, high: 101, low: 90, close: 100, volume: 1e6,
+    }))
+    const e = excursions({ bars: wicky, forwardDays: 3, lookback: 10 })
+    expect(e.length).toBeGreaterThan(0)
+    expect(e.every((x) => x.adversePct <= -9.9)).toBe(true)
+    expect(e.every((x) => x.endPct === 0)).toBe(true)
+  })
+
+  it('flips sign for a short', async () => {
+    const { excursions } = await import('./riskRead.js')
+    const rising2 = Array.from({ length: 30 }, (_, i) => {
+      const c = 100 + i
+      return { date: `d${i}`, open: c, high: c, low: c, close: c, volume: 1e6 }
+    })
+    const long = excursions({ bars: rising2, direction: 'long', forwardDays: 3, lookback: 20 })
+    const short = excursions({ bars: rising2, direction: 'short', forwardDays: 3, lookback: 20 })
+    expect(long.every((x) => x.endPct > 0)).toBe(true)
+    expect(short.every((x) => x.endPct < 0)).toBe(true)
+    expect(short.every((x) => x.adversePct < 0)).toBe(true)
+  })
+})
+
+describe('stopRead', () => {
+  const bars = readCommittedBars()
+  const atrOf = async (b) => (await import('./indicators.js')).atrSeries(b, 14).at(-1)
+
+  it('reports a usable distance for every tracked ticker', async () => {
+    const { stopRead } = await import('./riskRead.js')
+    for (const t of TICKERS) {
+      const b = bars[t.symbol]
+      if (!b) continue
+      const r = stopRead({ bars: b, symbol: t.symbol, atr: await atrOf(b) })
+      expect(r, t.symbol).toBeTruthy()
+      expect(r.levels.length, t.symbol).toBeGreaterThan(0)
+      expect(r.caveat, t.symbol).toMatch(/gap through the level/)
+    }
+  })
+
+  // Wider stops can only be hit less often. If that inverts, the excursion
+  // comparison is wrong somewhere.
+  it('is monotonic: a wider stop is never hit more often', async () => {
+    const { stopRead } = await import('./riskRead.js')
+    for (const t of TICKERS) {
+      const b = bars[t.symbol]
+      if (!b) continue
+      const r = stopRead({ bars: b, symbol: t.symbol, atr: await atrOf(b) })
+      for (let i = 1; i < r.levels.length; i++) {
+        expect(r.levels[i].hitPct, `${t.symbol} ${r.levels[i].mult} ATR`).toBeLessThanOrEqual(r.levels[i - 1].hitPct + 1e-9)
+        expect(r.levels[i].winnersLostPct, `${t.symbol} winners`).toBeLessThanOrEqual(r.levels[i - 1].winnersLostPct + 1e-9)
+      }
+    }
+  })
+
+  it('picks the tightest distance that keeps most winners', async () => {
+    const { stopRead } = await import('./riskRead.js')
+    const r = stopRead({ bars: bars.SPY, symbol: 'SPY', atr: await atrOf(bars.SPY) })
+    expect(r.keeper.winnersLostPct).toBeLessThanOrEqual(10)
+    const tighter = r.levels.filter((l) => l.mult < r.keeper.mult)
+    expect(tighter.every((l) => l.winnersLostPct > 10)).toBe(true)
+  })
+
+  it('returns null rather than guessing without an ATR', async () => {
+    const { stopRead } = await import('./riskRead.js')
+    expect(stopRead({ bars: bars.SPY, symbol: 'SPY', atr: 0 })).toBeNull()
+    expect(stopRead({ bars: bars.SPY, symbol: 'SPY', atr: null })).toBeNull()
+  })
+})
+
+describe('drawdownRead', () => {
+  const bars = readCommittedBars()
+
+  it('orders median, worst decile and deepest correctly', async () => {
+    const { drawdownRead } = await import('./riskRead.js')
+    for (const t of TICKERS) {
+      const b = bars[t.symbol]
+      if (!b) continue
+      const r = drawdownRead({ bars: b, symbol: t.symbol })
+      expect(r.medianAdversePct, t.symbol).toBeLessThanOrEqual(0)
+      expect(r.worstDecilePct, t.symbol).toBeLessThanOrEqual(r.medianAdversePct)
+      expect(r.worstPct, t.symbol).toBeLessThanOrEqual(r.worstDecilePct)
+    }
+  })
+
+  // The point of the read: winners are not a smooth ride either.
+  it('reports the drawdown inside the winners separately', async () => {
+    const { drawdownRead } = await import('./riskRead.js')
+    const r = drawdownRead({ bars: bars.SPY, symbol: 'SPY' })
+    expect(r.winnerMedianAdversePct).toBeLessThanOrEqual(0)
+    expect(r.read).toMatch(/ended profitable/)
+  })
+
+  it('warns that leverage multiplies all of it', async () => {
+    const { drawdownRead } = await import('./riskRead.js')
+    expect(drawdownRead({ bars: bars.SPY, symbol: 'SPY' }).caveat).toMatch(/Leverage multiplies/)
+  })
+
+  it('never turns into a directional call', async () => {
+    const { drawdownRead, stopRead } = await import('./riskRead.js')
+    const { atrSeries } = await import('./indicators.js')
+    const banned = /\b(buy|sell|will rise|will fall|recommend|target price|guaranteed|good time to)\b/i
+    for (const t of TICKERS) {
+      const b = bars[t.symbol]
+      if (!b) continue
+      const d = drawdownRead({ bars: b, symbol: t.symbol })
+      const s = stopRead({ bars: b, symbol: t.symbol, atr: atrSeries(b, 14).at(-1) })
+      expect(`${d.headline} ${d.read}`, t.symbol).not.toMatch(banned)
+      expect(`${s.headline} ${s.read}`, t.symbol).not.toMatch(banned)
+    }
+  })
+})

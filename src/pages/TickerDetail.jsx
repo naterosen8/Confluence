@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
 import { getSeries, hasRealData, screenerDirectionCheck } from '../lib/dataProvider'
-import { computeSignals } from '../lib/indicators'
+import { computeSignals, atrSeries } from '../lib/indicators'
 import { readSetup } from '../lib/setupRead'
 import { backtestTicker, backtestByScore, bestAvailableStat, mostRecentEvent, SIGNAL_LABELS } from '../lib/backtest'
 import { pollLivePrices } from '../lib/livePrice'
@@ -26,7 +26,7 @@ import { TICKER_CHAPTERS, chapterFor, chapterNeighbours } from '../lib/chapters'
 import { ChapterNav, ChapterHead, ChapterPager, useChapterKeys } from '../components/ChapterNav'
 import FeedbackLink from '../components/FeedbackLink'
 import { useWatchlist } from '../lib/watchlist'
-import { riskRead } from '../lib/riskRead'
+import { riskRead, stopRead, drawdownRead } from '../lib/riskRead'
 import PlainRead from '../components/PlainRead'
 
 export default function TickerDetail() {
@@ -103,6 +103,11 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
   const signals = useMemo(() => computeSignals(bars), [bars])
   const setup_read = useMemo(() => readSetup(bars, signals), [bars, signals])
   const risk = useMemo(() => riskRead({ bars, symbol }), [bars, symbol])
+  const stop = useMemo(
+    () => stopRead({ bars, symbol, atr: atrSeries(bars, 14).at(-1) }),
+    [bars, symbol]
+  )
+  const drawdown = useMemo(() => drawdownRead({ bars, symbol }), [bars, symbol])
   const backtest = useMemo(() => backtestTicker(bars), [bars])
   const scoreBacktest = useMemo(() => backtestByScore(bars, spyBars), [bars, spyBars])
   const setup = useMemo(() => bestAvailableStat(bars, spyBars), [bars, spyBars])
@@ -429,6 +434,22 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
         <PlainRead term="riskRead" tone={risk.safeLeverage == null || risk.safeLeverage < 3 ? 'down' : undefined}
           headline={risk.headline} caveat={risk.caveat}>
           {risk.read}
+        </PlainRead>
+      )}
+
+      {/* Ordered the way the decisions are actually made: how big, then where
+          it is wrong, then what holding it will feel like. All three are
+          measurements of this instrument's own past, which is why they can be
+          stated as instructions when nothing about direction can. */}
+      {stop && (
+        <PlainRead term="stopRead" headline={stop.headline} caveat={stop.caveat}>
+          {stop.read}
+        </PlainRead>
+      )}
+
+      {drawdown && (
+        <PlainRead term="drawdownRead" headline={drawdown.headline} caveat={drawdown.caveat}>
+          {drawdown.read}
         </PlainRead>
       )}
 

@@ -139,7 +139,15 @@ Direction is not it. The site measured that and found nothing — base rates tha
 
 Risk is a different question with a real answer. `lib/riskRead.js` opens a position at every one of the last 250 sessions, at each rung the simulator offers, and walks it forward — checking intraday lows and highs, so a position touched at its liquidation level counts as dead even if the bar closed back above. The largest rung that lost none of them is reported as an instruction, because it is a fact about a distribution rather than a guess about the next draw.
 
-The numbers differ enough per instrument to be worth stating: BTC/USD 3×, NVDA 5×, SPY 10×, KO 10×. The read says plainly that this is not a recommendation to use that size — it is the point past which the instrument has *already* gone through a position — and that funding, spread and slippage all make real outcomes worse than the figure shown. A test asserts this read can never acquire directional language.
+The numbers differ enough per instrument to be worth stating: BTC/USD 3×, NVDA 5×, SPY 10×, KO 10×.
+
+Two more reads sit alongside it, in the order the decisions actually get made — how big, then where it is wrong, then what holding it will feel like.
+
+**Stop distance** measures how often a stop at a given ATR multiple would have fired over a hold this length, and — the number nobody computes — how often it would have closed a position that ended profitable anyway. On SPY a 0.5 ATR stop was hit on 69% of holds and took out **half the winners**; 2 ATR cuts that to 6%. Distances are in ATR rather than percent so they compare across instruments: 2% is a tight stop on an index fund and a rounding error on an altcoin.
+
+**Drawdown while held** answers what a win rate cannot — the path. Across SPY's last 250 entries the median position was 1.1% under water at its worst point; on BTC/USD it was 3.2%, with the deepest reaching 23.8%. Reported separately for the entries that *ended profitable*, because a position sized so that the median winner's drawdown is intolerable is one that gets closed at the bottom of half its own winners.
+
+All three measure depth on intraday lows and highs rather than closes, because that is when a stop fires and what a drawdown actually felt like; scoring on closes would flatter every figure. Tests assert monotonicity in both (a wider stop can never be hit more often; survival can only fall as leverage rises) and that none of the three can acquire directional language. The read says plainly that this is not a recommendation to use that size — it is the point past which the instrument has *already* gone through a position — and that funding, spread and slippage all make real outcomes worse than the figure shown. A test asserts this read can never acquire directional language.
 
 ## The tracked universe
 
