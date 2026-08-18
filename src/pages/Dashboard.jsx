@@ -117,14 +117,30 @@ export default function Dashboard() {
   const leaderboard = useMemo(() => screenerLeaderboardCheck(), [])
   const market = useMemo(() => screenerMarketRead(), [])
 
-  const topSetups = useMemo(
-    () =>
-      [...rows]
-        .filter((r) => r.stat && r.kind !== 'macro')
-        .sort((a, b) => Math.abs(b.edge) - Math.abs(a.edge))
-        .slice(0, 5),
-    [rows]
-  )
+  // Ranked by evidence against each ticker's own drift, which is the same
+  // test the verdict sentence below the panel reports.
+  //
+  // It used to rank by |edge| — distance from a coin flip, weighted by sample
+  // size — and said so in the copy directly above a sentence describing a
+  // Benjamini-Hochberg correction computed against drift. Two different nulls
+  // stacked on the site's most prominent panel, left behind when everything
+  // else moved off the coin flip. On live data the two orderings share only
+  // two of five names, so this was not a cosmetic mismatch: the panel was
+  // promoting a different five than the analysis underneath it had found.
+  //
+  // The leaderboard already computes a per-row p-value against drift, so this
+  // reuses it rather than inventing a third ranking. Ordering by |gap| alone
+  // would have been the obvious move and the wrong one — it ignores sample
+  // size, so a 41-observation result outranks a 201-observation one.
+  const topSetups = useMemo(() => {
+    const evidence = new Map((leaderboard?.rows ?? []).map((r) => [r.symbol, r]))
+    const survivors = new Set(leaderboard?.survivors ?? [])
+    return [...rows]
+      .filter((r) => r.stat && r.kind !== 'macro' && evidence.has(r.symbol))
+      .map((r) => ({ row: r, ev: evidence.get(r.symbol), survives: survivors.has(r.symbol) }))
+      .sort((a, b) => a.ev.p - b.ev.p)
+      .slice(0, 5)
+  }, [rows, leaderboard])
 
   return (
     <div>
@@ -170,12 +186,13 @@ export default function Dashboard() {
       {topSetups.length > 0 && (
         <div className="top-setups">
           <h2>
-            <Explain term="edge">Most extreme readings right now</Explain>
+            <Explain term="driftBaseline">Furthest from their own drift</Explain>
           </h2>
           <p className="muted small">
-            Ordered by how far each ticker's historical win rate sits from a coin flip, weighted by sample size. This
-            is a <em>selection</em>, not a ranking of quality: picking the most extreme few out of many candidates
-            produces numbers this size from pure noise too.
+            Ordered by the strength of the evidence that each ticker's historical win rate differs from the rate that
+            ticker delivers anyway — not by distance from a coin flip, which says more about whether the instrument
+            rose than about the signal. This is a <em>selection</em>, not a ranking of quality, and a gap can point
+            either way: a setup landing reliably <em>below</em> its drift is a measurement too, not an opportunity.
           </p>
           {/* Derived every sync, never hardcoded. The previous wording carried
               a p-value measured once by hand, which would have kept claiming
@@ -186,29 +203,28 @@ export default function Dashboard() {
             <Explain term="selectionCorrection">{leaderboardVerdict(leaderboard)}</Explain>
           </p>
           <div className="top-setups-grid">
-            {topSetups.map((row) => {
-              const { stat } = row
-              const direction = stat.winRate >= 50 ? 'up' : 'down'
+            {topSetups.map(({ row, ev, survives }) => {
+              const gap = ev.winRate - ev.driftRate
               return (
                 <Link key={row.symbol} to={`/ticker/${encodeURIComponent(row.symbol)}`} className="top-setup-card">
                   <div className="top-setup-head">
                     <strong>{row.symbol}</strong>
                     <VerdictBadge verdict={row.verdict} bullishPoints={row.bullishPoints} bearishPoints={row.bearishPoints} />
                   </div>
-                  {/* Spelling out the direction matters here: a card reading
-                      "0% win rate" next to a "Bullish" badge looks like a
-                      contradiction until you know the win rate is what
-                      *happened next* historically, not a rating of the setup.
-                      Colour alone also left the whole distinction invisible to
-                      colourblind readers. */}
-                  <div className={`top-setup-stat top-setup-${direction === 'up' ? 'bullish' : 'bearish'}`}>
-                    {direction === 'up' ? 'Rose' : 'Fell'} {Math.max(stat.winRate, 100 - stat.winRate).toFixed(0)}% of
-                    the time
+                  {/* The comparison, not a rating. "Fell 78% of the time" is
+                      what the old card printed for a 22% win rate — true, and
+                      framed against a coin flip, which is the wrong reference
+                      when this instrument fell about half the time anyway.
+                      Above or below its own drift is the fact worth showing,
+                      and it is spelled out in words rather than left to colour
+                      so it survives being read by someone colourblind. */}
+                  <div className={`top-setup-stat top-setup-${gap >= 0 ? 'bullish' : 'bearish'}`}>
+                    {gap >= 0 ? '+' : '−'}
+                    {Math.abs(gap).toFixed(1)} pts {gap >= 0 ? 'above' : 'below'} its drift
                   </div>
                   <div className="muted small">
-                    {stat.avgReturn >= 0 ? '+' : ''}
-                    {stat.avgReturn.toFixed(2)}% avg over the next {FORWARD_DAYS} sessions · N={stat.sampleSize} (
-                    {stat.source === 'regime-matched' ? 'this regime' : 'all history'})
+                    Won {rate(ev.winRate)} of {ev.sampleSize} against {rate(ev.driftRate)} for this ticker generally.
+                    {survives ? ' Survives the selection correction.' : ' Does not survive the selection correction.'}
                   </div>
                 </Link>
               )
