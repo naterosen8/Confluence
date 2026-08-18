@@ -118,7 +118,10 @@ export function marketRead({ barsBySymbol, tickers }) {
     ratesChangePct: ratesPct,
     creditChangePct: creditPct,
     macro: quadrant,
-    caveat:
-      'A description of the tape as it stands, from the tickers this site tracks — not a forecast, and a two-dozen-name sample is not the whole market.',
+    // Derived, not written. This said "a two-dozen-name sample" for as long as
+    // the universe was two dozen, and went on saying it after the universe
+    // became eighty-nine — directly under a sentence reporting "58 of 87
+    // tracked names". A count stated in prose is a count that goes stale.
+    caveat: `A description of the tape as it stands, measured across the ${breadth.counted} tickers this site tracks — not a forecast, and ${breadth.counted} names is not the whole market.`,
   }
 }

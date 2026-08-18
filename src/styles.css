@@ -1745,3 +1745,18 @@ table.grid {
   font-weight: 600;
   box-shadow: inset 2px 0 0 #e0715a;
 }
+
+/* The body of a read is measured at 76ch; its caveat was not, so the small
+   print ran a third wider than the sentence it qualifies and read as a
+   different column. Same measure for both. */
+.plain-read .muted,
+.plain-read-note {
+  max-width: 76ch;
+}
+
+/* tone="down" was being passed for instruments whose survivable size is tiny
+   and for drawdowns that mostly never recover, but no rule matched it — the
+   class rendered and did nothing. These are the two semantic tones the reads
+   actually use; the four position-specific ones above stay as they are. */
+.plain-read-down { border-left-color: #e0715a; }
+.plain-read-up { border-left-color: #5cbf8a; }
