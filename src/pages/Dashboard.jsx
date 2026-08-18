@@ -34,11 +34,11 @@ function formatSyncTime(iso) {
 // reachable by keyboard and announced as pressable, with aria-sort on the th
 // itself so a screen reader can report the current ordering rather than
 // leaving it as a purely visual cue.
-function SortableTh({ sortKey, sort, onSort, term, children }) {
+function SortableTh({ sortKey, sort, onSort, term, numeric, children }) {
   const active = sort.key === sortKey
   const ariaSort = !active ? 'none' : sort.dir === 1 ? 'ascending' : 'descending'
   return (
-    <th aria-sort={ariaSort} className={active ? 'th-sorted' : undefined}>
+    <th aria-sort={ariaSort} className={[active ? 'th-sorted' : '', numeric ? 'num' : ''].filter(Boolean).join(' ') || undefined}>
       <span className="th-inner">
         <button type="button" className="th-sort" onClick={() => onSort(nextSort(sort, sortKey))}>
           <span>{children}</span>
@@ -139,7 +139,10 @@ export default function Dashboard() {
       .filter((r) => r.stat && r.kind !== 'macro' && evidence.has(r.symbol))
       .map((r) => ({ row: r, ev: evidence.get(r.symbol), survives: survivors.has(r.symbol) }))
       .sort((a, b) => a.ev.p - b.ev.p)
-      .slice(0, 5)
+      // Four rather than five: the cutoff is arbitrary either way, and four
+      // resolves to a clean row at every breakpoint instead of leaving one
+      // orphan card on a second line at desktop widths.
+      .slice(0, 4)
   }, [rows, leaderboard])
 
   return (
@@ -254,14 +257,14 @@ export default function Dashboard() {
           <tr>
             <th><span className="visually-hidden">Watchlist</span></th>
             <SortableTh sortKey="symbol" sort={view.sort} onSort={setSort}>Symbol</SortableTh>
-            <SortableTh sortKey="price" sort={view.sort} onSort={setSort} term="livePrice">Price</SortableTh>
+            <SortableTh sortKey="price" numeric sort={view.sort} onSort={setSort} term="livePrice">Price</SortableTh>
             <th><Explain term="sparkline">Trend</Explain></th>
-            <SortableTh sortKey="rsi" sort={view.sort} onSort={setSort} term="rsi">RSI(14)</SortableTh>
+            <SortableTh sortKey="rsi" numeric sort={view.sort} onSort={setSort} term="rsi">RSI(14)</SortableTh>
             <SortableTh sortKey="macd" sort={view.sort} onSort={setSort} term="macd">MACD</SortableTh>
             <SortableTh sortKey="setup" sort={view.sort} onSort={setSort} term="setupRead">Setup</SortableTh>
             <SortableTh sortKey="flags" sort={view.sort} onSort={setSort} term="flags">Flags</SortableTh>
-            <SortableTh sortKey="edge" sort={view.sort} onSort={setSort} term="edge">Edge</SortableTh>
-            <SortableTh sortKey="safeLeverage" sort={view.sort} onSort={setSort} term="riskRead">Max size</SortableTh>
+            <SortableTh sortKey="edge" numeric sort={view.sort} onSort={setSort} term="edge">Edge</SortableTh>
+            <SortableTh sortKey="safeLeverage" numeric sort={view.sort} onSort={setSort} term="riskRead">Max size</SortableTh>
             <SortableTh sortKey="verdict" sort={view.sort} onSort={setSort} term="verdict">Confluence</SortableTh>
           </tr>
         </thead>
@@ -278,25 +281,25 @@ export default function Dashboard() {
                     <span className="muted small">{row.name}</span>
                   </Link>
                 </td>
-                <td>
+                <td className="num">
                   <LivePrice basePrice={row.price} liveQuote={livePrices[row.symbol]} />
                 </td>
                 <td>
                   <Sparkline values={row.spark} />
                 </td>
-                <td>{row.rsi != null ? row.rsi.toFixed(1) : '—'}</td>
+                <td className="num">{row.rsi != null ? row.rsi.toFixed(1) : '—'}</td>
                 <td>{row.macd ? (row.macd === 'above' ? 'Above signal' : 'Below signal') : '—'}</td>
                 <td className={`setup-cell${row.setup ? ` setup-cell-${row.setup.key}` : ''}`}>
                   {row.setup ? row.setup.name : '—'}
                 </td>
                 <td className="muted small">{row.flags.length ? row.flags.join(', ') : '—'}</td>
-                <td className="muted small">
+                <td className="muted small num">
                   {row.stat ? `${rate(row.stat.winRate)} (N=${row.stat.sampleSize})` : '—'}
                 </td>
                 {/* The size this instrument has already gone through. Low
                     numbers are the signal here, which is why the column sorts
                     ascending first. */}
-                <td className={row.risk?.safeLeverage != null && row.risk.safeLeverage <= 3 ? 'size-tight' : undefined}>
+                <td className={`num${row.risk?.safeLeverage != null && row.risk.safeLeverage <= 3 ? ' size-tight' : ''}`}>
                   {row.risk?.safeLeverage != null ? `${row.risk.safeLeverage}x` : '—'}
                 </td>
                 <td>
