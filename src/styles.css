@@ -2896,3 +2896,24 @@ kbd {
 .corr-matrix .corr-self {
   text-align: center;
 }
+
+/* A link sitting in a row of filter chips. Deliberately not styled as a chip:
+   it navigates rather than toggling, and making the two look alike would put
+   a one-way door in a row of switches. */
+.facet-link {
+  font-size: 0.78rem;
+  color: var(--accent);
+  text-decoration: none;
+  padding: var(--s1) var(--s2);
+  white-space: nowrap;
+}
+
+.facet-link:hover {
+  text-decoration: underline;
+}
+
+/* The corner of the correlation grid. A cell rather than a header, so nothing
+   announces an empty column heading. */
+.corr-corner {
+  border-bottom: 1px solid var(--border);
+}

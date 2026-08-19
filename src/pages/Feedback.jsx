@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useEnsureSession } from '../context/AuthContext'
 import { HAS_SUPABASE } from '../lib/supabaseClient'
+import { probeTable, describeSupabaseError, SETUP_NEEDED } from '../lib/supabaseHealth'
 import { FEEDBACK_KINDS, MESSAGE_MAX, submitFeedback, listMyFeedback, validateFeedback, resolveKind } from '../lib/feedback'
 import { DATA_GENERATED_AT } from '../lib/dataProvider'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
@@ -33,6 +34,18 @@ export default function Feedback() {
   const [status, setStatus] = useState(null)
   const [errors, setErrors] = useState({})
   const [mine, setMine] = useState(null)
+  // Asked before the form is offered, not after someone has written a
+  // paragraph. A deployment whose schema has never been run is a real state
+  // this app can be in, and discovering it on submit means losing the message.
+  const [table, setTable] = useState(HAS_SUPABASE ? 'checking' : 'unconfigured')
+  useEffect(() => {
+    if (!HAS_SUPABASE) return
+    let live = true
+    probeTable('feedback').then((r) => live && setTable(r))
+    return () => {
+      live = false
+    }
+  }, [])
 
   // The page someone was looking at when they decided to complain is the
   // single most useful field on the form, and the one least likely to be
@@ -61,14 +74,19 @@ export default function Feedback() {
   const activeKind = useMemo(() => FEEDBACK_KINDS.find((k) => k.key === kind), [kind])
   const remaining = MESSAGE_MAX - message.trim().length
 
-  if (!HAS_SUPABASE) {
+  if (!HAS_SUPABASE || table === 'missing') {
     return (
       <div className="page-narrow">
         <h1>Feedback</h1>
         <p className="muted">
-          The feedback form stores submissions in the same database as the trade simulator, and that is not configured
-          on this deployment yet — so there is nowhere to put what you write. Rather than take a message and drop it,
-          this says so.
+          {HAS_SUPABASE
+            ? SETUP_NEEDED
+            : 'The feedback form stores submissions in the same database as the trade simulator, and that is not configured on this deployment yet — so there is nowhere to put what you write. Rather than take a message and drop it, this says so.'}
+        </p>
+        <p className="muted small">
+          If you have found a number here that looks wrong, it is still worth reporting — the repository’s issues are
+          open, and the raw data behind every figure is committed as{' '}
+          <a href="/screener.json">screener.json</a> and <a href="/track-record.json">track-record.json</a>.
         </p>
         <Link to="/" className="back-link">
           ← Back to the screener
@@ -98,7 +116,11 @@ export default function Feedback() {
       setContact('')
     } catch (err) {
       setStatus(null)
-      setErrors({ form: err.message || 'Could not send that. Try again in a moment.' })
+      setErrors({ form: describeSupabaseError(err, { action: 'send that' }) })
+      // A table that vanished between the probe and the submit switches the
+      // page into the same honest state, rather than leaving a form up that
+      // cannot work.
+      if (describeSupabaseError(err) === SETUP_NEEDED) setTable('missing')
     }
   }
 

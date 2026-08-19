@@ -1,4 +1,4 @@
-import { pairsWithin, effectiveBets, clusters, pairLookup, SAME_BET, CORRELATION_LOOKBACK } from './correlation.js'
+import { pairsWithin, effectiveBets, clusters, SAME_BET, CORRELATION_LOOKBACK } from './correlation.js'
 
 // The basket read, in words.
 //
@@ -113,12 +113,3 @@ export function overlapRead({ matrix, symbols, lookback = CORRELATION_LOOKBACK, 
     caveat: `Correlation of daily closes over the last ${lookback} sessions, on the dates each pair actually shared. It measures direction only — equal risk weights, so a position held at several times the size of the others is more concentrated than this says. Correlations change, and they change fastest in the sessions where they matter most: things that normally move apart tend to fall together.`,
   }
 }
-
-// The same read for whatever is on the screener right now, so the concentration
-// of a filtered list is visible without starring anything.
-export function overlapOfRows(matrix, rows, limit = 12) {
-  if (!rows?.length) return null
-  return overlapRead({ matrix, symbols: rows.slice(0, limit).map((r) => r.symbol) })
-}
-
-export { pairLookup }

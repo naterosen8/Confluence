@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient.js'
+import { getSupabase } from './supabaseClient.js'
 
 // Sending feedback about the site.
 //
@@ -86,6 +86,8 @@ export async function submitFeedback({ userId, kind, message, contact, page, sna
   // payload should not reach the database on the strength of the UI alone.
   if (!check.ok) throw new Error(Object.values(check.errors)[0])
 
+  const supabase = await getSupabase()
+
   const { data, error } = await supabase
     .from('feedback')
     .insert({
@@ -115,6 +117,7 @@ export async function submitFeedback({ userId, kind, message, contact, page, sna
 }
 
 export async function listMyFeedback(userId) {
+  const supabase = await getSupabase()
   const { data, error } = await supabase
     .from('feedback')
     .select('*')

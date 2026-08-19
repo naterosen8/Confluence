@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { describeSupabaseError } from '../lib/supabaseHealth'
 import { Link } from 'react-router-dom'
 import { useEnsureSession } from '../context/AuthContext'
 import { HAS_SUPABASE } from '../lib/supabaseClient'
@@ -38,7 +39,7 @@ export default function SimulateTradeForm({ symbol, currentPrice }) {
       })
       setSubmitStatus('saved')
     } catch (err) {
-      setSubmitStatus(err.message || 'Something went wrong')
+      setSubmitStatus(describeSupabaseError(err, { action: 'open that trade' }))
     }
   }
 

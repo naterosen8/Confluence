@@ -1,6 +1,7 @@
-import { supabase } from './supabaseClient.js'
+import { getSupabase } from './supabaseClient.js'
 
 export async function listTrades(userId) {
+  const supabase = await getSupabase()
   const { data, error } = await supabase
     .from('trades')
     .select('*')
@@ -11,6 +12,7 @@ export async function listTrades(userId) {
 }
 
 export async function createTrade({ userId, symbol, direction, capital, leverage, entryPrice }) {
+  const supabase = await getSupabase()
   const { data, error } = await supabase
     .from('trades')
     .insert({
@@ -28,6 +30,7 @@ export async function createTrade({ userId, symbol, direction, capital, leverage
 }
 
 export async function closeTrade(id, { closePrice, liquidated, closeDate }) {
+  const supabase = await getSupabase()
   const { data, error } = await supabase
     .from('trades')
     .update({
@@ -43,6 +46,7 @@ export async function closeTrade(id, { closePrice, liquidated, closeDate }) {
 }
 
 export async function deleteTrade(id) {
+  const supabase = await getSupabase()
   const { error } = await supabase.from('trades').delete().eq('id', id)
   if (error) throw error
 }

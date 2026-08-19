@@ -23,6 +23,17 @@ import Explain from '../components/Explain'
 // ?symbols= parameter overrides it, so a specific basket can be linked to and
 // argued about without anyone having to reproduce a watchlist.
 
+// Past this many names the pairwise grid stops being a table anyone reads:
+// fifteen names is 225 cells, and a basket of the whole tracked universe would
+// be 7,921. The measurements above it — bets, groups, strongest pairs — do not
+// degrade with size, so the grid is what gets dropped rather than the page.
+const MATRIX_LIMIT = 15
+
+// Likewise for the group cards. A large basket is mostly names that grouped
+// with nothing, and sixty cards saying "on its own" buries the four that
+// matter.
+const SINGLETON_LIMIT = 12
+
 // Buckets for the shading in the matrix. Coarse on purpose — the difference
 // between 0.61 and 0.64 is not a difference anyone should read a decision off,
 // and a continuous gradient invites exactly that.
@@ -104,6 +115,16 @@ export default function Overlap() {
     [matrix, basket]
   )
   const at = useMemo(() => (matrix ? pairLookup(matrix) : null), [matrix])
+
+  // Every group that carries more than one name, plus as many lone names as
+  // fit before the list stops being readable.
+  const shownGroups = useMemo(() => {
+    if (!read?.groups) return []
+    const blocks = read.groups.filter((g) => g.members.length > 1)
+    const singles = read.groups.filter((g) => g.members.length === 1)
+    return [...blocks, ...singles.slice(0, SINGLETON_LIMIT)]
+  }, [read])
+  const hiddenSingletons = (read?.groups?.filter((g) => g.members.length === 1).length ?? 0) - (shownGroups.length - (read?.blocks?.length ?? 0))
 
   // The other question the matrix can answer that no ticker page can: which
   // tracked names have not simply been the index in a costume.
@@ -255,7 +276,7 @@ export default function Overlap() {
                 <section className="detail-section">
                   <h2>What moves together</h2>
                   <div className="cluster-grid">
-                    {read.groups.map((g) => (
+                    {shownGroups.map((g) => (
                       <div key={g.members.join('-')} className={`cluster${g.members.length > 1 ? ' cluster-block' : ''}`}>
                         <div className="cluster-members">
                           {g.members.map((s) => (
@@ -272,18 +293,65 @@ export default function Overlap() {
                       </div>
                     ))}
                   </div>
+                  {hiddenSingletons > 0 && (
+                    <p className="muted small">
+                      {hiddenSingletons} further {hiddenSingletons === 1 ? 'name' : 'names'} grouped with nothing else
+                      at this threshold, and {hiddenSingletons === 1 ? 'is' : 'are'} not listed — the groups above are
+                      the ones carrying the concentration.
+                    </p>
+                  )}
                 </section>
               )}
 
               <section className="detail-section">
                 <h2>Pair by pair</h2>
+                {read.held.length > MATRIX_LIMIT ? (
+                  <>
+                    <p className="muted small">
+                      {read.held.length} names is {(read.held.length * (read.held.length - 1)) / 2} pairs — a grid
+                      nobody reads. The strongest are listed instead; every figure above is measured across all of
+                      them.
+                    </p>
+                    <div className="score-table-wrap">
+                      <table className="score-table">
+                        <thead>
+                          <tr>
+                            <th>Pair</th>
+                            <th className="num">
+                              <Explain term="correlation">Correlation</Explain>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {read.pairs.slice(0, 20).map((p) => (
+                            <tr key={`${p.a}-${p.b}`}>
+                              <td>
+                                <Link to={`/ticker/${encodeURIComponent(p.a)}`}>{p.a}</Link>
+                                {' / '}
+                                <Link to={`/ticker/${encodeURIComponent(p.b)}`}>{p.b}</Link>
+                              </td>
+                              <td className={`num ${heat(p.r)}`}>{p.r.toFixed(2)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                ) : (
                 <div className="score-table-wrap">
                   <table className="score-table corr-matrix">
+                    <caption className="visually-hidden">
+                      Pairwise correlation of daily returns over the last {read.lookback} sessions, for the{' '}
+                      {read.held.length} names in this basket.
+                    </caption>
                     <thead>
                       <tr>
-                        <th />
+                        {/* An empty corner cell, hidden from the accessible
+                            tree so a screen reader announces the row header
+                            rather than a blank column heading. */}
+                        <td className="corr-corner" aria-hidden="true" />
                         {read.held.map((s) => (
-                          <th key={s} className="num">
+                          <th key={s} scope="col" className="num">
                             {s}
                           </th>
                         ))}
@@ -306,6 +374,7 @@ export default function Overlap() {
                     </tbody>
                   </table>
                 </div>
+                )}
                 <p className="muted small">
                   Shaded by band rather than by a continuous gradient, because the difference between 0.61 and 0.64 is
                   not one to read a decision off. A dash means the two have not shared enough sessions to measure.

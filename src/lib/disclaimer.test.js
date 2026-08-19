@@ -91,7 +91,7 @@ describe('disclaimer acceptance', () => {
 describe('the terms themselves', () => {
   it('states the things this site is actually on the hook for', () => {
     const keys = DISCLAIMER_POINTS.map((p) => p.key)
-    for (const required of ['not-advice', 'no-edge', 'simulated', 'past', 'yours']) {
+    for (const required of ['not-advice', 'no-edge', 'simulated', 'past', 'sizing', 'yours']) {
       expect(keys, `missing ${required}`).toContain(required)
     }
   })
@@ -105,6 +105,28 @@ describe('the terms themselves', () => {
     const sim = DISCLAIMER_POINTS.find((p) => p.key === 'simulated')
     expect(sim.text).toMatch(/funding/)
     expect(sim.text).toMatch(/slippage/)
+  })
+
+  // The site turns measurements into a share count now. That is a different
+  // kind of output from a description of an instrument, and the terms have to
+  // say what it is and what it is not.
+  it('names the sizing panel as arithmetic rather than a suggestion', () => {
+    const sizing = DISCLAIMER_POINTS.find((p) => p.key === 'sizing')
+    expect(sizing.text).toMatch(/arithmetic/i)
+    expect(sizing.text).toMatch(/does not propose/i)
+    expect(sizing.text).toMatch(/not a suggestion/i)
+  })
+
+  it('says the risk figures are not safety limits', () => {
+    const past = DISCLAIMER_POINTS.find((p) => p.key === 'past')
+    expect(past.text).toMatch(/not a bound on what happens next/i)
+    expect(past.text).toMatch(/not safety limits/i)
+  })
+
+  // A material change to the terms means asking again. Anyone still carrying
+  // an acceptance of the older list has not agreed to this one.
+  it('has been bumped past the version that predates the sizing panel', () => {
+    expect(DISCLAIMER_VERSION).toBeGreaterThanOrEqual(2)
   })
 
   it('has no duplicate keys', () => {

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { KIND_LABELS, COLUMNS, DEFAULT_COLUMNS } from '../lib/screenerView'
 import Explain from './Explain'
 
@@ -94,6 +95,15 @@ export default function ScreenerFilters({ state, facets, onChange, shown, total,
           >
             Watchlist{watchCount ? ` (${watchCount})` : ''}
           </Chip>
+          {/* Placed here rather than only in the nav, because this is where
+              the question arises: the moment a watchlist has more than one
+              name in it, "how many bets is that" is a real question and there
+              was nothing on this page pointing at the answer. */}
+          {watchCount > 1 && (
+            <Link className="facet-link" to="/overlap">
+              How many bets is that? →
+            </Link>
+          )}
         </div>
 
         <div className="facet-group">

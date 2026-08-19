@@ -145,15 +145,15 @@ A real gate, not a dismissible banner. Nothing renders behind it, there is no cl
 
 It exists because of what is on the other side: a screener that says "aligned up" next to a control that goes to 50×. Caveats that arrive after someone has formed a view are worth very little.
 
-Seven points, deliberately concrete rather than legalese — a boilerplate wall gets scrolled past, and the only version that does anything is one people read. They include the two the site is most on the hook for: that its own measurements find no predictive edge, and that the simulator flatters leveraged outcomes because it charges no funding, spread or slippage.
+Eight points, deliberately concrete rather than legalese — a boilerplate wall gets scrolled past, and the only version that does anything is one people read. They include the three the site is most on the hook for: that its own measurements find no predictive edge, that the simulator flatters leveraged outcomes because it charges no funding, spread or slippage, and that the position-size panel is arithmetic on numbers you type in rather than a suggestion to take the position it returns.
 
-Acceptance is stored in `localStorage` with a **version**. If the terms change materially the version goes up and everyone is asked again, because consent to one set of terms is not consent to a different set. Storage failures (Safari private mode throws rather than returning null) all resolve to "ask again", never to a crash or a silent pass. A footer button re-opens the terms and withdraws the acceptance.
+Acceptance is stored in `localStorage` with a **version**. If the terms change materially the version goes up and everyone is asked again, because consent to one set of terms is not consent to a different set. It is on 2: adding a panel that turns measurements into a share count is a new kind of output, so everyone who accepted the earlier list is asked to read this one. Storage failures (Safari private mode throws rather than returning null) all resolve to "ask again", never to a crash or a silent pass. A footer button re-opens the terms and withdraws the acceptance.
 
 ## Where the site does give direct advice
 
 Its own chapter — **Risk**, on every ticker page — plus optional `Max size`, `Stop`, `Typical drawdown`, `Recovery` and `Absorbs` columns on the screener, so 89 instruments can be scanned for the ones that have already gone through a position.
 
-Direction is not on the list, and that is a measurement rather than squeamishness. Base rates that do not separate from their own drift, a confluence score correlating about −0.06 with what follows, twelve survivors from eighty-seven that are mostly *under*-performers. A "buy this" derived from inputs measured to carry no information is a confident voice attached to a coin flip, and there is a 50× simulator on the next panel.
+Direction is not on the list, and that is a measurement rather than squeamishness. Base rates that do not separate from their own drift, a confluence score correlating about −0.06 with what follows, and a leaderboard whose handful of survivors from eighty-seven are mostly *under*-performers — the four names it promoted on the day this was written were all below their own drift. A "buy this" derived from inputs measured to carry no information is a confident voice attached to a coin flip, and there is a 50× simulator on the next panel.
 
 Risk is a different question with a real answer. Six reads, in the order the decisions get made.
 
@@ -237,6 +237,26 @@ limit 50;
 ```
 
 `page` and `snapshot_at` are what make a "this number is wrong" report reproducible: check out the commit whose sync produced that snapshot and the figure being disputed is the one that was on screen. Without them the report is unfalsifiable a week later, which is why they are captured rather than requested.
+
+## What loads when
+
+The screener is the page every visit starts on, so it is what ships in the entry chunk; every other route is fetched when someone goes there. The Supabase client is loaded on demand rather than imported at boot — it is around 350 KB, larger than every page on this site combined, and it serves two optional features most visits never touch. `HAS_SUPABASE` stays a plain synchronous check of the environment, so the "not configured on this deployment" branches still resolve during render without waiting on anything.
+
+The result, measured on the built output: the entry bundle went from 656 KB (196 KB gzipped) to 279 KB (93 KB), and the screener downloads no auth library at all. A chunk that fails to arrive throws inside `Suspense` and is caught by the same error boundary every other page-level failure hits.
+
+## When the database has not been set up
+
+Both optional features need a table that someone has to create by running `supabase/schema.sql` once. Until that happens the deployment sits in a state the app previously had no word for: credentials present, client connects, auth works, every query fails. What a visitor saw was the raw PostgREST string — and on the feedback form, they saw it *after* writing a paragraph, which is the worst possible moment to find out the message has nowhere to go.
+
+So a missing table is treated as a configuration state rather than an error. `lib/supabaseHealth.js` tells an unknown relation (`42P01`, `PGRST205`) apart from a policy refusal (`42501`) apart from a dead connection, and the feedback page asks once, before offering the form, whether the table is actually there. If it is not, the form is switched off and the page says exactly which file has to be run and where. Verified against a stubbed project that answers 404 to every table.
+
+## Tests
+
+`npm test` runs everything: unit tests over the pure functions, validation tests that run against the committed snapshot rather than fixtures (OHLC invariants, look-ahead leaks, date-stamping in the track record, the correlation matrix reproducing from the bars in the repository), and static checks over the components.
+
+Those static checks exist because of a specific escape. A `useState` setter was renamed, one call site inside a JSX handler was missed, the build resolved nothing, 543 unit tests passed, and the first sign of trouble was `setMultiple is not defined` thrown when someone changed a dropdown. `src/lib/components.test.js` now fails on a setter that is called but never declared, or declared and never called.
+
+`npm run smoke` is the general version and needs a preview server and Playwright (not a dependency — it is a large install for something run by hand). It walks all 17 pages checking for uncaught exceptions, unrendered `NaN`/`undefined`, and horizontal overflow, then clicks the things unit tests cannot reach: the filter box at speed, the column picker, the sort headers, the keyboard shortcuts, the CSV download, the position sizer's dropdown and the overlap basket. Both guards were confirmed by reintroducing the original bug and watching them fail.
 
 ## Deploying
 

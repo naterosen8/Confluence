@@ -10,6 +10,7 @@ import {
   isFiltered,
   nextSort,
   DEFAULT_COLUMNS,
+  COLUMNS,
   orderedColumns,
   sortForColumns,
 } from './screenerView.js'
@@ -279,5 +280,43 @@ describe('nextSort', () => {
       expect(typeof spec.get, key).toBe('function')
       expect(spec.label, key).toBeTruthy()
     }
+  })
+})
+
+// The column list is now consumed by four things that each keep their own map
+// keyed by column: the sort specs here, the cell renderers on the dashboard,
+// and the value and header maps in the CSV export. A column added to one and
+// forgotten in another is a crash or a blank, and it would only show up when
+// someone switched that column on.
+describe('every column is wired everywhere', () => {
+  it('has a sort spec', () => {
+    expect(COLUMNS.filter((c) => !SORTS[c.key]).map((c) => c.key)).toEqual([])
+  })
+
+  it('has a cell renderer on the dashboard', async () => {
+    const src = await import('node:fs').then((fs) =>
+      fs.readFileSync(new URL('../pages/Dashboard.jsx', import.meta.url), 'utf8')
+    )
+    const block = src.slice(src.indexOf('const CELLS = {'), src.indexOf('\n}', src.indexOf('const CELLS = {')))
+    expect(COLUMNS.filter((c) => !new RegExp(`\\b${c.key}:`).test(block)).map((c) => c.key)).toEqual([])
+  })
+
+  it('has a CSV value and a CSV header', async () => {
+    const { screenerCsv } = await import('./exportCsv.js')
+    const row = { symbol: 'AAA', name: 'Alpha', kind: 'stock', price: 1, verdict: 'split', flags: [] }
+    for (const c of COLUMNS) {
+      const csv = screenerCsv([row], [c.key])
+      const [header, body] = csv.split('\r\n')
+      // A column with no header falls back to its label; a column with no
+      // value getter would throw. Both are caught by asking for it alone.
+      expect(header.split(',').length, `header for ${c.key}`).toBeGreaterThan(4)
+      expect(body, `body for ${c.key}`).toMatch(/^AAA,Alpha,stock,1,/)
+      expect(header, `${c.key} header names its unit or itself`).not.toContain('undefined')
+    }
+  })
+
+  it('offers every column key in the URL', () => {
+    const all = COLUMNS.map((c) => c.key)
+    expect(parseParams(new URLSearchParams(`cols=${all.join(',')}`)).columns).toEqual(all)
   })
 })

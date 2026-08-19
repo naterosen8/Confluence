@@ -27,10 +27,15 @@ export default function PositionSizer({ symbol, price, atr, stop, safeLeverage, 
   const prefs = useSizingPrefs()
   const [equityDraft, setEquityDraft] = useState(prefs.equity == null ? '' : String(prefs.equity))
   const [riskDraft, setRiskDraft] = useState(prefs.riskPct == null ? '' : String(prefs.riskPct))
-  // Starts at the multiple the record on this page settled on, and can be
-  // moved — someone who has decided on a wider stop should see what that costs
-  // in size rather than being told they are holding it wrong.
-  const [multiple, setMultiple] = useState(stop?.keeper?.mult ?? 2)
+  // Null means "follow the measurement". Held as an override rather than
+  // seeded into state, because a `useState(measuredValue)` initialiser only
+  // runs on mount — and React reuses this component across an in-app move from
+  // one ticker to another, so the previous instrument's measured stop would
+  // stay selected while the "— measured" label moved to a different option.
+  // Latent today only because most tickers happen to settle on 1.5 ATR.
+  const [chosen, setChosen] = useState(null)
+  const measured = stop?.keeper?.mult ?? null
+  const multiple = chosen ?? measured ?? 2
 
   const equity = numberOrNull(equityDraft)
   const riskPct = numberOrNull(riskDraft)
@@ -88,10 +93,10 @@ export default function PositionSizer({ symbol, price, atr, stop, safeLeverage, 
           <span className="muted small">
             <Explain term="stopRead">Stop distance</Explain>
           </span>
-          <select value={multiple} onChange={(e) => setMultiple(Number(e.target.value))}>
+          <select value={multiple} onChange={(e) => setChosen(Number(e.target.value))}>
             {STOP_ATR_MULTIPLES.map((m) => (
               <option key={m} value={m}>
-                {m} ATR{stop?.keeper?.mult === m ? ' — measured' : ''}
+                {m} ATR{measured === m ? ' — measured' : ''}
               </option>
             ))}
           </select>

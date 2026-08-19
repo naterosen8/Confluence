@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { supabase, HAS_SUPABASE } from '../lib/supabaseClient'
+import { getSupabase, HAS_SUPABASE } from '../lib/supabaseClient'
 
 const AuthContext = createContext({ user: null, loading: false, ensureSession: async () => null })
 
@@ -9,14 +9,31 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (!HAS_SUPABASE) return
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null)
-      setLoading(false)
-    })
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-    return () => subscription.subscription.unsubscribe()
+    let unsubscribe = null
+    let cancelled = false
+    getSupabase()
+      .then(async (supabase) => {
+        const { data } = await supabase.auth.getSession()
+        if (cancelled) return
+        setUser(data.session?.user ?? null)
+        setLoading(false)
+        const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+          setUser(session?.user ?? null)
+        })
+        // Unmounted while the client was still downloading: tear the listener
+        // down as soon as it exists rather than leaking it.
+        if (cancelled) subscription.subscription.unsubscribe()
+        else unsubscribe = () => subscription.subscription.unsubscribe()
+      })
+      .catch(() => {
+        // The auth chunk did not arrive. Stop reporting "loading" forever —
+        // the surfaces that need a session say so themselves.
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+      unsubscribe?.()
+    }
   }, [])
 
   // Silently creates (or resumes) an anonymous identity — no email, no
@@ -27,6 +44,7 @@ export function AuthProvider({ children }) {
   // no credential to sign back in with from another device.
   const ensureSession = useCallback(async () => {
     if (!HAS_SUPABASE) throw new Error('Simulated trades are not configured yet.')
+    const supabase = await getSupabase()
     const { data } = await supabase.auth.getSession()
     if (data.session) return data.session
     const { data: signInData, error } = await supabase.auth.signInAnonymously()

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { overlapRead, overlapOfRows } from './overlapRead.js'
+import { overlapRead } from './overlapRead.js'
 import { correlationMatrix } from './correlation.js'
 
 function weekdays(n, from = '2024-01-01') {
@@ -125,21 +125,5 @@ describe('overlapRead', () => {
   it('warns that correlations rise exactly when they matter', () => {
     const r = overlapRead({ matrix, symbols: ['TIED1', 'LONE1'] })
     expect(r.caveat).toMatch(/tend to fall together/)
-  })
-})
-
-describe('overlapOfRows', () => {
-  it('reads the top of a row list', () => {
-    const rows = ['TIED1', 'TIED2', 'TIED3'].map((symbol) => ({ symbol }))
-    expect(overlapOfRows(matrix, rows).count).toBe(3)
-  })
-
-  it('caps how many rows it takes, so a whole screener is not called one basket', () => {
-    const rows = Object.keys(barsBySymbol).map((symbol) => ({ symbol }))
-    expect(overlapOfRows(matrix, rows, 2).count).toBe(2)
-  })
-
-  it('has nothing to say about an empty list', () => {
-    expect(overlapOfRows(matrix, [])).toBeNull()
   })
 })

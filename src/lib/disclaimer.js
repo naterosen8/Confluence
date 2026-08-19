@@ -12,7 +12,12 @@
 // everyone is asked again, because consent to a different set of terms is not
 // consent to these ones. Bumping it for a typo would be noise; bumping it for
 // a new claim is the point.
-export const DISCLAIMER_VERSION = 1
+// Version 2: the site gained a position-size calculator and a basket overlap
+// read. Turning a measurement into a share count is a new kind of output, so
+// the terms name it and everyone is asked again — consent to a site that only
+// described instruments is not consent to one that does arithmetic on your
+// account size.
+export const DISCLAIMER_VERSION = 2
 
 const KEY = 'confluence.disclaimer'
 
@@ -42,7 +47,11 @@ export const DISCLAIMER_POINTS = [
   },
   {
     key: 'past',
-    text: 'The risk figures — survivable size, stop distance, drawdown, recovery time — describe what has already happened to each instrument. They are not a bound on what happens next.',
+    text: 'The risk figures — survivable size, stop distance, drawdown, recovery time, what a session absorbs, how much of a basket is one bet — describe what has already happened. They are not a bound on what happens next, and they are not safety limits.',
+  },
+  {
+    key: 'sizing',
+    text: 'The position-size panel is arithmetic on numbers you type in. It does not propose an account size, a risk budget, a direction or a size, and a figure it returns is not a suggestion to take that position.',
   },
   {
     key: 'yours',

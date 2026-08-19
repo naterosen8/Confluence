@@ -438,7 +438,23 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
         Everything below is measured from {symbol}'s own last 250 sessions. It is the one part of this site stated as
         instructions, because size, stop distance, drawdown and recovery time are facts about how this instrument has
         already behaved — not guesses about what it does next. There is deliberately nothing here about whether to
-        take a position, or in which direction.
+        take a position, or in which direction.{' '}
+        {/* Everything here describes this instrument held on its own. Held
+            alongside correlated names the drawdown budget is shared rather
+            than repeated, and no single ticker page can see that. Offered
+            only when there is actually a basket to measure — a link that
+            lands on "one name, nothing to overlap" is worse than no link. */}
+        {watchlist.symbols.some((s) => s !== symbol) ? (
+          <>
+            Every figure describes {symbol} held on its own —{' '}
+            <Link to={`/overlap?symbols=${encodeURIComponent([symbol, ...watchlist.symbols.filter((s) => s !== symbol)].join(','))}`}>
+              see how much of it overlaps your watchlist
+            </Link>
+            .
+          </>
+        ) : (
+          <>Every figure describes {symbol} held on its own; star a few names and the overlap page measures the basket.</>
+        )}
       </div>
 
       {/* Ordered the way the decisions actually get made: how big, where it is

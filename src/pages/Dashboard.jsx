@@ -372,6 +372,16 @@ export default function Dashboard() {
               )
             })}
           </div>
+          {/* These four were selected out of eighty-nine for being extreme,
+              which is exactly the situation where they turn out to be the
+              same trade. The panel above promotes them; this says how much of
+              a selection it really is. */}
+          <p className="muted small">
+            <Link to={`/overlap?symbols=${encodeURIComponent(topSetups.map((t) => t.row.symbol).join(','))}`}>
+              How correlated are these four?
+            </Link>{' '}
+            — a selection of extremes is often one position several times over, and that is invisible from the cards.
+          </p>
         </div>
       )}
 
@@ -412,6 +422,15 @@ export default function Dashboard() {
         watchCount={watchlist.count}
         onExport={exportVisible}
       />
+
+      {/* The row highlight is a visual affordance and nothing else. Naming
+          the row it lands on is the only way the keyboard navigation is
+          usable without sight of the screen. */}
+      <p className="visually-hidden" role="status">
+        {cursor != null && visibleRows[cursor]
+          ? `Row ${cursor + 1} of ${visibleRows.length}: ${visibleRows[cursor].symbol}, ${visibleRows[cursor].name}. Press Enter to open, s to star.`
+          : ''}
+      </p>
 
       <div className="table-wrap" ref={tableRef}>
       <table className="grid">

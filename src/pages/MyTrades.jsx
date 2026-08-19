@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useEnsureSession } from '../context/AuthContext'
 import { HAS_SUPABASE } from '../lib/supabaseClient'
+import { describeSupabaseError, SETUP_NEEDED } from '../lib/supabaseHealth'
 import { listTrades, closeTrade, deleteTrade } from '../lib/trades'
 import { getSeries, hasRealData, loadBars } from '../lib/dataProvider'
 import { evaluatePosition, computePnl } from '../lib/pnl'
@@ -68,7 +69,7 @@ export default function MyTrades() {
         )
         setTrades(resolved)
       })
-      .catch((err) => setError(err.message || 'Failed to load trades'))
+      .catch((err) => setError(describeSupabaseError(err, { action: 'load your trades' })))
   }, [user])
 
   async function handleClose(trade) {
@@ -86,7 +87,7 @@ export default function MyTrades() {
       })
       setTrades((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
     } catch (err) {
-      setError(err.message || 'Failed to close trade')
+      setError(describeSupabaseError(err, { action: 'close that trade' }))
     } finally {
       setClosingId(null)
     }
@@ -99,7 +100,7 @@ export default function MyTrades() {
       await deleteTrade(trade.id)
       setTrades((prev) => prev.filter((t) => t.id !== trade.id))
     } catch (err) {
-      setError(err.message || 'Failed to delete trade')
+      setError(describeSupabaseError(err, { action: 'delete that trade' }))
     } finally {
       setDeletingId(null)
     }
@@ -146,10 +147,17 @@ export default function MyTrades() {
         this browser — there's no login, so a different browser or device won't see them.
       </p>
 
-      {error && <p className="muted small">Error: {error}</p>}
+      {/* A deployment whose schema has never been run is a configuration
+          state, not a failure — and an empty trades table underneath a red
+          error line reads as "your trades are gone". */}
+      {error === SETUP_NEEDED ? (
+        <div className="callout">{SETUP_NEEDED}</div>
+      ) : (
+        error && <p className="muted small">Error: {error}</p>
+      )}
 
       {!trades ? (
-        <p className="muted">Loading trades…</p>
+        error ? null : <p className="muted">Loading trades…</p>
       ) : trades.length === 0 ? (
         <p className="muted">
           No simulated trades yet. Open one from any <Link to="/">ticker's page</Link>.

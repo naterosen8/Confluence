@@ -22,9 +22,11 @@ const chain = (result) => {
 }
 
 let response = { data: {}, error: null }
+// The client is fetched on demand now — see getSupabase() — so the mock is a
+// promise of a client rather than a client.
 vi.mock('./supabaseClient', () => ({
   HAS_SUPABASE: true,
-  supabase: { from: (...a) => chain(response).from(...a) },
+  getSupabase: async () => ({ from: (...a) => chain(response).from(...a) }),
 }))
 
 const { listTrades, createTrade, closeTrade, deleteTrade } = await import('./trades')
