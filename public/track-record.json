@@ -717,28 +717,52 @@
     "symbol": "AAPL",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 302.25
+    "price": 302.25,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 316.83,
+      "returnPct": 4.823821339950367,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "AMD",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 482.93
+    "price": 482.93,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 466.42,
+      "returnPct": -3.4187149276292614,
+      "correct": true
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "AMZN",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 267.28
+    "price": 267.28,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 265.84,
+      "returnPct": -0.5387608500448959,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "BAC",
     "verdict": "leaning-up",
     "score": 1,
-    "price": 64.81
+    "price": 64.81,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 63.17,
+      "returnPct": -2.530473692331431,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
@@ -758,105 +782,195 @@
     "symbol": "CRM",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 193.32
+    "price": 193.32,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 206.09,
+      "returnPct": 6.605627974343063,
+      "correct": true
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "CVX",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 196.6
+    "price": 196.6,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 205.76,
+      "returnPct": 4.659206510681586,
+      "correct": true
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "DIA",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 537.15
+    "price": 537.15,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 534.27,
+      "returnPct": -0.5361630829377261,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "IWM",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 302.71
+    "price": 302.71,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 301.72,
+      "returnPct": -0.32704568729145134,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "JPM",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 365.18
+    "price": 365.18,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 357.26,
+      "returnPct": -2.1687934717125845,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "META",
     "verdict": "aligned-down",
     "score": -4,
-    "price": 578.85
+    "price": 578.85,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 546.03,
+      "returnPct": -5.669862658719884,
+      "correct": true
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "MSFT",
     "verdict": "leaning-up",
     "score": 1,
-    "price": 492.43
+    "price": 492.43,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 484.31,
+      "returnPct": -1.6489653351745435,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "NFLX",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 74.21
+    "price": 74.21,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 80.22,
+      "returnPct": 8.098638997439705,
+      "correct": true
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "NVDA",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 224.09
+    "price": 224.09,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 217.56,
+      "returnPct": -2.914007764737383,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "QQQ",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 723.7
+    "price": 723.7,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 716.08,
+      "returnPct": -1.0529224816913092,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "SPY",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 772.49
+    "price": 772.49,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 769.06,
+      "returnPct": -0.4440186927986205,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "TLT",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 82.11
+    "price": 82.11,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 83.02,
+      "returnPct": 1.1082693947144033,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "TSLA",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 327.51
+    "price": 327.51,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 351.12,
+      "returnPct": 7.208940185032523,
+      "correct": false
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "UNH",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 405.59
+    "price": 405.59,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 388.61,
+      "returnPct": -4.186493749845894,
+      "correct": true
+    }
   },
   {
     "date": "2026-08-12",
     "symbol": "XOM",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 159.75
+    "price": 159.75,
+    "outcome": {
+      "resolvedDate": "2026-08-19",
+      "exitPrice": 164.77,
+      "returnPct": 3.1424100156494585,
+      "correct": true
+    }
   },
   {
     "date": "2026-08-13",
@@ -2067,5 +2181,502 @@
     "verdict": "aligned-down",
     "score": -4,
     "price": 1.003
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "ABBV",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 258.92
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "ABT",
+    "verdict": "leaning-up",
+    "score": 1,
+    "price": 112.68
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "ADA/USD",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 0.1746
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "AMGN",
+    "verdict": "leaning-up",
+    "score": 1,
+    "price": 425.28
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "AMZN",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 259.45
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "ANET",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 193.18
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "AVAX/USD",
+    "verdict": "aligned-down",
+    "score": -4,
+    "price": 6.334
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "AVGO",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 380
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "AXP",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 338.52
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "BA",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 223.06
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "BLK",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 1154.35
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "BTC/USD",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 64725.42
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "C",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 137.65
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "COIN",
+    "verdict": "aligned-down",
+    "score": -4,
+    "price": 146.23
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "COP",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 129.72
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "COST",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 961.35
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "CRM",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 196.14
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "CSCO",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 111.61
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "CVX",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 205.74
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "DE",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 588.72
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "DIA",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 532.91
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "DIS",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 103.95
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "DOGE/USD",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 0.0703
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "F",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 13.93
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "GE",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 375.09
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "GM",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 83.71
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "GOOGL",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 344.2
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "HD",
+    "verdict": "aligned-down",
+    "score": -4,
+    "price": 337.49
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "HYG",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 79.53
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "IBM",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 232.67
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "IWM",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 300.23
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "JNJ",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 271.11
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "JPM",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 363.25
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "KO",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 88.82
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "LINK/USD",
+    "verdict": "leaning-up",
+    "score": 1,
+    "price": 9.538
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "LLY",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 1225.73
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "MA",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 574.31
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "MCD",
+    "verdict": "aligned-down",
+    "score": -6,
+    "price": 266.99
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "META",
+    "verdict": "aligned-down",
+    "score": -4,
+    "price": 543.67
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "MRK",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 135.17
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "MS",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 217.55
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "NFLX",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 77.77
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "NKE",
+    "verdict": "aligned-down",
+    "score": -4,
+    "price": 40.06
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "NOW",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 119.49
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "NVDA",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 219.74
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "ORCL",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 142.79
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "OXY",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 59.8
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "PANW",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 374.14
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "PEP",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 140.13
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "PFE",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 27.25
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "PG",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 143.45
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "PLTR",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 171.54
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "PYPL",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 60.43
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "QQQ",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 717.51
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "RTX",
+    "verdict": "leaning-down",
+    "score": -1,
+    "price": 225.49
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "SBUX",
+    "verdict": "aligned-up",
+    "score": 6,
+    "price": 106.01
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "SCHW",
+    "verdict": "leaning-up",
+    "score": 1,
+    "price": 111.68
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "SLB",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 53.21
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "SOL/USD",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 77.05
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "SPY",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 767.45
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "T",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 24.9
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "TGT",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 152.48
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "TLT",
+    "verdict": "aligned-down",
+    "score": -4,
+    "price": 81.66
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "TSLA",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 336.87
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "UBER",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 74.66
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "UNH",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 393.93
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "V",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 364.25
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "VZ",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 48.54
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "WMT",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 115.2
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "XOM",
+    "verdict": "leaning-up",
+    "score": 1,
+    "price": 165.56
+  },
+  {
+    "date": "2026-08-18",
+    "symbol": "XRP/USD",
+    "verdict": "aligned-down",
+    "score": -4,
+    "price": 1.0019
   }
 ]
