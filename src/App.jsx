@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react'
 import Dashboard from './pages/Dashboard'
 import TickerDetail from './pages/TickerDetail'
 import TrackRecord from './pages/TrackRecord'
+import Overlap from './pages/Overlap'
 import MyTrades from './pages/MyTrades'
 import NotFound from './pages/NotFound'
 import Methodology from './pages/Methodology'
@@ -27,6 +28,7 @@ function RoutedContent() {
         {/* Each chapter is its own URL, so a page can be linked to, opened in
             a new tab, and walked with the browser's own back button. */}
         <Route path="/ticker/:symbol/:chapter" element={<TickerDetail />} />
+        <Route path="/overlap" element={<Overlap />} />
         <Route path="/track-record" element={<TrackRecord />} />
         <Route path="/my-trades" element={<MyTrades />} />
         <Route path="/methodology" element={<Methodology />} />
@@ -74,6 +76,7 @@ export default function App() {
           </Link>
           <span className="tagline">A live TA screener — not a signal service</span>
           <nav className="site-nav">
+            <Link to="/overlap">Overlap</Link>
             <Link to="/my-trades">My trades</Link>
             <Link to="/track-record">Track record</Link>
             <Link to="/methodology">How to read this</Link>

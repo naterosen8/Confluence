@@ -100,6 +100,38 @@ export default function Methodology() {
         </div>
       </section>
 
+      <section className="detail-section">
+        <h3>What it will answer, and what it will not</h3>
+        <p className="muted small">
+          The site refuses one question and answers several others directly, and the line between them is not
+          squeamishness — it is where the evidence runs out.
+        </p>
+        <p className="muted small">
+          <strong>Direction: no.</strong> Four independent measurements are published on the next page, and none of
+          them finds that the confluence score predicts which way price goes. A site whose own numbers say that and
+          then tells you what to buy is not being helpful, it is contradicting itself. So nothing here says whether
+          to take a position or which way to lean, and nothing ever will unless the measurement changes.
+        </p>
+        <p className="muted small">
+          <strong>Size, stops, drawdown, recovery, liquidity and overlap: yes, plainly.</strong> These are facts about
+          a distribution that has already happened rather than guesses about the next draw. What size this instrument
+          has already liquidated, how far a stop has to sit before it stops firing on ordinary noise, how far under
+          water a hold typically goes and how long it stays there, what a quiet session absorbs, and how much of a
+          basket is really one position — all of it is measured from the same committed bars every other number here
+          comes from, and none of it requires knowing what happens next.
+        </p>
+        <p className="muted small">
+          The one calculation that turns those into a share count needs two numbers this site does not have and will
+          not assume: how much money is at stake, and how much of it you are willing to lose being wrong once. Both
+          are typed in, both stay in your browser, and neither field arrives with a suggestion in it.
+        </p>
+        <p className="small explain-isnot">
+          <em>What it is not:</em> the risk figures are not safety limits. "Survived every entry at 5x" describes what
+          has already happened to a position of that size over a particular stretch of history — not a level anyone
+          has checked is safe, and not a bound on the next stretch.
+        </p>
+      </section>
+
       </>)}
 
       {chapter.key === 'evidence' && (<>

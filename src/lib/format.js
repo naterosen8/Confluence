@@ -50,7 +50,23 @@ export function compactMoney(v) {
   if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(2)}T`
   if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(2)}B`
   if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(1)}M`
-  return `${sign}$${abs.toFixed(0)}`
+  // Grouped below a million, where the abbreviation stops doing the work.
+  // "$565371" and "$100000" appear side by side in the position sizer and
+  // differ by a factor of five and a half, which is not something anyone
+  // should have to count digits to see.
+  return `${sign}$${group(abs)}`
+}
+
+// Thousands separators, locale-aware. Used wherever a raw amount is shown at
+// full precision rather than abbreviated.
+export function group(v, digits = 0) {
+  if (v == null || !Number.isFinite(v)) return '—'
+  return v.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits })
+}
+
+export function money(v, digits = 0) {
+  if (v == null || !Number.isFinite(v)) return '—'
+  return `${v < 0 ? MINUS : ''}$${group(Math.abs(v), digits)}`
 }
 
 export function shareCount(n) {

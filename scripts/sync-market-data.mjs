@@ -13,7 +13,7 @@ import { computeSignals } from '../src/lib/indicators.js'
 import { TICKERS } from '../src/lib/tickers.js'
 import { leanDirection } from '../src/lib/lean.js'
 import { lastSettledIndex, repairUnresolved } from '../src/lib/trackRecord.js'
-import { buildScreener } from '../src/lib/screener.js'
+import { buildScreener, buildCorrelations } from '../src/lib/screener.js'
 import { barsFileName } from '../src/lib/barsFile.js'
 import { summarizeTrackRecord } from '../src/lib/trackRecordSummary.js'
 
@@ -31,6 +31,10 @@ const BARS_DIR = new URL('../public/bars/', import.meta.url)
 const TRACK_RECORD_PATH = new URL('../public/track-record.json', import.meta.url)
 // The dashboard's rows, precomputed. See src/lib/screener.js for why.
 const SCREENER_PATH = new URL('../public/screener.json', import.meta.url)
+// The pairwise correlation matrix. Its own file rather than part of the index
+// because it is a fifth again of the index's size and only the overlap panel
+// needs it — see buildCorrelations() in src/lib/screener.js.
+const CORRELATIONS_PATH = new URL('../public/correlations.json', import.meta.url)
 // The track-record page's figures, precomputed. The raw log stays committed
 // as the audit trail; this is what the page actually downloads.
 const TRACK_SUMMARY_PATH = new URL('../public/track-record-summary.json', import.meta.url)
@@ -226,6 +230,17 @@ async function main() {
     JSON.stringify({ ...previousScreener, generatedAt: null }) !== JSON.stringify({ ...screener, generatedAt: null })
   if (screenerChanged) fs.writeFileSync(SCREENER_PATH, JSON.stringify(screener) + '\n')
   console.log(`Screener index: ${screener.rows.length} rows, ${screenerChanged ? 'rewritten' : 'unchanged'}.`)
+
+  const correlations = buildCorrelations({ barsBySymbol, tickers: TICKERS })
+  const previousCorrelations = loadJson(CORRELATIONS_PATH, null)
+  const correlationsChanged =
+    !previousCorrelations ||
+    JSON.stringify({ ...previousCorrelations, generatedAt: null }) !==
+      JSON.stringify({ ...correlations, generatedAt: null })
+  if (correlationsChanged) fs.writeFileSync(CORRELATIONS_PATH, JSON.stringify(correlations) + '\n')
+  console.log(
+    `Correlations: ${correlations.symbols.length} symbols, ${correlations.pairs.length} pairs, ${correlationsChanged ? 'rewritten' : 'unchanged'}.`
+  )
 
   let log = loadJson(TRACK_RECORD_PATH, [])
 

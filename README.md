@@ -19,7 +19,9 @@ The split matters for growth. A combined file is ~92KB of raw bars per symbol, s
 
 `screener.json` is the dashboard, computed once by the job rather than in every visitor's browser: ~228 bytes per row against ~20KB gzipped of bars, so the dashboard paints from a few KB and never downloads bar history at all. No API key ever ships to the browser, and it costs the same ~22 API requests/day regardless of how many people have the site open, because everyone reads the same snapshot instead of each visitor's browser calling Twelve Data independently.
 
-The same job also updates `public/track-record.json` (see below) from the same fetch, so there's no duplicate API usage between the two features.
+The same job also updates `public/track-record.json` (see below) and `public/correlations.json` from the same fetch, so there's no duplicate API usage between the features.
+
+Everything except the bars is *derived*, which means a change to how a number is computed does not reach the site until the next scheduled run — a commit that adds a column would ship a site whose rows do not have it. `npm run rebuild` recomputes `screener.json` and `correlations.json` from the committed bars with no network access, no API key and no rate limit, and never writes a bar file, so it cannot invent or alter a single price. It carries the existing `generatedAt` forward rather than restamping, so the staleness check keeps telling the truth.
 
 Without a synced snapshot yet (fresh clone, or before the first workflow run), the app falls back to deterministic demo data (a seeded random walk per symbol) so it's fully explorable out of the box. The mechanics — divergence detection, base rates, volatility context — are real; the numbers they're computed from aren't, until real data is behind them. The app flags this per-ticker whenever that symbol is running on demo data.
 
@@ -31,11 +33,7 @@ npm run dev
 npm test    # vitest — covers the leverage/liquidation math
 ```
 
-To sync real data locally: `TWELVE_DATA_KEY=your_key node scripts/sync-market-data.mjs` (takes ~3 minutes, throttled to stay under Twelve Data's free-tier rate limit). Commit the resulting `public/bars/` and `public/screener.json`, or leave them uncommitted for local testing.
-
-## Scope
-
-~20 tickers (major indices, mega-cap tech, a couple of crypto pairs) rather than "every stock" — keeps the free data tier viable and the UI scannable. See `src/lib/tickers.js` to adjust the list.
+To sync real data locally: `TWELVE_DATA_KEY=your_key node scripts/sync-market-data.mjs` (takes ~3 minutes, throttled to stay under Twelve Data's free-tier rate limit). Commit the resulting `public/bars/`, `public/screener.json` and `public/correlations.json`, or leave them uncommitted for local testing.
 
 ## Indicators
 
@@ -153,35 +151,53 @@ Acceptance is stored in `localStorage` with a **version**. If the terms change m
 
 ## Where the site does give direct advice
 
-Its own chapter — **Risk**, on every ticker page — and a `Max size` column on the screener so 89 instruments can be scanned for the ones that have already gone through a position. Four reads, in the order the decisions get made.
+Its own chapter — **Risk**, on every ticker page — plus optional `Max size`, `Stop`, `Typical drawdown`, `Recovery` and `Absorbs` columns on the screener, so 89 instruments can be scanned for the ones that have already gone through a position.
 
-**Survivable size.** A position opened at every one of the last 250 sessions, at each rung the simulator offers, walked forward. The largest rung that lost none of them. SOL/USD 2×, TSLA 3×, NVDA 5×, SPY 10×.
+Direction is not on the list, and that is a measurement rather than squeamishness. Base rates that do not separate from their own drift, a confluence score correlating about −0.06 with what follows, twelve survivors from eighty-seven that are mostly *under*-performers. A "buy this" derived from inputs measured to carry no information is a confident voice attached to a coin flip, and there is a 50× simulator on the next panel.
 
-**Stop distance.** How often a stop at each ATR multiple would have fired — and, the number nobody computes, how often it would have closed a position that ended profitable anyway. On SPY a 0.5 ATR stop was hit on 69% of holds and took out **half the winners**; 2 ATR cuts that to 6%.
+Risk is a different question with a real answer. Six reads, in the order the decisions get made.
+
+**Survivable size.** A position opened at every one of the last 250 sessions, at each rung the simulator offers, walked forward. The largest rung that lost none of them. SOL/USD 2×, BTC/USD 3×, NVDA 5×, SPY 10×. Reported as an instruction because it is a fact about a distribution rather than a guess about the next draw — and stated plainly as *not* a recommendation to use that size, but the point past which the instrument has already gone through a position.
+
+**Stop distance.** How often a stop at each ATR multiple would have fired — and, the number nobody computes, how often it would have closed a position that ended profitable anyway. On SPY a 0.5 ATR stop was hit on 69% of holds and took out **half the winners**; 2 ATR cuts that to 6%. Distances are in ATR rather than percent so they compare across instruments: 2% is a tight stop on an index fund and a rounding error on an altcoin.
 
 **Drawdown while held.** What a win rate cannot say: the path. Median, worst decile, deepest — and separately for the entries that finished in profit, because a position sized so the median winner's drawdown is intolerable gets closed at the bottom of half its own winners.
 
 **Time to recovery.** Once a position *closed* a full ATR under water, how many sessions until it touched entry again, and how often it never did. BTC/USD: 38% had not recovered 60 sessions later.
 
-All four measure intraday lows and highs, because that is when a stop fires and what a drawdown felt like. The recovery clock starts on a **close** under water, not an intraday dip — measuring the low made half of BTC/USD's drawdowns "recover in zero sessions", which is a wick inside a session, not something anyone holds through.
+**Absorbable size.** The ceiling the four reads above quietly assume away — that a position of the size they describe can be got into and out of at the price on the screen. One percent of a typical session's traded value, with the tenth-percentile session shown alongside it, because the day a position has to come off is not usually chosen. Crypto pairs report *unknown* rather than zero: the feed quotes them as currency pairs and carries no volume at all, and reading that as zero would label the most liquid instruments on the board untradeable.
 
+**Position size.** The step from measurement to a position, and the only thing here that needs numbers from the reader: how much money is at stake, and how much of it they are willing to lose being wrong once. Neither field arrives with a suggestion in it — a pre-filled "1%" would be this site proposing a risk budget, which is the half of the question it has no standing to answer. What comes back is the multiplication plus the three separately-measured ceilings it runs into (survivable size, quiet-session liquidity, the account itself), with the smallest reported as binding. Both inputs stay in `localStorage` and never leave the browser.
 
+All the excursion-based reads measure intraday lows and highs, because that is when a stop fires and what a drawdown felt like; scoring on closes would flatter every figure. The recovery clock starts on a **close** under water, not an intraday dip — measuring the low made half of BTC/USD's drawdowns "recover in zero sessions", which is a wick inside a session, not something anyone holds through. Tests assert monotonicity (a wider stop can never be hit more often; survival can only fall as leverage rises) and that none of these reads can acquire directional language.
 
-On risk, and deliberately not on direction.
+## Overlap
 
-Direction is not it. The site measured that and found nothing — base rates that do not separate from their own drift, a confluence score correlating about −0.06 with what follows, twelve survivors from eighty-seven that are mostly *under*-performers. A "buy this" derived from inputs measured to carry no information is a confident voice attached to a coin flip, and there is a 50× simulator on the next panel.
+Every other page here reads one instrument. `/overlap` reads a basket, and answers the question a list of screener results cannot: how many separate positions it actually amounts to.
 
-Risk is a different question with a real answer. `lib/riskRead.js` opens a position at every one of the last 250 sessions, at each rung the simulator offers, and walks it forward — checking intraday lows and highs, so a position touched at its liquidation level counts as dead even if the bar closed back above. The largest rung that lost none of them is reported as an instruction, because it is a fact about a distribution rather than a guess about the next draw.
+The gap was structural. Filter 89 names down to the six that read the same way and the natural conclusion is that six opportunities were found — usually one was, wearing six tickers. Nothing on the site said so, and the per-name risk figures are misleading the moment more than one is held, because six positions that fall together do not each get their own drawdown budget.
 
-The numbers differ enough per instrument to be worth stating: BTC/USD 3×, NVDA 5×, SPY 10×, KO 10×.
+For N equal-risk positions with average pairwise correlation ρ, portfolio variance is (1/N)(1 + (N−1)ρ) times a single position's; setting that equal to 1/k gives **k = N / (1 + (N−1)ρ)** independent bets. The four index ETFs come to 1.2 bets at a mean correlation of 0.80. Three large crypto pairs come to 1.1.
 
-Two more reads sit alongside it, in the order the decisions actually get made — how big, then where it is wrong, then what holding it will feel like.
+Correlations are Pearson on daily close-to-close returns over 120 sessions, keyed **by date** rather than by array position — the universe mixes 7-day and 5-day calendars, and lining those up by index pairs a Saturday in BTC with a Thursday in SPY and drifts a little further out of register every weekend. Grouping into "same bet" blocks uses average linkage at 0.70, not single linkage, which would chain through individually weak links until one group swallowed the board.
 
-**Stop distance** measures how often a stop at a given ATR multiple would have fired over a hold this length, and — the number nobody computes — how often it would have closed a position that ended profitable anyway. On SPY a 0.5 ATR stop was hit on 69% of holds and took out **half the winners**; 2 ATR cuts that to 6%. Distances are in ATR rather than percent so they compare across instruments: 2% is a tight stop on an index fund and a rounding error on an altcoin.
+The basket is the watchlist by default; `?symbols=A,B,C` overrides it so a specific basket can be linked and argued about without anyone reproducing a watchlist, and editing a linked basket changes the link rather than the reader's saved list. The matrix ships as `public/correlations.json` (~5.6 KB gzipped, 3,916 pairs) and is fetched only when the page is opened; a single `corrSpy` per row rides along in the index so the screener can sort by it.
 
-**Drawdown while held** answers what a win rate cannot — the path. Across SPY's last 250 entries the median position was 1.1% under water at its worst point; on BTC/USD it was 3.2%, with the deepest reaching 23.8%. Reported separately for the entries that *ended profitable*, because a position sized so that the median winner's drawdown is intolerable is one that gets closed at the bottom of half its own winners.
+## Getting the numbers out
 
-All three measure depth on intraday lows and highs rather than closes, because that is when a stop fires and what a drawdown actually felt like; scoring on closes would flatter every figure. Tests assert monotonicity in both (a wider stop can never be hit more often; survival can only fall as leverage rises) and that none of the three can acquire directional language. The read says plainly that this is not a recommendation to use that size — it is the point past which the instrument has *already* gone through a position — and that funding, spread and slippage all make real outcomes worse than the figure shown. A test asserts this read can never acquire directional language.
+The screener exports exactly what is on screen — same rows, same order, same columns — as CSV. An export that quietly includes rows a filter removed, or a column that was switched off, is a file that disagrees with the page it came from, and the disagreement gets discovered later inside someone else's model. Values are raw rather than formatted (a spreadsheet cannot add up "$220.3M"), units live in the header, and the win rate always travels with its sample size because a rate without its N will be averaged. Filtered exports are named `-filtered` so the file cannot be mistaken for the whole board.
+
+## Screener columns, sorting, filtering and keys
+
+Every column sorts, and the table filters by text (symbol or name), instrument type, chart setup, and confluence lean, plus a "has flags" toggle. Values within a facet are OR, separate facets are AND, and the facets only offer states something is actually in — a filter for a structure nothing is currently in produces an empty table that reads as a broken page.
+
+The row carries more measurement than a fixed table can show, so the middle columns are **chosen**. The spine (star, symbol, price, trend, confluence) is fixed; everything between is toggleable, and the default set is exactly what the table showed before columns existed, so nobody's screener changes until they change it. Hiding the column a table is sorted by drops the sort rather than leaving the table ordered by a number nobody can see — and drops it from the URL too, so the address cannot claim an ordering the page is not using.
+
+Two rules worth keeping if this is edited. Columns sort by **what the cell displays**: the Edge column shows a win rate, so it sorts by win rate rather than by the signed `edge` behind it. And rows with no value sort **last in both directions** — flipping a sort should reorder the rows that have data, not swap a block of dashes from one end to the other. `vs SPY` sorts by distance from zero, because a reliably inverse name is no more independent of the index than a reliably parallel one.
+
+Keyboard: `/` focuses the filter, `j`/`k` (or the arrows) move a row cursor, `Enter` opens it, `s` stars it, `g`/`G` jump to either end, `Escape` drops the highlight, `?` lists them. Nothing fires while the cursor is in a text field — a screener whose filter box eats the "j" out of "JPM" and jumps the cursor instead is worse than one with no shortcuts at all.
+
+The whole view lives in the URL (`?q=&kind=&setup=&verdict=&flagged=&watch=&cols=&sort=rsi:desc`), like every other view on the site, so a narrowed screener can be linked and reloaded. Only non-default state is written, so an untouched screener keeps a clean URL, and changes `replace` rather than `push` so dragging a filter around does not bury the page someone arrived from. Logic is pure functions in `lib/screenerView.js` with the table as a plain consumer. The filter input itself is *locally* controlled and writes to the URL a beat later: driving it straight from the query string meant every keystroke had to survive a router round trip before the next arrived, and typing "NVDA" at speed left "A" in the box.
 
 ## The tracked universe
 
@@ -198,14 +214,6 @@ Star any row on the screener, or the symbol on a ticker page, and it collects in
 Stored in `localStorage`, not the database, deliberately: a watchlist is a preference and not a record. It works on the first visit with no account, no anonymous identity minted, no network round trip before the star responds, and nothing about it is worth putting behind row-level security. The cost — it does not follow you to another device — is the same trade the simulator already makes, and the page says so rather than hiding it. Reads and writes are wrapped because storage *throws* in Safari private mode and when a browser blocks site data; a watchlist that fails to persist is a far smaller problem than a screener that fails to render. Cross-tab `storage` events keep two open tabs from disagreeing about what is starred.
 
 `filterToWatchlist` is strict: an empty watchlist matches nothing. Treating it as "no filter" leaves the chip visibly active with all 24 tickers still listed, which reads as broken — that was a real bug, caught in a browser doing exactly that. The page distinguishes "nothing starred yet" from "starred names, none of which match the other filters" and says which.
-
-## Screener sorting and filtering
-
-Every column sorts, and the table filters by text (symbol or name), instrument type, chart setup, and confluence lean, plus a "has flags" toggle. Values within a facet are OR, separate facets are AND, and the facets only offer states something is actually in — a filter for a structure nothing is currently in produces an empty table that reads as a broken page.
-
-Two rules worth keeping if this is edited. Columns sort by **what the cell displays**: the Edge column shows a win rate, so it sorts by win rate rather than by the signed `edge` behind it, because ordering a table by a number the reader cannot see is how it stops being trustworthy. And rows with no value sort **last in both directions** — flipping a sort should reorder the rows that have data, not swap a block of dashes from one end to the other.
-
-The whole view lives in the URL (`?q=&kind=&setup=&verdict=&flagged=&sort=rsi:desc`), like every other view on the site, so a narrowed screener can be linked and reloaded. Only non-default state is written, so an untouched screener keeps a clean URL, and changes `replace` rather than `push` so dragging a filter around does not bury the page someone arrived from. Logic is pure functions in `lib/screenerView.js` with the table as a plain consumer.
 
 ## Feedback (optional)
 

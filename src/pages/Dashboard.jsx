@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
 import { screenerRows, screenerLeaderboardCheck, screenerMarketRead, HAS_LIVE_DATA, DATA_GENERATED_AT, isSnapshotStale, snapshotAgeDays } from '../lib/dataProvider'
 import { leaderboardVerdict } from '../lib/leaderboardCheck'
@@ -23,7 +23,13 @@ import {
   toParams,
   isFiltered,
   nextSort,
+  orderedColumns,
+  sortForColumns,
+  DEFAULT_COLUMNS,
 } from '../lib/screenerView'
+import { screenerCsv, csvFileName, downloadCsv } from '../lib/exportCsv'
+import { shortcutFor, moveCursor, SHORTCUTS } from '../lib/shortcuts'
+import { compactMoney } from '../lib/format'
 
 function formatSyncTime(iso) {
   if (!iso) return null
@@ -69,9 +75,58 @@ function StarButton({ symbol, starred, onToggle }) {
 
 const CLEARED = { query: '', kinds: [], setups: [], verdicts: [], flagged: false, watchlistOnly: false }
 
+// One cell renderer per optional column, so the table body is a loop rather
+// than eleven hand-written <td>s that have to be kept in the same order as the
+// header. The formatting choices are the same ones the rest of the site makes:
+// a missing measurement is a dash and never a zero, and a unit is shown
+// because a bare number in a narrow column is a number nobody can name.
+const CELLS = {
+  rsi: (r) => ({ className: 'num', content: r.rsi != null ? r.rsi.toFixed(1) : '—' }),
+  macd: (r) => ({ content: r.macd ? (r.macd === 'above' ? 'Above signal' : 'Below signal') : '—' }),
+  setup: (r) => ({
+    className: `setup-cell${r.setup ? ` setup-cell-${r.setup.key}` : ''}`,
+    content: r.setup ? r.setup.name : '—',
+  }),
+  flags: (r) => ({ className: 'muted small', content: r.flags?.length ? r.flags.join(', ') : '—' }),
+  edge: (r) => ({
+    className: 'muted small num',
+    content: r.stat ? `${rate(r.stat.winRate)} (N=${r.stat.sampleSize})` : '—',
+  }),
+  // The size this instrument has already gone through. Low numbers are the
+  // signal here, which is why the column sorts ascending first.
+  safeLeverage: (r) => ({
+    className: `num${r.risk?.safeLeverage != null && r.risk.safeLeverage <= 3 ? ' size-tight' : ''}`,
+    content: r.risk?.safeLeverage != null ? `${r.risk.safeLeverage}x` : '—',
+  }),
+  stopAtr: (r) => ({ className: 'num', content: r.risk?.stopAtr != null ? `${r.risk.stopAtr} ATR` : '—' }),
+  drawdown: (r) => ({
+    className: 'num',
+    content: r.risk?.medianDrawdownPct != null ? `${r.risk.medianDrawdownPct.toFixed(1)}%` : '—',
+  }),
+  recovery: (r) => ({
+    className: 'num',
+    content: r.risk?.recoverySessions != null ? `${r.risk.recoverySessions}d` : '—',
+  }),
+  // Unreported and zero are different claims: the feed carries no volume for
+  // currency pairs, which means unknown, not untradeable.
+  liquidity: (r) => ({
+    className: `num${r.liquidity?.reported && r.liquidity.thin ? ' size-tight' : ''}`,
+    content: r.liquidity?.reported ? compactMoney(r.liquidity.absorbableQuiet) : '—',
+  }),
+  corrSpy: (r) => ({ className: 'num', content: r.corrSpy != null ? r.corrSpy.toFixed(2) : '—' }),
+}
+
 export default function Dashboard() {
   const [livePrices, setLivePrices] = useState({})
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
+  // Which row the keyboard is on. Null rather than 0 on arrival: a highlight
+  // sitting on the first row before anyone has pressed anything reads as a
+  // selection that was made, and the first row is alphabetical rather than
+  // interesting.
+  const [cursor, setCursor] = useState(null)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const tableRef = useRef(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -94,7 +149,14 @@ export default function Dashboard() {
   // send to another person or reload back into, and state held only in the
   // component is the one view that cannot be.
   const watchlist = useWatchlist()
-  const view = useMemo(() => parseParams(searchParams), [searchParams])
+  const parsed = useMemo(() => parseParams(searchParams), [searchParams])
+  // Sorting by a column that is switched off leaves the table ordered by a
+  // number nobody can see. See sortForColumns().
+  const view = useMemo(
+    () => ({ ...parsed, sort: sortForColumns(parsed.sort, parsed.columns) }),
+    [parsed]
+  )
+  const columns = useMemo(() => orderedColumns(view.columns), [view.columns])
   const facets = useMemo(() => availableFacets(rows), [rows])
   const visibleRows = useMemo(() => {
     const filtered = filterRows(rows, view)
@@ -113,6 +175,83 @@ export default function Dashboard() {
     [setSearchParams]
   )
   const setSort = useCallback((sort) => setView({ ...view, sort }), [setView, view])
+
+  // Read inside the handler rather than closed over, so the listener is
+  // registered once and still sees the current filter result.
+  const visibleRowsRef = useRef(visibleRows)
+  const cursorRef = useRef(cursor)
+  const watchlistRef = useRef(watchlist)
+  visibleRowsRef.current = visibleRows
+  cursorRef.current = cursor
+  watchlistRef.current = watchlist
+
+  // Every keystroke that is not a row action. Registered once on the document
+  // rather than on the table, because the point is to reach the table without
+  // having clicked into it first.
+  useEffect(() => {
+    const onKey = (e) => {
+      const action = shortcutFor(e)
+      if (!action) return
+      if (action === 'blur') {
+        e.target.blur()
+        return
+      }
+      if (action === 'search') {
+        e.preventDefault()
+        document.getElementById('screener-q')?.focus()
+        return
+      }
+      if (action === 'help') {
+        e.preventDefault()
+        setHelpOpen((v) => !v)
+        return
+      }
+      if (action === 'clear') {
+        setCursor(null)
+        setHelpOpen(false)
+        return
+      }
+      // Everything below acts on a row, and the row list is read at keypress
+      // time so the handler never needs re-registering as filters change.
+      const list = visibleRowsRef.current
+      if (!list.length) return
+      if (action === 'open' || action === 'star') {
+        if (cursorRef.current == null) return
+        const row = list[cursorRef.current]
+        if (!row) return
+        e.preventDefault()
+        if (action === 'open') navigate(`/ticker/${encodeURIComponent(row.symbol)}`)
+        else watchlistRef.current.toggle(row.symbol)
+        return
+      }
+      const next = moveCursor(cursorRef.current, action, list.length)
+      if (next == null) return
+      e.preventDefault()
+      setCursor(next)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [navigate])
+
+  // A cursor pointing past the end of a freshly-filtered list is a cursor on
+  // nothing; drop it rather than silently clamping it onto an unrelated row.
+  useEffect(() => {
+    setCursor((c) => (c == null || c < visibleRows.length ? c : null))
+  }, [visibleRows.length])
+
+  // Keep the highlighted row on screen. `nearest` rather than `center` so
+  // stepping through rows that are already visible does not scroll at all.
+  useEffect(() => {
+    if (cursor == null) return
+    tableRef.current?.querySelector('.row-cursor')?.scrollIntoView({ block: 'nearest' })
+  }, [cursor])
+
+  const exportVisible = useCallback(() => {
+    downloadCsv(
+      screenerCsv(visibleRows, view.columns),
+      csvFileName(DATA_GENERATED_AT, { filtered: visibleRows.length !== rows.length })
+    )
+  }, [visibleRows, view.columns, rows.length])
 
   const leaderboard = useMemo(() => screenerLeaderboardCheck(), [])
   const market = useMemo(() => screenerMarketRead(), [])
@@ -236,7 +375,33 @@ export default function Dashboard() {
         </div>
       )}
 
-      <h2 className="table-heading">All tracked tickers</h2>
+      <div className="table-heading-row">
+        <h2 className="table-heading">All tracked tickers</h2>
+        <button type="button" className="link-button" onClick={() => setHelpOpen((v) => !v)} aria-expanded={helpOpen}>
+          Keyboard shortcuts
+        </button>
+      </div>
+
+      {helpOpen && (
+        <div className="callout shortcut-help">
+          <dl>
+            {SHORTCUTS.map((s) => (
+              <div key={s.action}>
+                <dt>
+                  {s.keys.map((k) => (
+                    <kbd key={k}>{k === ' ' ? 'Space' : k}</kbd>
+                  ))}
+                </dt>
+                <dd className="muted small">{s.label}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="muted small">
+            None of these fire while the cursor is in a text field, so typing a symbol into the filter box does what
+            typing does.
+          </p>
+        </div>
+      )}
 
       <ScreenerFilters
         state={view}
@@ -245,9 +410,10 @@ export default function Dashboard() {
         shown={visibleRows.length}
         total={rows.length}
         watchCount={watchlist.count}
+        onExport={exportVisible}
       />
 
-      <div className="table-wrap">
+      <div className="table-wrap" ref={tableRef}>
       <table className="grid">
         <thead>
           {/* The sort control and the "?" are siblings inside the cell, never
@@ -259,19 +425,31 @@ export default function Dashboard() {
             <SortableTh sortKey="symbol" sort={view.sort} onSort={setSort}>Symbol</SortableTh>
             <SortableTh sortKey="price" numeric sort={view.sort} onSort={setSort} term="livePrice">Price</SortableTh>
             <th><Explain term="sparkline">Trend</Explain></th>
-            <SortableTh sortKey="rsi" numeric sort={view.sort} onSort={setSort} term="rsi">RSI(14)</SortableTh>
-            <SortableTh sortKey="macd" sort={view.sort} onSort={setSort} term="macd">MACD</SortableTh>
-            <SortableTh sortKey="setup" sort={view.sort} onSort={setSort} term="setupRead">Setup</SortableTh>
-            <SortableTh sortKey="flags" sort={view.sort} onSort={setSort} term="flags">Flags</SortableTh>
-            <SortableTh sortKey="edge" numeric sort={view.sort} onSort={setSort} term="edge">Edge</SortableTh>
-            <SortableTh sortKey="safeLeverage" numeric sort={view.sort} onSort={setSort} term="riskRead">Max size</SortableTh>
+            {columns.map((c) => (
+              <SortableTh
+                key={c.key}
+                sortKey={c.key}
+                numeric={c.numeric}
+                sort={view.sort}
+                onSort={setSort}
+                term={c.term}
+              >
+                {c.label}
+              </SortableTh>
+            ))}
             <SortableTh sortKey="verdict" sort={view.sort} onSort={setSort} term="verdict">Confluence</SortableTh>
           </tr>
         </thead>
         <tbody>
           {visibleRows.map((row) => {
             return (
-              <tr key={row.symbol} className={watchlist.has(row.symbol) ? 'row-watched' : undefined}>
+              <tr
+                key={row.symbol}
+                className={[watchlist.has(row.symbol) ? 'row-watched' : '', visibleRows[cursor]?.symbol === row.symbol ? 'row-cursor' : '']
+                  .filter(Boolean)
+                  .join(' ') || undefined}
+                aria-current={visibleRows[cursor]?.symbol === row.symbol ? 'true' : undefined}
+              >
                 <td className="star-cell">
                   <StarButton symbol={row.symbol} starred={watchlist.has(row.symbol)} onToggle={watchlist.toggle} />
                 </td>
@@ -287,21 +465,14 @@ export default function Dashboard() {
                 <td>
                   <Sparkline values={row.spark} />
                 </td>
-                <td className="num">{row.rsi != null ? row.rsi.toFixed(1) : '—'}</td>
-                <td>{row.macd ? (row.macd === 'above' ? 'Above signal' : 'Below signal') : '—'}</td>
-                <td className={`setup-cell${row.setup ? ` setup-cell-${row.setup.key}` : ''}`}>
-                  {row.setup ? row.setup.name : '—'}
-                </td>
-                <td className="muted small">{row.flags.length ? row.flags.join(', ') : '—'}</td>
-                <td className="muted small num">
-                  {row.stat ? `${rate(row.stat.winRate)} (N=${row.stat.sampleSize})` : '—'}
-                </td>
-                {/* The size this instrument has already gone through. Low
-                    numbers are the signal here, which is why the column sorts
-                    ascending first. */}
-                <td className={`num${row.risk?.safeLeverage != null && row.risk.safeLeverage <= 3 ? ' size-tight' : ''}`}>
-                  {row.risk?.safeLeverage != null ? `${row.risk.safeLeverage}x` : '—'}
-                </td>
+                {columns.map((c) => {
+                  const cell = CELLS[c.key](row)
+                  return (
+                    <td key={c.key} className={cell.className}>
+                      {cell.content}
+                    </td>
+                  )
+                })}
                 <td>
                   <VerdictBadge verdict={row.verdict} bullishPoints={row.bullishPoints} bearishPoints={row.bearishPoints} />
                 </td>

@@ -5,6 +5,8 @@ import { leaderboardCheck } from './leaderboardCheck.js'
 import { readSetup } from './setupRead.js'
 import { marketRead } from './marketRead.js'
 import { riskRead, stopRead, drawdownRead, recoveryRead } from './riskRead.js'
+import { liquidityRead } from './liquidityRead.js'
+import { correlationMatrix, pairLookup } from './correlation.js'
 import { atrSeries } from './indicators.js'
 
 // The dashboard's rows, computed once by the daily job instead of by every
@@ -88,6 +90,23 @@ export function buildScreenerRow({ ticker, bars, spyBars }) {
         neverRecoveredPct: rec ? round(rec.neverRecoveredPct, 1) : null,
       }
     })(),
+    // The current ATR in price terms, shipped because the sizing arithmetic
+    // needs it and the screener is the only place that can supply it without
+    // downloading a symbol's whole history first. Four bytes a row.
+    atr: round(atrSeries(bars, 14).at(-1), 4),
+    // What a quiet session absorbs. The other ceiling on size, and the one
+    // the risk figures quietly assume away — see src/lib/liquidityRead.js.
+    liquidity: (() => {
+      const liq = liquidityRead({ bars, symbol: ticker.symbol })
+      if (!liq.reported) return { reported: false }
+      return {
+        reported: true,
+        absorbable: Math.round(liq.absorbable),
+        absorbableQuiet: Math.round(liq.absorbableQuiet),
+        medianDollarVolume: Math.round(liq.medianDollarVolume),
+        thin: liq.thin,
+      }
+    })(),
     spark: bars.slice(-SPARK_POINTS).map((b) => round(b.close, 4)),
     edge: round(setup.edge, 4),
     stat: stat
@@ -103,6 +122,25 @@ export function buildScreenerRow({ ticker, bars, spyBars }) {
           source: setup.source,
         }
       : null,
+  }
+}
+
+// The pairwise correlation matrix, as its own file.
+//
+// Kept out of screener.json deliberately. Eighty-nine symbols is 3,916 pairs
+// and roughly 20 KB — a fifth again on top of the index that every visitor
+// waits for before the first row paints, to answer a question only someone
+// looking at a basket has asked. The overlap panel fetches it when opened.
+export function buildCorrelations({ barsBySymbol, tickers }) {
+  const symbols = tickers.map((t) => t.symbol).filter((s) => barsBySymbol[s]?.length)
+  const matrix = correlationMatrix(barsBySymbol, symbols)
+  return {
+    generatedAt: new Date().toISOString(),
+    lookback: matrix.lookback,
+    symbols: matrix.symbols,
+    // Two decimals: the third digit of a correlation measured on 120 points is
+    // noise, and rounding here is a quarter of the file size.
+    pairs: matrix.pairs.map((p) => (p == null ? null : Math.round(p * 100) / 100)),
   }
 }
 
@@ -124,6 +162,15 @@ export function buildScreener({ barsBySymbol, tickers }) {
   // here too.
   const symbols = rows.map((r) => r.symbol)
   const directionCheck = scoreDirectionCheck(barsBySymbol, symbols)
+
+  // How much of each name is just the index. One number a row, so the screener
+  // can be sorted by it: a filtered list of eight "aligned up" names that all
+  // sit above 0.9 against SPY is one position, and that is not visible from
+  // any of the eight rows on their own. The full pairwise matrix is too big
+  // for the index and ships as its own file — see buildCorrelations().
+  const matrix = correlationMatrix(barsBySymbol, symbols)
+  const at = pairLookup(matrix)
+  for (const row of rows) row.corrSpy = round(at(row.symbol, 'SPY'), 3)
 
   // Whether the leaderboard's ordering survives having been selected. Computed
   // here because the correction has to know how many tickers were looked at,

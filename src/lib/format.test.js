@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
-import { pct, rate, price, signedMoney, compactMoney, shareCount } from './format.js'
+import { pct, rate, price, signedMoney, compactMoney, shareCount, group, money } from './format.js'
 
 const SRC = path.resolve(new URL('..', import.meta.url).pathname)
 
@@ -18,7 +18,7 @@ describe('shared formatters', () => {
   it('renders a missing number as a dash rather than NaN', () => {
     // One of the four copies had no null guard at all and would have printed
     // "NaN%" — a missing figure and a zero are different claims.
-    for (const f of [pct, rate, price, signedMoney, compactMoney, shareCount]) {
+    for (const f of [pct, rate, price, signedMoney, compactMoney, shareCount, group, money]) {
       expect(f(null)).toBe('—')
       expect(f(undefined)).toBe('—')
       expect(f(NaN)).toBe('—')
@@ -46,7 +46,18 @@ describe('shared formatters', () => {
     expect(compactMoney(3.2e12)).toBe('$3.20T')
     expect(compactMoney(-125.93e9)).toBe('−$125.93B')
     expect(compactMoney(4.5e6)).toBe('$4.5M')
-    expect(compactMoney(-1000)).toBe('−$1000')
+    // Grouped below the abbreviation threshold. Asserted as a shape rather
+    // than a literal because the separator is the runtime's, not ours: a
+    // machine set to a European locale groups with a dot or a space, and
+    // pinning "1,000" here would fail on a correct result.
+    expect(compactMoney(-1000)).toMatch(/^−\$1\D?000$/)
+    expect(compactMoney(999_999)).toMatch(/^\$999\D?999$/)
+  })
+
+  it('groups full-precision amounts so digits do not have to be counted', () => {
+    expect(group(1234567)).toMatch(/^1\D?234\D?567$/)
+    expect(money(-1234)).toMatch(/^−\$1\D?234$/)
+    expect(money(1234.5, 2)).toMatch(/^\$1\D?234[.,]50$/)
   })
 
   it('abbreviates share counts', () => {

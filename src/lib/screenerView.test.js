@@ -9,6 +9,9 @@ import {
   toParams,
   isFiltered,
   nextSort,
+  DEFAULT_COLUMNS,
+  orderedColumns,
+  sortForColumns,
 } from './screenerView.js'
 
 const row = (over = {}) => ({
@@ -150,13 +153,23 @@ describe('URL round-trip', () => {
       verdicts: ['aligned-up'],
       flagged: true,
       watchlistOnly: false,
+      columns: ['rsi', 'liquidity', 'corrSpy'],
       sort: { key: 'rsi', dir: -1 },
     }
     expect(roundTrip(state)).toEqual(state)
   })
 
   it('writes nothing for an untouched screener', () => {
-    const clean = { query: '', kinds: [], setups: [], verdicts: [], flagged: false, watchlistOnly: false, sort: DEFAULT_SORT }
+    const clean = {
+      query: '',
+      kinds: [],
+      setups: [],
+      verdicts: [],
+      flagged: false,
+      watchlistOnly: false,
+      columns: DEFAULT_COLUMNS,
+      sort: DEFAULT_SORT,
+    }
     expect(toParams(clean).toString()).toBe('')
   })
 
@@ -168,12 +181,64 @@ describe('URL round-trip', () => {
       verdicts: [],
       flagged: false,
       watchlistOnly: false,
+      columns: DEFAULT_COLUMNS,
       sort: DEFAULT_SORT,
     })
   })
 
   it('ignores a sort key that does not exist rather than sorting by nothing', () => {
     expect(parseParams(new URLSearchParams('sort=haxx:desc')).sort).toEqual(DEFAULT_SORT)
+  })
+
+  describe('columns', () => {
+    it('defaults to the set the table showed before columns were choosable', () => {
+      expect(parseParams(new URLSearchParams()).columns).toEqual(DEFAULT_COLUMNS)
+    })
+
+    it('reads a chosen set back out of the URL', () => {
+      expect(parseParams(new URLSearchParams('cols=corrSpy,liquidity')).columns).toEqual(['corrSpy', 'liquidity'])
+    })
+
+    // "No optional columns" is a real choice and has to survive a reload,
+    // which means an absent parameter and an empty one cannot mean the same
+    // thing.
+    it('distinguishes no parameter from an empty one', () => {
+      expect(parseParams(new URLSearchParams('cols=')).columns).toEqual([])
+      expect(parseParams(new URLSearchParams()).columns).toEqual(DEFAULT_COLUMNS)
+    })
+
+    it('drops a column key that does not exist', () => {
+      expect(parseParams(new URLSearchParams('cols=rsi,haxx')).columns).toEqual(['rsi'])
+    })
+
+    it('does not leave a sort in the URL for a column that was switched off', () => {
+      const base = { query: '', kinds: [], setups: [], verdicts: [], flagged: false, watchlistOnly: false }
+      const written = toParams({ ...base, columns: ['rsi'], sort: { key: 'corrSpy', dir: -1 } })
+      expect(written.get('sort')).toBeNull()
+      expect(parseParams(written).sort).toEqual(DEFAULT_SORT)
+    })
+
+    it('writes nothing while the default set is showing', () => {
+      const base = { query: '', kinds: [], setups: [], verdicts: [], flagged: false, watchlistOnly: false, sort: DEFAULT_SORT }
+      expect(toParams({ ...base, columns: DEFAULT_COLUMNS }).toString()).toBe('')
+      expect(toParams({ ...base, columns: ['rsi'] }).toString()).toBe('cols=rsi')
+    })
+
+    it('orders columns as defined, not as they were switched on', () => {
+      expect(orderedColumns(['corrSpy', 'rsi', 'setup']).map((c) => c.key)).toEqual(['rsi', 'setup', 'corrSpy'])
+    })
+
+    // Sorting by a column nobody can see is the exact failure the file's
+    // opening comment is about.
+    it('drops a sort whose column has been switched off', () => {
+      expect(sortForColumns({ key: 'corrSpy', dir: -1 }, ['rsi'])).toEqual(DEFAULT_SORT)
+      expect(sortForColumns({ key: 'rsi', dir: -1 }, ['rsi'])).toEqual({ key: 'rsi', dir: -1 })
+    })
+
+    it('leaves the spine sorts alone whatever the columns are', () => {
+      expect(sortForColumns({ key: 'price', dir: -1 }, [])).toEqual({ key: 'price', dir: -1 })
+      expect(sortForColumns({ key: 'verdict', dir: 1 }, [])).toEqual({ key: 'verdict', dir: 1 })
+    })
   })
 
   it('tolerates junk in the list params', () => {

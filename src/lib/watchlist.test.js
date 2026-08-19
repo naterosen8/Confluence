@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { filterToWatchlist } from './watchlist.js'
-import { parseParams, toParams, isFiltered, DEFAULT_SORT } from './screenerView.js'
+import { parseParams, toParams, isFiltered, DEFAULT_SORT, DEFAULT_COLUMNS } from './screenerView.js'
 
 describe('filterToWatchlist', () => {
   const rows = [{ symbol: 'AAPL' }, { symbol: 'BTC/USD' }, { symbol: 'SPY' }]
@@ -37,6 +37,7 @@ describe('watchlist in the URL', () => {
       verdicts: [],
       flagged: false,
       watchlistOnly: true,
+      columns: DEFAULT_COLUMNS,
       sort: DEFAULT_SORT,
     }
     expect(parseParams(toParams(state))).toEqual(state)

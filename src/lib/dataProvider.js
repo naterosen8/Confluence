@@ -49,6 +49,31 @@ export function screenerMarketRead() {
   return screener?.market ?? null
 }
 
+// The pairwise correlation matrix, fetched on demand.
+//
+// Deliberately not part of the boot path. It is a fifth of the index's size
+// again and answers a question only someone looking at a basket has asked, so
+// the overlap panel pays for it and the screener does not.
+let correlations = null
+let correlationsPromise = null
+
+export function loadCorrelations() {
+  if (!correlationsPromise) {
+    correlationsPromise = fetch('/correlations.json')
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null)
+      .then((data) => {
+        correlations = data?.symbols?.length ? data : null
+        return correlations
+      })
+  }
+  return correlationsPromise
+}
+
+export function correlationData() {
+  return correlations
+}
+
 // True once a real snapshot has loaded (see scripts/sync-market-data.mjs) —
 // not tied to any browser-side API key, because there isn't one anymore.
 // Every indicator here is daily-bar based, so there's nothing to gain from

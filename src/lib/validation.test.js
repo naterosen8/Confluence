@@ -412,6 +412,67 @@ d('track record entries are stamped so they can actually resolve', () => {
   })
 })
 
+// The correlation matrix ships as its own file and is written by the same job
+// that writes the screener index. Two files derived from one set of bars can
+// fall out of step in exactly one way that matters: the index gains a ticker
+// and the matrix does not, and the overlap page then quietly drops that name
+// from every basket it is put in with nothing on screen saying so.
+d('the published correlation matrix agrees with the published index', () => {
+  const load = (name) => {
+    const file = path.join(process.cwd(), 'public', name)
+    return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null
+  }
+  const screener = load('screener.json')
+  const matrix = load('correlations.json')
+
+  it('covers every symbol the screener publishes', () => {
+    if (!screener || !matrix) return
+    const covered = new Set(matrix.symbols)
+    expect(screener.rows.map((r) => r.symbol).filter((s) => !covered.has(s))).toEqual([])
+  })
+
+  it('carries exactly one value per distinct pair', () => {
+    if (!matrix) return
+    const n = matrix.symbols.length
+    expect(matrix.pairs).toHaveLength((n * (n - 1)) / 2)
+  })
+
+  it('holds only real correlations, or an honest null', () => {
+    if (!matrix) return
+    const bad = matrix.pairs.filter((p) => p !== null && !(Number.isFinite(p) && p >= -1 && p <= 1))
+    expect(bad).toEqual([])
+  })
+
+  it('reads back the same number in both directions', async () => {
+    if (!matrix) return
+    const { pairLookup } = await import('./correlation.js')
+    const at = pairLookup(matrix)
+    const [a, b, c] = matrix.symbols
+    expect(at(a, b)).toBe(at(b, a))
+    expect(at(a, c)).toBe(at(c, a))
+    expect(at(a, a)).toBe(1)
+  })
+
+  // Recomputing from the committed bars must reproduce the committed file. If
+  // it does not, the file was generated from data that is no longer here.
+  it('is reproducible from the bars in this repository', async () => {
+    if (!matrix || !hasData) return
+    const { correlationMatrix } = await import('./correlation.js')
+    const rebuilt = correlationMatrix(bars, matrix.symbols, matrix.lookback)
+    expect(rebuilt.symbols).toEqual(matrix.symbols)
+    for (let i = 0; i < matrix.pairs.length; i++) {
+      const published = matrix.pairs[i]
+      const computed = rebuilt.pairs[i]
+      if (published === null || computed === null) {
+        expect(published).toBe(computed === null ? null : published)
+        continue
+      }
+      // The file rounds to two decimals; that is the only difference allowed.
+      expect(Math.abs(computed - published)).toBeLessThanOrEqual(0.005 + 1e-9)
+    }
+  })
+})
+
 describe('snapshot staleness is detectable', () => {
   // The sync has failed silently three times. Its failure mode is not an error
   // page but yesterday's prices rendered as today's, so the app needs to be

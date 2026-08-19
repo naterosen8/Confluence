@@ -2567,3 +2567,332 @@ main {
     display: none;
   }
 }
+
+/* ==========================================================================
+   Overlap
+   ========================================================================== */
+
+/* The basket, as removable chips. A list of symbols is the input to this whole
+   page, so it is edited in place rather than behind a form — the point of the
+   page is watching the number move as names go in and out. */
+.basket {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin: var(--s3) 0;
+  min-height: 32px;
+  align-items: center;
+}
+
+.basket-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  background: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--s1) var(--s1) var(--s1) var(--s2);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.basket-chip a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.basket-chip a:hover {
+  color: var(--accent);
+}
+
+.basket-chip button {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 var(--s1);
+  border-radius: var(--r-sm);
+}
+
+.basket-chip button:hover {
+  color: var(--down);
+  background: color-mix(in srgb, var(--down) 14%, transparent);
+}
+
+.basket-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  align-items: center;
+}
+
+.basket-add input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: var(--s2) var(--s3);
+  min-width: 180px;
+}
+
+.basket-add input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Groups as cards, sized by how many names they swallowed. A group of one is
+   deliberately quieter than a group of four: the whole read is about which
+   names collapsed into each other, and equal weight would hide that. */
+.cluster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--s3);
+}
+
+.cluster {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s3) var(--s4);
+}
+
+.cluster-block {
+  border-color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 7%, var(--panel));
+}
+
+.cluster-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-bottom: var(--s1);
+}
+
+.cluster-members a {
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.cluster-members a:hover {
+  color: var(--accent);
+}
+
+/* Banded, not a gradient. A continuous colour ramp reads as precision the
+   underlying number does not have — a correlation measured on 120 sessions is
+   not accurate to the third digit, and shading 0.61 differently from 0.64
+   invites someone to act on the difference. */
+.corr-matrix th[scope='row'] {
+  text-align: left;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.corr-self {
+  color: var(--dim);
+}
+
+.corr-c1 { background: color-mix(in srgb, var(--warn) 4%, transparent); }
+.corr-c2 { background: color-mix(in srgb, var(--warn) 12%, transparent); }
+.corr-c3 { background: color-mix(in srgb, var(--warn) 22%, transparent); }
+.corr-c4 { background: color-mix(in srgb, var(--down) 22%, transparent); }
+.corr-c5 { background: color-mix(in srgb, var(--down) 34%, transparent); }
+/* Negative correlation is not "good" and is not shaded as though it were —
+   it is simply the other end of the same scale, and a basket built to be
+   anti-correlated is still a single view expressed twice. */
+.corr-neg { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+
+/* ==========================================================================
+   Position sizer
+   ========================================================================== */
+
+.sizer {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s4);
+}
+
+.sizer-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--s3);
+  margin: var(--s3) 0;
+}
+
+.sizer-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+}
+
+.sizer-inputs input,
+.sizer-inputs select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  padding: var(--s2) var(--s3);
+  width: 100%;
+}
+
+.sizer-inputs input:focus,
+.sizer-inputs select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* The percent sign belongs to the field, not to the label — "1" in a box
+   labelled "willing to lose" is ambiguous between one percent and one dollar,
+   and that ambiguity is a hundred-fold sizing error. */
+.sizer-suffix {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.sizer-suffix span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.sizer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--s3);
+  margin: var(--s4) 0 var(--s3);
+}
+
+.sizer-read {
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0 0 var(--s4);
+}
+
+.sizer-caps {
+  margin-top: var(--s3);
+}
+
+/* ==========================================================================
+   Screener: columns, export, keyboard
+   ========================================================================== */
+
+.column-picker {
+  margin-top: var(--s3);
+}
+
+.column-picker summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: var(--s1) 0;
+  list-style: none;
+}
+
+.column-picker summary::-webkit-details-marker {
+  display: none;
+}
+
+.column-picker summary::before {
+  content: '▸ ';
+  color: var(--muted);
+}
+
+.column-picker[open] summary::before {
+  content: '▾ ';
+}
+
+.column-picker .facet-group {
+  margin-top: var(--s2);
+}
+
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3);
+  margin-top: var(--s3);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--border);
+}
+
+.table-heading-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+  flex-wrap: wrap;
+}
+
+/* The keyboard cursor. A left bar rather than a background wash, because the
+   watchlist already uses a row background and two row states competing for the
+   same surface makes both unreadable — a row can be starred and highlighted at
+   once, and that has to look like both. */
+.row-cursor > td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.row-cursor > td {
+  background: var(--accent-wash);
+}
+
+.shortcut-help dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--s2) var(--s4);
+  margin: 0 0 var(--s3);
+}
+
+.shortcut-help dl > div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s2);
+}
+
+.shortcut-help dt {
+  display: flex;
+  gap: var(--s1);
+  flex-shrink: 0;
+}
+
+.shortcut-help dd {
+  margin: 0;
+}
+
+kbd {
+  background: var(--raised);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--r-sm);
+  padding: 1px var(--s2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  color: var(--text);
+  min-width: 20px;
+  text-align: center;
+}
+
+/* A text column in a table that right-aligns by default. Company names read
+   as a list, not as figures, and right-aligning them puts the ragged edge on
+   the side the eye starts from. */
+.score-table td.text,
+.score-table th.text {
+  text-align: left;
+  white-space: normal;
+}
+
+/* The diagonal of the correlation matrix carries no number, so its marker is
+   centred rather than pushed to the edge where a value would sit. */
+.corr-matrix .corr-self {
+  text-align: center;
+}

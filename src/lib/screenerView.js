@@ -56,6 +56,59 @@ export const SORTS = {
   // numbers — the instruments that have already gone through a position at
   // sizes people routinely use.
   safeLeverage: { label: 'Max size', get: (r) => r.risk?.safeLeverage ?? null, defaultDir: 1 },
+  // What a quiet session absorbs. Ascending first for the same reason as max
+  // size: the names where this is small are the ones where it constrains
+  // anything.
+  liquidity: { label: 'Absorbs', get: (r) => (r.liquidity?.reported ? r.liquidity.absorbableQuiet : null), defaultDir: 1 },
+  // Sorted by distance from zero, not by signed value: the useful end of this
+  // column is the names that have not simply been the index, and a reliably
+  // inverse name is no more independent of it than a reliably parallel one.
+  corrSpy: { label: 'vs SPY', get: (r) => (r.corrSpy == null ? null : Math.abs(r.corrSpy)), defaultDir: 1 },
+  stopAtr: { label: 'Stop', get: (r) => r.risk?.stopAtr ?? null, defaultDir: 1 },
+  // Stored negative — a drawdown is an adverse move — so ascending puts the
+  // deepest first, which is the end worth looking at.
+  drawdown: { label: 'Typical drawdown', get: (r) => r.risk?.medianDrawdownPct ?? null, defaultDir: 1 },
+  recovery: { label: 'Recovery', get: (r) => r.risk?.recoverySessions ?? null, defaultDir: -1 },
+}
+
+// --- Columns ---------------------------------------------------------------
+// Which measurements the table shows.
+//
+// The row already carries far more than eleven columns' worth of measurement,
+// and each new one made the table wider until adding anything at all was a net
+// loss. A fixed set is also the wrong shape for the question: someone sizing
+// positions wants what a session absorbs and where the stop sits, someone
+// looking for something that is not the index wants the correlation column,
+// and neither wants the other's columns taking up the screen.
+//
+// So the spine is fixed — star, symbol, price, trend, confluence, the things
+// that identify a row rather than measure it — and everything between them is
+// chosen. The default set is exactly what the table showed before this
+// existed, so nobody's screener changes until they change it.
+export const COLUMNS = [
+  { key: 'rsi', label: 'RSI(14)', term: 'rsi', numeric: true, default: true },
+  { key: 'macd', label: 'MACD', term: 'macd', default: true },
+  { key: 'setup', label: 'Setup', term: 'setupRead', default: true },
+  { key: 'flags', label: 'Flags', term: 'flags', default: true },
+  { key: 'edge', label: 'Edge', term: 'edge', numeric: true, default: true },
+  { key: 'safeLeverage', label: 'Max size', term: 'riskRead', numeric: true, default: true },
+  { key: 'stopAtr', label: 'Stop', term: 'stopRead', numeric: true },
+  { key: 'drawdown', label: 'Typical drawdown', term: 'drawdownRead', numeric: true },
+  { key: 'recovery', label: 'Recovery', term: 'recoveryRead', numeric: true },
+  { key: 'liquidity', label: 'Absorbs', term: 'absorbableSize', numeric: true },
+  { key: 'corrSpy', label: 'vs SPY', term: 'correlation', numeric: true },
+]
+
+export const DEFAULT_COLUMNS = COLUMNS.filter((c) => c.default).map((c) => c.key)
+
+const COLUMN_KEYS = new Set(COLUMNS.map((c) => c.key))
+
+// Order follows COLUMNS, not the order they were switched on — a table whose
+// columns rearrange themselves as you toggle them is a table you have to
+// re-read every time.
+export function orderedColumns(keys) {
+  const wanted = new Set(keys)
+  return COLUMNS.filter((c) => wanted.has(c.key))
 }
 
 export const DEFAULT_SORT = { key: 'symbol', dir: 1 }
@@ -109,6 +162,14 @@ export function availableFacets(rows) {
   }
 }
 
+// Hiding the column a table is sorted by leaves it ordered by a number nobody
+// can see, which is the exact failure this file's opening comment is about.
+// The sort falls back to the spine instead.
+export function sortForColumns(sort, columns) {
+  if (!sort || !COLUMN_KEYS.has(sort.key)) return sort ?? DEFAULT_SORT
+  return columns.includes(sort.key) ? sort : DEFAULT_SORT
+}
+
 // --- URL state -------------------------------------------------------------
 // A filtered screener is a view worth linking to, and the site already treats
 // every other view that way — chapters are URLs precisely so they can be sent
@@ -128,23 +189,40 @@ export function parseParams(params) {
     verdicts: list('verdict'),
     flagged: get('flagged') === '1',
     watchlistOnly: get('watch') === '1',
+    // An explicit empty list is a real choice — the spine alone — and has to
+    // survive a reload, so "cols is absent" and "cols is empty" are different
+    // states rather than both falling back to the default set.
+    columns: params.has('cols')
+      ? get('cols').split(',').map((s) => s.trim()).filter((k) => COLUMN_KEYS.has(k))
+      : DEFAULT_COLUMNS,
     sort: SORTS[key] ? { key, dir: dirRaw === 'desc' ? -1 : 1 } : DEFAULT_SORT,
   }
 }
 
 // Only non-default state is written, so an untouched screener keeps a clean
 // URL and the back button does not walk through a trail of identical views.
-export function toParams({ query, kinds, setups, verdicts, flagged, watchlistOnly, sort }) {
+export function toParams({ query, kinds, setups, verdicts, flagged, watchlistOnly, sort, columns }) {
   const p = new URLSearchParams()
   if (query?.trim()) p.set('q', query.trim())
   const lists = { kind: kinds, setup: setups, verdict: verdicts }
   for (const k of LIST_KEYS) if (lists[k]?.length) p.set(k, lists[k].join(','))
   if (flagged) p.set('flagged', '1')
   if (watchlistOnly) p.set('watch', '1')
-  if (sort && (sort.key !== DEFAULT_SORT.key || sort.dir !== DEFAULT_SORT.dir)) {
-    p.set('sort', `${sort.key}:${sort.dir === -1 ? 'desc' : 'asc'}`)
+  if (columns && !sameColumns(columns, DEFAULT_COLUMNS)) p.set('cols', columns.join(','))
+  // Written through the same guard the table renders with, so the address
+  // cannot claim an ordering the page is not using. Without this, switching
+  // off the column a table is sorted by leaves "sort=corrSpy" in the URL
+  // describing a sort that has already been dropped — and re-enabling the
+  // column later silently reapplies it.
+  const effective = columns ? sortForColumns(sort, columns) : sort
+  if (effective && (effective.key !== DEFAULT_SORT.key || effective.dir !== DEFAULT_SORT.dir)) {
+    p.set('sort', `${effective.key}:${effective.dir === -1 ? 'desc' : 'asc'}`)
   }
   return p
+}
+
+function sameColumns(a, b) {
+  return a.length === b.length && a.every((k, i) => k === b[i])
 }
 
 export function isFiltered({ query, kinds, setups, verdicts, flagged, watchlistOnly }) {

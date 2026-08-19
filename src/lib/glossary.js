@@ -590,6 +590,54 @@ export const GLOSSARY = {
     isNot:
       'Not a floor on the share price. Companies trading below it usually are so because the market expects those assets to be consumed by losses.',
   },
+  correlation: {
+    term: 'Correlation',
+    basis: 'measured',
+    what: 'How closely two instruments have moved on the same days, from -1 (opposite) through 0 (unrelated) to +1 (identical).',
+    how: "Pearson correlation of daily close-to-close returns over the last 120 sessions, computed only on dates both instruments actually traded — a crypto pair's weekend move lands in the Friday-to-Monday return so the two are compared on the same days.",
+    isNot:
+      'Not a measure of size, and not stable. It says two things moved in the same direction, not that they moved by the same amount, and it is measured on the last few months only. Correlations rise in falling markets: the number that matters is the one during a sell-off, and this is not it.',
+  },
+  effectiveBets: {
+    term: 'Independent bets',
+    basis: 'measured',
+    what: 'How many genuinely separate positions a basket amounts to, once the fact that its names move together is accounted for.',
+    how: 'For N equal-risk positions with average pairwise correlation rho, portfolio variance is (1/N)(1 + (N-1)rho) times a single position\'s. That is set equal to the variance of k independent positions, 1/k, and solved: k = N / (1 + (N-1)rho).',
+    isNot:
+      'Not a target and not a recommendation. It does not say how many positions to hold or which to drop. It assumes equal risk in each name, so a basket with one oversized position is more concentrated than this reports, never less.',
+  },
+  sameBet: {
+    term: 'Same-bet threshold',
+    basis: 'measured',
+    what: 'The correlation at which this site groups two names together as one position rather than two.',
+    how: 'Average-linkage grouping at 0.70, the level where two names share about half their variance (0.70 squared is 0.49). Groups merge only when the mean correlation across every pair spanning them clears it, so a chain of weak links cannot swallow the board.',
+    isNot:
+      'Not a natural boundary in the data — correlation is continuous and 0.70 is a convention, stated so it can be argued with. Two names at 0.69 are not meaningfully more separate than two at 0.71.',
+  },
+  absorbableSize: {
+    term: 'Absorbable size',
+    basis: 'measured',
+    what: 'Roughly how large an order this name trades enough to take without the order itself moving the price.',
+    how: "One percent of a typical session's traded value — median close times volume over the last 20 sessions — with the tenth-percentile session shown alongside it, because the day a position has to come off is not usually chosen.",
+    isNot:
+      'Not a fill estimate. Daily bars cannot see the order book, the spread, or whether a name trades all day or only at the open. It is an order of magnitude. Absent entirely for crypto pairs, where the feed quotes a currency pair and reports no volume at all — which means unknown, not zero.',
+  },
+  positionSizing: {
+    term: 'Position size',
+    basis: 'hypothetical',
+    what: 'What a stated account size and a stated tolerance for loss work out to in shares, given where the measured stop sits.',
+    how: 'Money at risk is the account times the percentage you type in. Shares are that divided by the stop distance in dollars, which is the current ATR times the stop multiple from the record on this page. Nothing about it is chosen here.',
+    isNot:
+      'Not advice, and not a suggestion that the position is worth taking. Both inputs are yours — this site never proposes a risk budget, a direction, or a size. It is multiplication, plus the three measured ceilings the answer runs into.',
+  },
+  sizeCeiling: {
+    term: 'Size ceilings',
+    basis: 'measured',
+    what: 'The three separately-measured points at which a computed position size stops describing anything real.',
+    how: "Survivable size is the account times the largest leverage this instrument has not already liquidated. Quiet-session liquidity is one percent of a tenth-percentile session's traded value. Account equity is the point past which the position is on margin.",
+    isNot:
+      'Not limits anyone enforces, and not levels that are safe to trade up to. Each is a place a measurement stops applying — the smallest of them is reported as binding because past it the arithmetic above is describing a position that could not have been held at those prices.',
+  },
 }
 
 export function glossaryByBasis() {

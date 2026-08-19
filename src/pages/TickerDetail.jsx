@@ -27,6 +27,8 @@ import { ChapterNav, ChapterHead, ChapterPager, useChapterKeys } from '../compon
 import FeedbackLink from '../components/FeedbackLink'
 import { useWatchlist } from '../lib/watchlist'
 import { riskRead, stopRead, drawdownRead, recoveryRead } from '../lib/riskRead'
+import { liquidityRead } from '../lib/liquidityRead'
+import PositionSizer from '../components/PositionSizer'
 import PlainRead from '../components/PlainRead'
 
 export default function TickerDetail() {
@@ -112,6 +114,7 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
     () => recoveryRead({ bars, symbol, atr: atrSeries(bars, 14).at(-1) }),
     [bars, symbol]
   )
+  const liquidity = useMemo(() => liquidityRead({ bars, symbol }), [bars, symbol])
   const backtest = useMemo(() => backtestTicker(bars), [bars])
   const scoreBacktest = useMemo(() => backtestByScore(bars, spyBars), [bars, spyBars])
   const setup = useMemo(() => bestAvailableStat(bars, spyBars), [bars, spyBars])
@@ -465,6 +468,30 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
           {recovery.read}
         </PlainRead>
       )}
+
+      {/* The ceiling every figure above quietly assumes away: that a position
+          of the size they describe can be got into and out of at the price on
+          the screen. */}
+      {liquidity && (
+        <PlainRead term="absorbableSize" tone={liquidity.thin ? 'down' : undefined}
+          headline={liquidity.headline} caveat={liquidity.caveat}>
+          {liquidity.read}
+        </PlainRead>
+      )}
+
+      {/* Last, because it is the only thing here that needs numbers from the
+          reader, and because it is where everything above turns into a share
+          count. */}
+      <Section title={<Explain term="positionSizing">What that works out to</Explain>}>
+        <PositionSizer
+          symbol={symbol}
+          price={liveQuote?.price ?? signals.price}
+          atr={atrSeries(bars, 14).at(-1)}
+          stop={stop}
+          safeLeverage={risk?.safeLeverage ?? null}
+          liquidity={liquidity}
+        />
+      </Section>
       </>)}
 
       {chapter.key === 'what-if' && (<>
