@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-19T22:15:06.418Z",
+  "generatedAt": "2026-08-20T23:02:52.908Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -4261,7 +4261,7 @@
     },
     "NOW": {
       "cik": 1373715,
-      "entityName": "SERVICENOW, INC.",
+      "entityName": "ServiceNow, Inc.",
       "quarters": [
         {
           "asOf": "2023-09-30",
