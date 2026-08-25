@@ -71,11 +71,19 @@ export function clusteredRate(entries, { forwardDays = 5 } = {}) {
   // range around a single number.
   const mean = episodes.length >= 2 ? meanWithInterval(episodes.map((e) => e.rate)) : null
 
+  // Naming a number and then not using it is how the last wrong-N survived, so
+  // this says outright which one the interval is built on. It is `days`, not
+  // `independentEpisodes`: with three episodes there is no spread worth an
+  // interval, and a range computed on three points would be so wide it stops
+  // carrying information at all. Days is the conservative reading that still
+  // says something — and it is still not the floor, because consecutive call
+  // dates share most of their forward window. The prose says so.
   return {
     total: decidable.length,
     hits,
     days: dates.length,
     independentEpisodes,
+    intervalBasis: 'days',
     episodes,
     perCall: {
       rate: (hits / decidable.length) * 100,
@@ -116,7 +124,7 @@ export function clusterRead(clustered) {
   }
 
   parts.push(
-    `At a five-session hold, those ${days} dates contain about ${independentEpisodes} non-overlapping ${independentEpisodes === 1 ? 'episode' : 'episodes'}.`
+    `At a five-session hold, those ${days} dates contain about ${independentEpisodes} non-overlapping ${independentEpisodes === 1 ? 'episode' : 'episodes'} — the range below is computed across the ${days} days rather than the ${independentEpisodes}, so it is still not the widest honest reading, only a much better one than per call.`
   )
 
   if (perEpisode) {

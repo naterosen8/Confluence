@@ -183,3 +183,28 @@ describe('sampleSizeToDistinguish at the edges', () => {
     expect(far).toBeGreaterThan(0)
   })
 })
+
+describe('meanWithInterval uses t rather than z', () => {
+  // A z-score on eleven observations understates the interval by about 14%,
+  // in the direction that flatters whatever is being measured — the same
+  // direction as every other error of this kind found in this codebase.
+  const sample = [0.4, 0.55, 0.5, 0.62, 0.38, 0.71, 0.45, 0.52, 0.6, 0.33, 0.58]
+
+  it('widens the interval at small samples', () => {
+    const m = meanWithInterval(sample)
+    const width = m.upper - m.lower
+    const zWidth = 2 * 1.96 * m.stderr
+    expect(width).toBeGreaterThan(zWidth)
+    expect(width / zWidth).toBeGreaterThan(1.1)
+  })
+
+  it('converges on the normal limit as the sample grows', () => {
+    const big = Array.from({ length: 200 }, (_, i) => 0.5 + Math.sin(i) * 0.05)
+    const m = meanWithInterval(big)
+    expect((m.upper - m.lower) / (2 * 1.96 * m.stderr)).toBeCloseTo(1, 2)
+  })
+
+  it('still refuses a sample of one', () => {
+    expect(meanWithInterval([0.5])).toBeNull()
+  })
+})

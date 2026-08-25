@@ -22,7 +22,10 @@ export const FORWARD_DAYS = 5
 // So `distinguishable` now means distinguishable from drift. The coin-flip
 // interval is still reported — it is what the win rate's own uncertainty
 // looks like — but it is no longer what the verdict rests on.
-function summarize(occurrences, baseline) {
+// Exported for its own tests. The interval arithmetic here decides what every
+// ticker page is allowed to claim, so it is worth pinning directly rather than
+// only through whatever a synthetic price series happens to produce.
+export function summarize(occurrences, baseline) {
   if (occurrences.length === 0) return { sampleSize: 0 }
   const returns = occurrences.map((o) => o.return)
   const wins = returns.filter((r) => r > 0).length
@@ -36,14 +39,37 @@ function summarize(occurrences, baseline) {
   // The gap against drift, with an interval on the gap itself. Two rates that
   // look far apart frequently are not: the interval on a difference is wider
   // than the interval on either rate behind it.
+  //
+  // Computed on the INDEPENDENT sample, not the raw count. This function was
+  // already calculating `independentSample` eight lines above and then
+  // building the interval on `occurrences.length` anyway — so a ticker page
+  // could print "distinguishable" from an interval on N=183 directly above a
+  // sentence saying that 183 is really 53. It was the same wrong-N error the
+  // track record had, left in the place it does the most damage: 22 of 88
+  // tickers claimed a distinguishable gap, and 6 survived being asked on the
+  // sample the page itself reports.
+  //
+  // Both sides shrink. Drift is measured over every forward window in the
+  // series and those overlap exactly as much, so correcting only the signal
+  // side would trade one wrong N for another.
+  const independent = indices.length ? independentCount(indices, FORWARD_DAYS) : null
+  const effN = independent ?? occurrences.length
+  const effWins = Math.round((wins / occurrences.length) * effN)
+  const baseEffN = baseline && baseline.total ? Math.max(1, Math.round(baseline.total / FORWARD_DAYS)) : 0
+  const baseEffWins = baseEffN ? Math.round((baseline.wins / baseline.total) * baseEffN) : 0
+
   const gapCi =
+    baseline && baseline.total ? differenceInterval(effWins, effN, baseEffWins, baseEffN) : null
+  // Kept so the difference between the two is visible rather than asserted —
+  // the same treatment the track record gives its per-call reading.
+  const naiveGapCi =
     baseline && baseline.total
       ? differenceInterval(wins, occurrences.length, baseline.wins, baseline.total)
       : null
 
   return {
     sampleSize: occurrences.length,
-    independentSample: indices.length ? independentCount(indices, FORWARD_DAYS) : null,
+    independentSample: independent,
     winRate: (wins / occurrences.length) * 100,
     winRateLow: ci ? ci.lower * 100 : null,
     winRateHigh: ci ? ci.upper * 100 : null,
@@ -51,10 +77,16 @@ function summarize(occurrences, baseline) {
     // believing it is a drift one.
     distinguishableFromCoinFlip: ci ? ci.distinguishable : false,
     drift: baseline && baseline.total ? (baseline.wins / baseline.total) * 100 : null,
-    gap: gapCi ? gapCi.point * 100 : null,
+    // The point estimate is the one from the full sample — shrinking N widens
+    // the interval, it does not move where the gap sits.
+    gap: naiveGapCi ? naiveGapCi.point * 100 : null,
     gapLow: gapCi ? gapCi.lower * 100 : null,
     gapHigh: gapCi ? gapCi.upper * 100 : null,
     distinguishable: gapCi ? gapCi.distinguishable : false,
+    // What the interval looked like before overlapping windows were counted
+    // once. Published so the correction is checkable, never used for a verdict.
+    naiveGapLow: naiveGapCi ? naiveGapCi.lower * 100 : null,
+    naiveGapHigh: naiveGapCi ? naiveGapCi.upper * 100 : null,
     avgReturn: (returns.reduce((a, b) => a + b, 0) / returns.length) * 100,
     bestReturn: Math.max(...returns) * 100,
     worstReturn: Math.min(...returns) * 100,

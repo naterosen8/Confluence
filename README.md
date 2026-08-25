@@ -133,6 +133,21 @@ Fixing this surfaced a sharp edge in `sampleSizeToDistinguish`: at a rate of exa
 
 Backed by [Supabase](https://supabase.com) (free tier) — Postgres for storage, anonymous auth (a real account created silently, no email/password/click required — see `AuthContext.ensureSession`). No custom backend: the browser talks to Supabase directly, and row-level security (`supabase/schema.sql`) enforces that a user can only ever read or write their own trades — that's a database-level guarantee, not application code. The tradeoff of skipping email: an anonymous identity lives in the browser that created it, so trades don't follow you to a different device. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (browser-side, safe to expose — see `.env.example`) to enable; without them the simulator and the feedback form each show a "not set up yet" message instead of breaking. Requires **Authentication → Sign In / Providers → Anonymous Sign-Ins** enabled in the Supabase dashboard (off by default).
 
+## The N is not the N — everywhere, not just on the track record
+
+This error has now been found three times in three places, and the third one was in code written the same week as the fix for the second.
+
+`summarize()` in `lib/backtest.js` computed `independentSample` — how many of a signal's occurrences are genuinely separate, once overlapping five-session forward windows are counted once — and then built the gap's confidence interval on the **raw** occurrence count anyway. Eight lines apart, in the same function. So a ticker page printed *"distinguishable"* from an interval on N=183 directly above a sentence reading *"that 183 is closer to 53 once overlapping forward windows are accounted for."* The page contradicted itself and nothing noticed, because both halves were individually true.
+
+Measured across the tracked universe: **22 of 88 tickers claimed a distinguishable gap. One survives** being asked on the sample the page itself reports — and one out of eighty-eight is below the ~4.4 you would expect from chance alone, so even that should not be read as a finding. The leaderboard's BH-corrected survivors fell from seven to four.
+
+Both sides of the comparison shrink. Drift is measured over every forward window in the series and those overlap exactly as much, so correcting only the signal side would have traded one wrong N for another. The point estimate does not move — shrinking N widens an interval, it does not relocate it — and the pre-correction interval is still published as `naiveGapLow`/`naiveGapHigh` so the correction is checkable rather than asserted.
+
+Two smaller gaps from the same audit, both in code written days earlier:
+
+- `clustering.js` computed the count of non-overlapping episodes, printed it in prose, and then built its interval across *days* anyway. That is the same shape of mistake — name the right number, use the wrong one. Days is a defensible choice here (three episodes cannot support an interval at all) but the page now says outright which basis it used and that days is still not the floor.
+- `meanWithInterval` used a z-score on a sample of eleven. The normal approximation understates the interval by about 14% at that size, and — like every one of these — it understates it in the flattering direction. It uses t now.
+
 ## What every base rate tests against
 
 Win rates on ticker pages are compared to **that instrument's own drift** over the same forward window, not to 50%. A coin flip is the wrong alternative to a signal: a stock that rose in 61% of all five-session windows makes a signal "winning" 65% of the time look like an edge when it is carrying no information about that stock at all.

@@ -134,10 +134,27 @@ export function independentCount(indices, forwardDays) {
 // Mean and standard error of a set of returns, plus whether the mean is
 // distinguishable from zero. A positive average return over a handful of
 // noisy observations usually is not.
+// Two-tailed 95% t values by degrees of freedom, falling back to the normal
+// limit past 30. A z-score on eleven observations understates the interval by
+// about 14%, and — like every other error of this kind found here — it
+// understates it in the direction that flatters whatever is being measured.
+const T95 = [
+  12.71, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228,
+  2.201, 2.179, 2.16, 2.145, 2.131, 2.12, 2.11, 2.101, 2.093, 2.086,
+  2.08, 2.074, 2.069, 2.064, 2.06, 2.056, 2.052, 2.048, 2.045, 2.042,
+]
+
+export function tValue(df, confidence = 0.95) {
+  if (confidence !== 0.95 || df < 1) return Z[confidence] ?? Z[0.95]
+  return df <= T95.length ? T95[df - 1] : Z[0.95]
+}
+
 export function meanWithInterval(values, confidence = 0.95) {
   const n = values.length
   if (n < 2) return null
-  const z = Z[confidence] ?? Z[0.95]
+  // t, not z: this is a mean of a sample whose variance is estimated from the
+  // same sample, and n here is routinely in the low tens.
+  const z = tValue(n - 1, confidence)
   const mean = values.reduce((a, b) => a + b, 0) / n
   // Sample variance (n-1): these returns are a sample, not the population.
   const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1)

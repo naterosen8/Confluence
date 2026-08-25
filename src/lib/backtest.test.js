@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { backtestTicker, backtestByScore, regimeSeries, bestAvailableStat, mostRecentEvent, FORWARD_DAYS } from './backtest'
+import { backtestTicker, backtestByScore, regimeSeries, bestAvailableStat, mostRecentEvent, summarize, FORWARD_DAYS } from './backtest'
 
 const bar = (date, close) => ({ date, open: close, high: close * 1.01, low: close * 0.99, close, volume: 1e6 })
 
@@ -184,5 +184,53 @@ describe('base rates are tested against drift, not a coin flip', () => {
     const closes = [1, 2, 3, 2, 1]
     // Windows of 2: (1->3) up, (2->2) flat, (3->1) down => 1 win of 3.
     expect(driftBaseline(closes, 2)).toEqual({ wins: 1, total: 3 })
+  })
+})
+
+describe('the gap interval is built on the independent sample', () => {
+  // This function was already computing `independentSample` and then building
+  // the interval on the raw occurrence count anyway — so a ticker page printed
+  // "distinguishable" from an interval on N=183 directly above a sentence
+  // saying that 183 was really 53. Across the tracked universe, 22 of 88
+  // tickers claimed a distinguishable gap and 1 survived being asked on the
+  // sample the page itself reports.
+  const series = (n, up) => {
+    // Consecutive indices, so every forward window overlaps the next: the
+    // worst case for treating occurrences as independent.
+    const occurrences = Array.from({ length: n }, (_, i) => ({ index: i, return: i < up ? 0.02 : -0.02 }))
+    return summarize(occurrences, { wins: 50, total: 100 })
+  }
+
+  it('reports an independent sample far below the raw count when windows overlap', () => {
+    const s = series(100, 70)
+    expect(s.sampleSize).toBe(100)
+    expect(s.independentSample).toBeLessThan(s.sampleSize / 2)
+  })
+
+  it('gives a wider interval than the raw count would', () => {
+    const s = series(100, 70)
+    const honest = s.gapHigh - s.gapLow
+    const naive = s.naiveGapHigh - s.naiveGapLow
+    expect(honest).toBeGreaterThan(naive)
+  })
+
+  it('leaves the point estimate where it was — shrinking N widens, it does not move', () => {
+    const s = series(100, 70)
+    // Asserted against the rates themselves, not against the middle of the
+    // interval: Newcombe's is a hybrid-score method and its interval is not
+    // symmetric about the point, so a midpoint check would be testing the
+    // wrong property (and did, on the first attempt).
+    expect(s.gap).toBeCloseTo(s.winRate - s.drift, 6)
+  })
+
+  it('keeps the honest interval containing the point estimate', () => {
+    const s = series(100, 70)
+    expect(s.gapLow).toBeLessThanOrEqual(s.gap)
+    expect(s.gapHigh).toBeGreaterThanOrEqual(s.gap)
+  })
+
+  it('decides distinguishable on the honest interval, not the flattering one', () => {
+    const s = series(100, 70)
+    expect(s.distinguishable).toBe(s.gapLow > 0 || s.gapHigh < 0)
   })
 })
