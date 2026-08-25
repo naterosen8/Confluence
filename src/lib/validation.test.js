@@ -473,6 +473,53 @@ d('the published correlation matrix agrees with the published index', () => {
   })
 })
 
+// The per-ticker record is the same log sliced by symbol, published as its own
+// bounded file. Two views of one source can disagree in one way that matters:
+// the page shows a call the log does not have, or hides one it does.
+d('the per-ticker record agrees with the log it came from', () => {
+  const load = (name) => {
+    const file = path.join(process.cwd(), 'public', name)
+    return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null
+  }
+  const log = load('track-record.json')
+  const index = load('ticker-record.json')
+
+  it('is reproducible from the committed log', async () => {
+    if (!log || !index) return
+    const { bySymbol } = await import('./tickerRecord.js')
+    expect(index.symbols).toEqual(bySymbol(log))
+  })
+
+  it('publishes no call the log does not contain', () => {
+    if (!log || !index) return
+    const known = new Set(log.map((e) => `${e.symbol}|${e.date}`))
+    const invented = []
+    for (const [symbol, block] of Object.entries(index.symbols)) {
+      for (const c of block.calls) if (!known.has(`${symbol}|${c.date}`)) invented.push(`${symbol} ${c.date}`)
+    }
+    expect(invented).toEqual([])
+  })
+
+  it('never counts a retracted call as resolved', () => {
+    if (!log || !index) return
+    const voided = new Set(log.filter((e) => e.voided).map((e) => `${e.symbol}|${e.date}`))
+    const leaked = []
+    for (const [symbol, block] of Object.entries(index.symbols)) {
+      for (const c of block.calls) if (voided.has(`${symbol}|${c.date}`)) leaked.push(`${symbol} ${c.date}`)
+    }
+    expect(leaked).toEqual([])
+  })
+
+  it('counts every resolved call, including the ones it does not list', () => {
+    if (!log || !index) return
+    for (const [symbol, block] of Object.entries(index.symbols)) {
+      const settled = log.filter((e) => e.symbol === symbol && !e.voided && e.outcome && e.outcome.correct !== null)
+      expect(block.resolvedCount, symbol).toBe(settled.length)
+      expect(block.hits, symbol).toBe(settled.filter((e) => e.outcome.correct).length)
+    }
+  })
+})
+
 describe('snapshot staleness is detectable', () => {
   // The sync has failed silently three times. Its failure mode is not an error
   // page but yesterday's prices rendered as today's, so the app needs to be

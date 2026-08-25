@@ -84,6 +84,7 @@ const PAGES = [
   '/nope',
   ...['layers', 'signals', 'record', 'balance-sheet', 'risk', 'what-if', 'share'].map((c) => `/ticker/NVDA/${c}`),
   '/ticker/BTC%2FUSD/risk',
+  '/ticker/INTC/record',
 ]
 for (const p of PAGES) await open(p)
 
@@ -144,6 +145,17 @@ for (const value of ['3', '0.5', '2']) {
   await page.waitForTimeout(200)
 }
 if (!(await page.locator('.sizer-caps tbody tr').count())) note(where, 'no size ceilings listed')
+
+where = 'ticker: published record'
+await open('/ticker/NVDA/record')
+where = 'ticker: published record'
+if (!(await page.locator('.plain-read-head').first().count())) note(where, 'no published-record read rendered')
+// A ticker the log has never leaned on must read as a record rather than as a
+// missing page.
+await open('/ticker/INTC/record')
+where = 'ticker: published record (never called)'
+const empty = await page.locator('.plain-read-body').first().innerText()
+if (!/has not published a call|waiting to resolve/.test(empty)) note(where, 'silent about a ticker with no calls')
 
 where = 'overlap: basket'
 await open('/overlap')

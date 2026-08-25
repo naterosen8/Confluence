@@ -94,6 +94,12 @@ export function differenceInterval(k1, n1, k2, n2, confidence = 0.95) {
 export function sampleSizeToDistinguish(observedRate, confidence = 0.95) {
   const effect = Math.abs(observedRate - 0.5)
   if (effect < 1e-9) return null
+  // A rate of exactly 0 or 1 has no usable variance to estimate from — the
+  // formula's p(1-p) term goes to zero and it returns 0, which reads as "no
+  // more data needed" when a flawless three-for-three is precisely the case
+  // that needs the most. The sample cannot answer the question; saying so is
+  // the honest return.
+  if (observedRate <= 0 || observedRate >= 1) return null
   const z = Z[confidence] ?? Z[0.95]
   // Normal approximation is adequate here: this is a rough "order of
   // magnitude more data" figure, not a formal power calculation.

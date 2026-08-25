@@ -16,6 +16,7 @@ import { lastSettledIndex, repairUnresolved } from '../src/lib/trackRecord.js'
 import { buildScreener, buildCorrelations } from '../src/lib/screener.js'
 import { barsFileName } from '../src/lib/barsFile.js'
 import { summarizeTrackRecord } from '../src/lib/trackRecordSummary.js'
+import { bySymbol } from '../src/lib/tickerRecord.js'
 
 const API_KEY = process.env.TWELVE_DATA_KEY
 // Lives in public/, not data/, so the built app can fetch it as a plain
@@ -38,6 +39,10 @@ const CORRELATIONS_PATH = new URL('../public/correlations.json', import.meta.url
 // The track-record page's figures, precomputed. The raw log stays committed
 // as the audit trail; this is what the page actually downloads.
 const TRACK_SUMMARY_PATH = new URL('../public/track-record-summary.json', import.meta.url)
+// The same log sliced by ticker, so a ticker page can show what this site has
+// said about that instrument without downloading a log that grows forever.
+// Bounded per symbol — see PER_SYMBOL_LIMIT in src/lib/tickerRecord.js.
+const TICKER_RECORD_PATH = new URL('../public/ticker-record.json', import.meta.url)
 const FORWARD_SESSIONS = 5
 
 if (!API_KEY) {
@@ -337,6 +342,16 @@ async function main() {
     !previousSummary ||
     JSON.stringify({ ...previousSummary, generatedAt: null }) !== JSON.stringify({ ...summary, generatedAt: null })
   if (summaryChanged) fs.writeFileSync(TRACK_SUMMARY_PATH, JSON.stringify(summary) + '\n')
+
+  const tickerRecord = { generatedAt, symbols: bySymbol(log) }
+  const previousTickerRecord = loadJson(TICKER_RECORD_PATH, null)
+  const tickerRecordChanged =
+    !previousTickerRecord ||
+    JSON.stringify(previousTickerRecord.symbols) !== JSON.stringify(tickerRecord.symbols)
+  if (tickerRecordChanged) fs.writeFileSync(TICKER_RECORD_PATH, JSON.stringify(tickerRecord) + '\n')
+  console.log(
+    `Per-ticker record: ${Object.keys(tickerRecord.symbols).length} symbols, ${tickerRecordChanged ? 'rewritten' : 'unchanged'}.`
+  )
   console.log(
     `Track record: ${summary.resolvedCount} resolved, ${summary.pendingCount} pending, summary ${summaryChanged ? 'rewritten' : 'unchanged'}.`
   )

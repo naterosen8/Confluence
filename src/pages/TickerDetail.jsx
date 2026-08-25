@@ -29,6 +29,7 @@ import { useWatchlist } from '../lib/watchlist'
 import { riskRead, stopRead, drawdownRead, recoveryRead } from '../lib/riskRead'
 import { liquidityRead } from '../lib/liquidityRead'
 import PositionSizer from '../components/PositionSizer'
+import TickerRecord from '../components/TickerRecord'
 import PlainRead from '../components/PlainRead'
 
 export default function TickerDetail() {
@@ -339,6 +340,13 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
       </>)}
 
       {chapter.key === 'record' && (<>
+      {/* First, because it is the only thing in this chapter that is not a
+          reconstruction: what the site published about this ticker, before
+          the outcome was known. */}
+      <Section title={<Explain term="trackRecord">What this site has said about {symbol}</Explain>}>
+        <TickerRecord symbol={symbol} />
+      </Section>
+
       <Section
         title={
           <>

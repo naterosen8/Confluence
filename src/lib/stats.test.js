@@ -163,3 +163,23 @@ describe('effect size is not the same question as significance', () => {
     expect(Math.abs(r.mean)).toBeLessThan(0.1) // and yet negligible
   })
 })
+
+describe('sampleSizeToDistinguish at the edges', () => {
+  // The formula's p(1-p) term vanishes at a perfect record and it returned 0,
+  // which reads as "enough data already" for the one case that needs the most.
+  it('refuses to answer for a flawless or hopeless record', () => {
+    expect(sampleSizeToDistinguish(1)).toBeNull()
+    expect(sampleSizeToDistinguish(0)).toBeNull()
+  })
+
+  it('still refuses when there is no effect to detect', () => {
+    expect(sampleSizeToDistinguish(0.5)).toBeNull()
+  })
+
+  it('asks for more data the closer a rate sits to a coin flip', () => {
+    const near = sampleSizeToDistinguish(0.55)
+    const far = sampleSizeToDistinguish(0.8)
+    expect(near).toBeGreaterThan(far)
+    expect(far).toBeGreaterThan(0)
+  })
+})

@@ -74,6 +74,30 @@ export function correlationData() {
   return correlations
 }
 
+// What this site has published about each ticker, sliced from the log by the
+// daily job. Fetched by the record chapter only — the aggregate track record
+// has its own summary, and neither page should be downloading a log that grows
+// by twenty rows a session forever.
+let tickerRecord = null
+let tickerRecordPromise = null
+
+export function loadTickerRecord() {
+  if (!tickerRecordPromise) {
+    tickerRecordPromise = fetch('/ticker-record.json')
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null)
+      .then((data) => {
+        tickerRecord = data?.symbols ? data : null
+        return tickerRecord
+      })
+  }
+  return tickerRecordPromise
+}
+
+export function tickerRecordData() {
+  return tickerRecord
+}
+
 // True once a real snapshot has loaded (see scripts/sync-market-data.mjs) —
 // not tied to any browser-side API key, because there isn't one anymore.
 // Every indicator here is daily-bar based, so there's nothing to gain from

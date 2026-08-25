@@ -16,10 +16,13 @@ import fs from 'node:fs'
 import { TICKERS } from '../src/lib/tickers.js'
 import { buildScreener, buildCorrelations } from '../src/lib/screener.js'
 import { barsFileName } from '../src/lib/barsFile.js'
+import { bySymbol } from '../src/lib/tickerRecord.js'
 
 const BARS_DIR = new URL('../public/bars/', import.meta.url)
 const SCREENER_PATH = new URL('../public/screener.json', import.meta.url)
 const CORRELATIONS_PATH = new URL('../public/correlations.json', import.meta.url)
+const TRACK_RECORD_PATH = new URL('../public/track-record.json', import.meta.url)
+const TICKER_RECORD_PATH = new URL('../public/ticker-record.json', import.meta.url)
 
 function readAllBars() {
   const out = {}
@@ -50,6 +53,14 @@ fs.writeFileSync(SCREENER_PATH, JSON.stringify(screener) + '\n')
 const correlations = { ...buildCorrelations({ barsBySymbol, tickers: TICKERS }), generatedAt }
 fs.writeFileSync(CORRELATIONS_PATH, JSON.stringify(correlations) + '\n')
 
+// Sliced from the committed log rather than from the bars, but derived all the
+// same, and for the same reason: a change to how it is grouped should not have
+// to wait for the market to close.
+const log = fs.existsSync(TRACK_RECORD_PATH) ? JSON.parse(fs.readFileSync(TRACK_RECORD_PATH, 'utf8')) : []
+const tickerRecord = { generatedAt, symbols: bySymbol(log) }
+fs.writeFileSync(TICKER_RECORD_PATH, JSON.stringify(tickerRecord) + '\n')
+
 console.log(`Rebuilt from ${have} bar files (as of ${generatedAt}).`)
-console.log(`  screener.json     ${screener.rows.length} rows`)
-console.log(`  correlations.json ${correlations.symbols.length} symbols, ${correlations.pairs.length} pairs`)
+console.log(`  screener.json      ${screener.rows.length} rows`)
+console.log(`  correlations.json  ${correlations.symbols.length} symbols, ${correlations.pairs.length} pairs`)
+console.log(`  ticker-record.json ${Object.keys(tickerRecord.symbols).length} symbols, ${log.length} logged calls`)

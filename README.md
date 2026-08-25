@@ -101,6 +101,18 @@ Historical P/B uses the book value actually reported for each quarter against th
 
 `public/track-record.json` is a public, append-only log of every non-neutral verdict the app has ever shown, resolved 5 trading sessions later against the actual close — hits and misses both, nothing curated out. Written by the same daily sync job. See it at `/track-record`.
 
+## The record, per ticker
+
+The aggregate track record answers whether the site is worth anything. It is the wrong question for the person in front of one instrument, who is being shown a verdict badge on NVDA with no way to ask the obvious follow-up: what did this thing say about NVDA before, and was it right?
+
+The Record chapter on every ticker page now answers that. Every call this site published on that symbol, dated, with entry and exit prices and how each resolved — and, beside it, how often price rose in those same windows regardless of what the call said. Everything else in that chapter is a reconstruction of what the score would have done; this is the only part that was written down before the outcome was known.
+
+There will usually be about three of them, and the module refuses to turn three into a percentage. Below ten resolved calls no rate is quoted at all — not "quoted with a caveat", not quoted, because a percentage printed beside a sample of three is read as a percentage and the explanation underneath in smaller type is not a fair fight. The read says so plainly instead: *"100% of 3 and 0% of 3 are the same evidence about this ticker, which is none"*, with a figure for how many calls it would actually take. Above ten, the rate is always shown against that ticker's own drift with the interval on the difference, the same null everything else here tests against.
+
+The published index (`public/ticker-record.json`, ~1.8 KB gzipped) keeps the most recent twelve calls per symbol so the file cannot grow with a log that gains twenty rows a session forever; the complete log stays committed at `track-record.json`, and the counts on the page describe everything including what it is not listing. Validation tests assert the index reproduces from the log, invents no call, leaks no retracted one, and counts every resolved call including the trimmed ones.
+
+Fixing this surfaced a sharp edge in `sampleSizeToDistinguish`: at a rate of exactly 0 or 1 the formula's p(1−p) term vanishes and it returned **0**, which reads as "no more data needed" for the one case that needs the most. It returns null now.
+
 ## Live price overlay (optional)
 
 `VITE_FINNHUB_KEY` (browser-side, Vercel env var) enables a ~50s-refresh price overlay from Finnhub's free tier, shown as a pulsing "live" dot next to the price wherever it appears. Purely cosmetic — it never feeds the indicator or backtest engine, which stay on the daily-synced Twelve Data snapshot regardless. Stock/ETF symbols only; crypto pairs fall back to the snapshot price silently. Chosen over a WebSocket feed because Finnhub's free tier caps one API key at a single concurrent connection, which rules out every visitor's browser connecting directly — a shared relay would be real new infrastructure this app doesn't need yet for a value-add that's purely visual. The key is unavoidably shared client-side (unlike the Twelve Data key, which never leaves the sync job), so every open tab draws from the same 60 req/min account cap — the poll interval is tuned to leave headroom for a few concurrent visitors, not just one.
