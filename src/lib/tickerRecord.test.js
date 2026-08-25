@@ -162,3 +162,24 @@ describe('tickerRecordRead', () => {
     expect(tickerRecordRead(null)).toBeNull()
   })
 })
+
+describe('published values survive a JSON round trip', () => {
+  // Rounding a tiny negative move produced -0, which JSON writes as `0`. The
+  // published file and the value it was built from then stop being equal, and
+  // a check that recomputes the file fails on a difference nobody can see.
+  it('never publishes negative zero', () => {
+    const idx = bySymbol([call('AAA', day(1), { returnPct: -0.0009, correct: true })])
+    const value = idx.AAA.calls[0].returnPct
+    expect(Object.is(value, -0)).toBe(false)
+    expect(value).toBe(0)
+  })
+
+  it('round-trips identically through JSON', () => {
+    const idx = bySymbol([
+      call('AAA', day(1), { returnPct: -0.0009 }),
+      call('AAA', day(2), { returnPct: 1.239, correct: false }),
+      call('BBB', day(3), { returnPct: -4.005 }),
+    ])
+    expect(JSON.parse(JSON.stringify(idx))).toEqual(idx)
+  })
+})

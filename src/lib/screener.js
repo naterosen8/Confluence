@@ -33,7 +33,15 @@ import { atrSeries } from './indicators.js'
 // significant figures a 40-point spark is ~240 bytes of the ~400-byte row.
 export const SPARK_POINTS = 40
 
-const round = (n, dp) => (n == null || !Number.isFinite(n) ? null : Math.round(n * 10 ** dp) / 10 ** dp)
+// Negative zero is normalised away: JSON writes -0 as `0`, so a value that
+// survives a round trip differently from the one it was computed from breaks
+// any check that recomputes a published file — and "−0.00%" is not a move
+// anything made.
+const round = (n, dp) => {
+  if (n == null || !Number.isFinite(n)) return null
+  const r = Math.round(n * 10 ** dp) / 10 ** dp
+  return r === 0 ? 0 : r
+}
 
 // The flags column, computed here so the dashboard does not need divergence
 // detection — the single most expensive check — just to render a table cell.

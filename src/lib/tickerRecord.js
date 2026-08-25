@@ -38,6 +38,16 @@ export const MIN_FOR_RATE = 10
 
 const decidable = (entries) => entries.filter((e) => isCounted(e) && e.outcome && e.outcome.correct !== null)
 
+// Rounding a tiny negative move produces negative zero, which JSON writes as
+// `0` and reads back as `0` — so a file and the value it was built from stop
+// being equal, and a validation test that recomputes the file fails on a
+// difference nobody can see. It would also render as "−0.00%", which is not a
+// move anything made. Normalised at the one place the rounding happens.
+const round2 = (n) => {
+  const r = Math.round(n * 100) / 100
+  return r === 0 ? 0 : r
+}
+
 // The published per-symbol index: bounded, and carrying the counts in full so
 // the page can say how much it is not showing.
 export function bySymbol(log, { limit = PER_SYMBOL_LIMIT } = {}) {
@@ -67,7 +77,7 @@ export function bySymbol(log, { limit = PER_SYMBOL_LIMIT } = {}) {
         price: e.price,
         resolvedDate: e.outcome.resolvedDate,
         exitPrice: e.outcome.exitPrice,
-        returnPct: Math.round(e.outcome.returnPct * 100) / 100,
+        returnPct: round2(e.outcome.returnPct),
         correct: e.outcome.correct,
       })),
     }
