@@ -90,6 +90,24 @@ describe('every component file is self-consistent', () => {
     expect(offenders).toEqual([])
   })
 
+  // A chapter with no render branch is a blank page, and the chapter nav will
+  // happily link to it. Adding a chapter and forgetting the branch is a
+  // one-line mistake that no build step catches.
+  it('renders every chapter it offers', async () => {
+    const { TICKER_CHAPTERS, METHODOLOGY_CHAPTERS } = await import('./chapters.js')
+    const pageFor = (name) => files.find((f) => f.file === `pages/${name}.jsx`).source
+    const missing = []
+    for (const [chapters, page] of [
+      [TICKER_CHAPTERS, pageFor('TickerDetail')],
+      [METHODOLOGY_CHAPTERS, pageFor('Methodology')],
+    ]) {
+      for (const c of chapters) {
+        if (!page.includes(`chapter.key === '${c.key}'`)) missing.push(c.key)
+      }
+    }
+    expect(missing).toEqual([])
+  })
+
   // Every component that renders a route must actually be routed, and every
   // route must point at something that exists — a lazy import resolves at
   // navigation time, so a typo here is a blank page rather than a build error.

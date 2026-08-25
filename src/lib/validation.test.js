@@ -7,6 +7,7 @@ import path from 'node:path'
 import { rsiSeries, macdHistogramSeries, smaSeries, scoreSeries, computeSignals, atrSeries } from './indicators'
 import { bestAvailableStat, FORWARD_DAYS } from './backtest'
 import { wilsonInterval } from './stats'
+import { compactMoney } from './format'
 
 // Validation of the data and claims this site actually publishes, run against
 // the real synced snapshot rather than fixtures. Unit tests prove the formulas
@@ -516,6 +517,221 @@ d('the per-ticker record agrees with the log it came from', () => {
       const settled = log.filter((e) => e.symbol === symbol && !e.voided && e.outcome && e.outcome.correct !== null)
       expect(block.resolvedCount, symbol).toBe(settled.length)
       expect(block.hits, symbol).toBe(settled.filter((e) => e.outcome.correct).length)
+    }
+  })
+})
+
+// The brief tells the reader "every figure here is computed, tested and
+// caveated on one of them, and none of it is new". That is a claim about the
+// code, and it is the kind that rots quietly: a figure gets rounded
+// differently, or read off a screener row instead of the source, and the brief
+// starts disagreeing with the chapter it points at. Checked against real bars.
+d('the brief agrees with the chapters it claims to assemble', () => {
+  const symbols5 = symbols.slice(0, 5)
+
+  it('reports the same numbers the risk chapter does', async () => {
+    const { brief } = await import('./brief.js')
+    const { riskRead, stopRead, drawdownRead, recoveryRead } = await import('./riskRead')
+    const { liquidityRead } = await import('./liquidityRead.js')
+    const { computeSignals, atrSeries } = await import('./indicators')
+    const { readSetup } = await import('./setupRead.js')
+
+    for (const symbol of symbols5) {
+      const b = bars[symbol]
+      const signals = computeSignals(b)
+      const atr = atrSeries(b, 14).at(-1)
+      const risk = riskRead({ bars: b, symbol })
+      const stop = stopRead({ bars: b, symbol, atr })
+      const drawdown = drawdownRead({ bars: b, symbol })
+      const liquidity = liquidityRead({ bars: b, symbol })
+
+      const assembled = brief({
+        symbol,
+        signals,
+        setup: readSetup(b, signals),
+        stat: null,
+        market: null,
+        record: null,
+        risk,
+        stop,
+        drawdown,
+        recovery: recoveryRead({ bars: b, symbol, atr }),
+        liquidity,
+        atr,
+        corrSpy: null,
+        overlap: null,
+      })
+
+      const figure = (key) => assembled.figures.find((f) => f.key === key)
+
+      if (risk?.safeLeverage != null) {
+        expect(figure('size').value, `${symbol} size`).toBe(`${risk.safeLeverage}x`)
+      }
+      if (stop?.keeper?.mult != null) {
+        expect(figure('stop').value, `${symbol} stop`).toBe(`${stop.keeper.mult} ATR`)
+        // The dollar distance is the multiple times the current ATR, not a
+        // separately-rounded number that could drift from it.
+        expect(figure('stop').note, `${symbol} stop $`).toBe(`$${(stop.keeper.mult * atr).toFixed(2)}`.replace('$', '$') + ' from entry')
+      }
+      if (drawdown?.medianAdversePct != null) {
+        expect(figure('drawdown').value, `${symbol} drawdown`).toContain(
+          Math.abs(drawdown.medianAdversePct).toFixed(2)
+        )
+      }
+      // Unreported volume must show as unknown, never as an omitted row or a
+      // zero — the two mean opposite things.
+      expect(figure('liquidity'), `${symbol} liquidity row`).toBeTruthy()
+      expect(figure('liquidity').value, `${symbol} liquidity`).toBe(
+        liquidity.reported ? compactMoney(liquidity.absorbableQuiet) : '—'
+      )
+    }
+  })
+
+  it('never states a lean without what that lean has been worth', async () => {
+    const { brief } = await import('./brief.js')
+    const { computeSignals, atrSeries } = await import('./indicators')
+    const { readSetup } = await import('./setupRead.js')
+    const { bestAvailableStat } = await import('./backtest')
+
+    for (const symbol of symbols5) {
+      const b = bars[symbol]
+      const signals = computeSignals(b)
+      const assembled = brief({
+        symbol,
+        signals,
+        setup: readSetup(b, signals),
+        stat: bestAvailableStat(b, bars.SPY ?? b).stat,
+        market: null,
+        record: null,
+        risk: null,
+        stop: null,
+        drawdown: null,
+        recovery: null,
+        liquidity: null,
+        atr: atrSeries(b, 14).at(-1),
+        corrSpy: null,
+        overlap: null,
+      })
+      const worth = assembled.sections.find((s) => s.key === 'worth')
+      if (!worth) continue
+      // Wherever the text says which way the readings lean, the same paragraph
+      // has to carry the measurement.
+      if (/readings lean (up|down)/.test(worth.text)) {
+        expect(worth.text, `${symbol} lean without worth`).toMatch(/gap of|split rather than/)
+      }
+    }
+  })
+
+  it('recommends nothing, on real data, whatever the readings say', async () => {
+    const { brief } = await import('./brief.js')
+    const { computeSignals, atrSeries } = await import('./indicators')
+    const { readSetup } = await import('./setupRead.js')
+    const { bestAvailableStat } = await import('./backtest')
+    const { riskRead, stopRead, drawdownRead, recoveryRead } = await import('./riskRead')
+    const { liquidityRead } = await import('./liquidityRead.js')
+
+    const banned = /\b(buy|sell it|go long|short it|we recommend|you should (buy|sell|take)|worth taking)\b/i
+    for (const symbol of symbols) {
+      const b = bars[symbol]
+      const signals = computeSignals(b)
+      const atr = atrSeries(b, 14).at(-1)
+      const assembled = brief({
+        symbol,
+        signals,
+        setup: readSetup(b, signals),
+        stat: bestAvailableStat(b, bars.SPY ?? b).stat,
+        market: null,
+        record: null,
+        risk: riskRead({ bars: b, symbol }),
+        stop: stopRead({ bars: b, symbol, atr }),
+        drawdown: drawdownRead({ bars: b, symbol }),
+        recovery: recoveryRead({ bars: b, symbol, atr }),
+        liquidity: liquidityRead({ bars: b, symbol }),
+        atr,
+        corrSpy: null,
+        overlap: null,
+      })
+      const text = [assembled.headline, ...assembled.sections.map((x) => x.text), assembled.caveat].join(' ')
+      expect(text, `${symbol} reads as a recommendation`).not.toMatch(banned)
+      // And it must never render the word for having no direction as one.
+      expect(text, `${symbol} printed a direction of "none"`).not.toMatch(/lean none|leans none/)
+    }
+  })
+})
+
+// The largest published file, and the one every page paints from. Correlations,
+// the per-ticker record and the summary all had a reproducibility guard; this
+// one did not, which left the site's most-read numbers as the only derived
+// figures nothing checked against the bars they came from.
+d('the published screener index reproduces from the bars', () => {
+  const file = path.join(process.cwd(), 'public', 'screener.json')
+
+  it('rebuilds identically from the committed bar files', async () => {
+    if (!fs.existsSync(file)) return
+    const { buildScreener } = await import('./screener.js')
+    const published = JSON.parse(fs.readFileSync(file, 'utf8'))
+    const rebuilt = buildScreener({ barsBySymbol: bars, tickers: TICKERS })
+    expect({ ...rebuilt, generatedAt: null }).toEqual({ ...published, generatedAt: null })
+  })
+
+  it('is deterministic — two builds of the same bars agree', async () => {
+    const { buildScreener } = await import('./screener.js')
+    const once = buildScreener({ barsBySymbol: bars, tickers: TICKERS })
+    const twice = buildScreener({ barsBySymbol: bars, tickers: TICKERS })
+    expect({ ...once, generatedAt: null }).toEqual({ ...twice, generatedAt: null })
+  })
+
+  it('publishes no negative zero, which JSON cannot round-trip', () => {
+    if (!fs.existsSync(file)) return
+    const published = JSON.parse(fs.readFileSync(file, 'utf8'))
+    const found = []
+    const walk = (node, path) => {
+      if (typeof node === 'number') {
+        if (Object.is(node, -0)) found.push(path)
+        return
+      }
+      if (node && typeof node === 'object') for (const k of Object.keys(node)) walk(node[k], `${path}.${k}`)
+    }
+    walk(published, 'screener')
+    expect(found).toEqual([])
+  })
+
+  it('ships a row only for symbols it actually has bars for', () => {
+    if (!fs.existsSync(file)) return
+    const published = JSON.parse(fs.readFileSync(file, 'utf8'))
+    const invented = published.rows.filter((r) => !bars[r.symbol]?.length).map((r) => r.symbol)
+    expect(invented).toEqual([])
+  })
+})
+
+// Four derived files are published from two sources. Three already had a
+// reproducibility guard; the summary did not, and it was also the one the
+// rebuild script had been silently skipping.
+d('the published summary reproduces from the log', () => {
+  const file = path.join(process.cwd(), 'public', 'track-record-summary.json')
+  const logFile = path.join(process.cwd(), 'public', 'track-record.json')
+
+  it('matches what summarizeTrackRecord produces from the committed log', async () => {
+    if (!fs.existsSync(file) || !fs.existsSync(logFile)) return
+    const { summarizeTrackRecord } = await import('./trackRecordSummary.js')
+    const published = JSON.parse(fs.readFileSync(file, 'utf8'))
+    const rebuilt = summarizeTrackRecord(JSON.parse(fs.readFileSync(logFile, 'utf8')))
+    // generatedAt is a stamp, not a figure.
+    expect({ ...published, generatedAt: null }).toEqual({ ...rebuilt, generatedAt: null })
+  })
+
+  it('carries the clustered reading, not only the per-call one', () => {
+    if (!fs.existsSync(file)) return
+    const published = JSON.parse(fs.readFileSync(file, 'utf8'))
+    if (!published.resolvedCount) return
+    expect(published.clustered).toBeTruthy()
+    expect(published.clustered.days).toBeGreaterThan(0)
+    // The honest interval is the wider one; if it ever stops being wider,
+    // something has gone wrong with the clustering rather than with reality.
+    if (published.clustered.perEpisode) {
+      const naive = published.clustered.perCall.high - published.clustered.perCall.low
+      const honest = published.clustered.perEpisode.high - published.clustered.perEpisode.low
+      expect(honest).toBeGreaterThan(naive)
     }
   })
 })

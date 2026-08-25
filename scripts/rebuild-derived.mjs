@@ -17,12 +17,14 @@ import { TICKERS } from '../src/lib/tickers.js'
 import { buildScreener, buildCorrelations } from '../src/lib/screener.js'
 import { barsFileName } from '../src/lib/barsFile.js'
 import { bySymbol } from '../src/lib/tickerRecord.js'
+import { summarizeTrackRecord } from '../src/lib/trackRecordSummary.js'
 
 const BARS_DIR = new URL('../public/bars/', import.meta.url)
 const SCREENER_PATH = new URL('../public/screener.json', import.meta.url)
 const CORRELATIONS_PATH = new URL('../public/correlations.json', import.meta.url)
 const TRACK_RECORD_PATH = new URL('../public/track-record.json', import.meta.url)
 const TICKER_RECORD_PATH = new URL('../public/ticker-record.json', import.meta.url)
+const TRACK_SUMMARY_PATH = new URL('../public/track-record-summary.json', import.meta.url)
 
 function readAllBars() {
   const out = {}
@@ -60,7 +62,16 @@ const log = fs.existsSync(TRACK_RECORD_PATH) ? JSON.parse(fs.readFileSync(TRACK_
 const tickerRecord = { generatedAt, symbols: bySymbol(log) }
 fs.writeFileSync(TICKER_RECORD_PATH, JSON.stringify(tickerRecord) + '\n')
 
+// The summary was missing from this script, which is the exact drift it
+// exists to prevent: a change to how a published figure is computed reached
+// three of the four derived files and left the fourth describing the old
+// arithmetic. It was patched by hand once, which is how a gap like this
+// survives — the workaround works and the hole stays open.
+const summary = { ...summarizeTrackRecord(log), generatedAt }
+fs.writeFileSync(TRACK_SUMMARY_PATH, JSON.stringify(summary) + '\n')
+
 console.log(`Rebuilt from ${have} bar files (as of ${generatedAt}).`)
 console.log(`  screener.json      ${screener.rows.length} rows`)
 console.log(`  correlations.json  ${correlations.symbols.length} symbols, ${correlations.pairs.length} pairs`)
 console.log(`  ticker-record.json ${Object.keys(tickerRecord.symbols).length} symbols, ${log.length} logged calls`)
+console.log(`  track-record-summary.json ${summary.resolvedCount} resolved, ${summary.pendingCount} pending`)
