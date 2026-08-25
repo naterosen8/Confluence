@@ -1,5 +1,6 @@
 import { distinguishableFromChance, differenceInterval } from './stats.js'
 import { leanDirection } from './lean.js'
+import { clusteredRate } from './clustering.js'
 
 // The track-record page's figures, computed by the daily job rather than by
 // downloading the whole log into every visitor's browser.
@@ -106,6 +107,11 @@ export function summarizeTrackRecord(log, { recentLimit = RECENT_LIMIT } = {}) {
     // with extra steps.
     voidedCount: voided.length,
     overall: summarize(resolved),
+    // The same record read as the clustered evidence it actually is. The
+    // interval above assumes every call is an independent observation; these
+    // calls were made on a handful of days and scored over overlapping
+    // windows, so it is roughly twice too narrow. See src/lib/clustering.js.
+    clustered: clusteredRate(resolved.filter(isCounted)),
     up: summarize(up),
     down: summarize(down),
     upBaseline: baselineOf(resolved, 'up'),

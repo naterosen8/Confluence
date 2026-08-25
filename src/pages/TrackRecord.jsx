@@ -6,6 +6,7 @@ import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { pct, rate, price } from '../lib/format'
 import { RECENT_LIMIT } from '../lib/trackRecordSummary'
 import Explain from '../components/Explain'
+import { clusterRead, overstatement } from '../lib/clustering'
 
 // Reads the precomputed summary rather than the raw log. The log only ever
 // grows — one row per ticker per session whose readings leaned — so at any
@@ -99,7 +100,17 @@ export default function TrackRecord() {
               label="Overall hit rate"
               value={rate(overall.winRate)}
               note={
-                overall.low != null ? (
+                /* The clustered range, not the per-call one. Calls made on the
+                   same session are scored over the same five sessions of the
+                   same market and do not fail independently, so the per-call
+                   interval is roughly twice too narrow — it is still shown,
+                   below, next to the reason it is wrong. */
+                summary.clustered?.perEpisode ? (
+                  <Explain term="clusteredEvidence">
+                    95% range {summary.clustered.perEpisode.low.toFixed(0)}–
+                    {summary.clustered.perEpisode.high.toFixed(0)}% across {summary.clustered.days} call days
+                  </Explain>
+                ) : overall.low != null ? (
                   <Explain term="confidenceInterval">
                     95% range {overall.low.toFixed(0)}–{overall.high.toFixed(0)}%
                   </Explain>
@@ -131,6 +142,25 @@ export default function TrackRecord() {
           </div>
 
           <GapVerdict gap={upGap} />
+
+          {summary.clustered?.perEpisode && (
+            <div className="callout callout-highlight">
+              <strong>
+                {summary.clustered.total} calls is not {summary.clustered.total} observations.
+              </strong>{' '}
+              {clusterRead(summary.clustered)}
+              <p className="muted small" style={{ marginBottom: 0 }}>
+                The directional gaps above carry the same dependence, so their intervals — already the widest figures
+                on this page — are optimistic by roughly the same factor
+                {overstatement(summary.clustered)
+                  ? ` (about ${overstatement(summary.clustered).toFixed(1)}x)`
+                  : ''}
+                . This is the third time this page has had to widen a claim it had been making too confidently, and it
+                is worth stating why the correction keeps going the same direction: every error of this kind flatters
+                the site, so nothing catches them except looking.
+              </p>
+            </div>
+          )}
 
           <p className="muted small record-note">
             <Explain term="driftBaseline">

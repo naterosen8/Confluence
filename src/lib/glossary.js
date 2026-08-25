@@ -590,6 +590,14 @@ export const GLOSSARY = {
     isNot:
       'Not a floor on the share price. Companies trading below it usually are so because the market expects those assets to be consumed by losses.',
   },
+  clusteredEvidence: {
+    term: 'Independent evidence',
+    basis: 'measured',
+    what: 'How much of a record is genuinely separate tests, once calls made on the same day and scored over overlapping windows are accounted for.',
+    how: 'Calls are grouped by the session they fired on and each day is scored once; the published interval is on the spread across those days rather than across individual calls. The count of non-overlapping episodes walks the call dates and skips any that begin before the previous five-session window has closed.',
+    isNot:
+      'Not a smaller version of the same claim — it is a different and wider one. A per-call interval treats seventy-four calls made on one morning as seventy-four tests of the method, when they are one market week wearing seventy-four tickers. The per-day figure gives up power on purpose, because the alternative is a confidence claim the data cannot support.',
+  },
   correlation: {
     term: 'Correlation',
     basis: 'measured',

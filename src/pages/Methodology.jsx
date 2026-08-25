@@ -136,6 +136,31 @@ export default function Methodology() {
 
       {chapter.key === 'evidence' && (<>
       <section className="detail-section">
+        <h3>Why the sample is smaller than the count</h3>
+        <p className="muted small">
+          The track record says a few hundred resolved calls. That number is not the number of times this method has
+          been tested, and the difference is large enough to change what the page is entitled to claim.
+        </p>
+        <p className="muted small">
+          Calls are logged automatically on every ticker whose readings lean on a given session, so a single morning
+          can produce seventy-odd of them. Every one is then scored over the same five sessions of the same market.
+          They do not fail independently: if that week rose, the upward-leaning calls made that morning are right
+          together, and how many there are says more about how many tickers the site tracks than about how often the
+          method was right. The forward windows overlap on top of that — consecutive call dates held five sessions
+          each share most of their outcome.
+        </p>
+        <p className="muted small">
+          So the headline interval is computed across <em>call days</em> rather than across calls: each day scored
+          once, and the range taken from how much the days disagree. It is roughly twice as wide as the per-call
+          version, which is also shown, next to the reason it is wrong.
+        </p>
+        <p className="small explain-isnot">
+          <em>What it is not:</em> a correction that recovers the lost evidence. It does not make a small sample
+          bigger; it stops a small sample being reported as a large one.
+        </p>
+      </section>
+
+      <section className="detail-section">
         <h3>Does the score actually work? (the app's own self-check)</h3>
         <p className="muted small">
           Computed live from the same snapshot the rest of the site uses, so it cannot drift out of date and will
