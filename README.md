@@ -101,6 +101,16 @@ Historical P/B uses the book value actually reported for each quarter against th
 
 `public/track-record.json` is a public, append-only log of every non-neutral verdict the app has ever shown, resolved 5 trading sessions later against the actual close — hits and misses both, nothing curated out. Written by the same daily sync job. See it at `/track-record`.
 
+## The Brief
+
+A ticker was seven chapters, which is the right shape for checking the site and the wrong one for using it. You landed on **Layers** — the most abstract and most heavily caveated page here — and the question you actually arrived with, *what is this thing doing*, was answered in pieces across six more, each piece wrapped in its own disclaimer. Six panels that hedge separately read as evasion. One paragraph that states the limits once reads as knowing what it knows.
+
+So chapter one is now a **Brief**: the whole instrument on one screen in one voice. Where price sits and what shape it is in, the tape around it, what the readings lean and what that lean has been worth, what holding it has been like, and what else in your watchlist is the same trade — plus the four or five numbers worth carrying away. It computes nothing; every figure is assembled from a chapter that follows, which stays underneath as the audit trail.
+
+The rule the whole module is built around: **the lean is never stated without what it has been worth.** A badge saying "leaning up" at the top of a brief carries far more weight than the same badge in a table of eighty-nine rows, and the site's own measurements say it is worth nothing — so the two facts share a sentence, always. On NVDA that reads: *"The readings lean up… After setups like this one, price went the leaned way 50% of 183 times, against 60% for this ticker generally: a gap of −9.7 points. That gap clears the interval on the difference, so it is not the instrument simply doing what it does — this structure has been actively unhelpful here rather than merely uninformative."* The verdict badge is deliberately **not** repeated beside the headline; the page header already carries one, and a second copy made the lean the loudest thing on a page built so it could not travel alone.
+
+Tests assert it never recommends a direction, a size or an action, on every verdict including the strongest ones; the smoke test asserts the same against the rendered page. One bug it caught along the way: a split's direction is the *string* `'none'`, and reading it as truthy produced "the readings lean none" — the most confusing sentence the page could have opened with.
+
 ## The record, per ticker
 
 The aggregate track record answers whether the site is worth anything. It is the wrong question for the person in front of one instrument, who is being shown a verdict badge on NVDA with no way to ask the obvious follow-up: what did this thing say about NVDA before, and was it right?

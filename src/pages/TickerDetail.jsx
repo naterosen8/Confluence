@@ -1,7 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { TICKERS } from '../lib/tickers'
-import { getSeries, hasRealData, screenerDirectionCheck } from '../lib/dataProvider'
+import {
+  getSeries,
+  hasRealData,
+  screenerDirectionCheck,
+  screenerMarketRead,
+  screenerRows,
+  correlationData,
+  loadCorrelations,
+  loadTickerRecord,
+  tickerRecordData,
+} from '../lib/dataProvider'
 import { computeSignals, atrSeries } from '../lib/indicators'
 import { readSetup } from '../lib/setupRead'
 import { backtestTicker, backtestByScore, bestAvailableStat, mostRecentEvent, SIGNAL_LABELS } from '../lib/backtest'
@@ -30,6 +40,10 @@ import { riskRead, stopRead, drawdownRead, recoveryRead } from '../lib/riskRead'
 import { liquidityRead } from '../lib/liquidityRead'
 import PositionSizer from '../components/PositionSizer'
 import TickerRecord from '../components/TickerRecord'
+import Brief from '../components/Brief'
+import { brief as buildBrief } from '../lib/brief'
+import { overlapRead } from '../lib/overlapRead'
+import { symbolRecord } from '../lib/tickerRecord'
 import PlainRead from '../components/PlainRead'
 
 export default function TickerDetail() {
@@ -125,6 +139,47 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
   // symbol on each ticker page view.
   const banner = useMemo(() => directionBanner(screenerDirectionCheck()), [])
   const [liveQuote, setLiveQuote] = useState(null)
+  // The brief pulls in two files the rest of the page does not need. Fetched
+  // rather than waited on: the paragraph that needs each one is dropped if it
+  // never arrives, which is a smaller loss than a chapter that will not paint.
+  const [extras, setExtras] = useState(() => ({ correlations: correlationData(), records: tickerRecordData() }))
+  useEffect(() => {
+    if (chapter.key !== 'brief') return
+    let live = true
+    Promise.all([loadCorrelations(), loadTickerRecord()]).then(([correlations, records]) => {
+      if (live) setExtras({ correlations, records })
+    })
+    return () => {
+      live = false
+    }
+  }, [chapter.key])
+
+  const briefData = useMemo(() => {
+    if (chapter.key !== 'brief') return null
+    const row = screenerRows().find((r) => r.symbol === symbol)
+    const block = extras.records?.symbols?.[symbol]
+    // Measured against the reader's own watchlist plus this ticker: "what else
+    // do I hold that is this trade" is the only version of the overlap
+    // question a single ticker page can usefully ask.
+    const basket = [symbol, ...watchlist.symbols.filter((s) => s !== symbol)]
+    return buildBrief({
+      symbol,
+      signals,
+      setup: setup_read,
+      stat: setup.stat,
+      market: screenerMarketRead(),
+      record: block ? symbolRecord(block, symbol) : null,
+      risk,
+      stop,
+      drawdown,
+      recovery,
+      liquidity,
+      atr: atrSeries(bars, 14).at(-1),
+      corrSpy: row?.corrSpy ?? null,
+      overlap: extras.correlations ? overlapRead({ matrix: extras.correlations, symbols: basket }) : null,
+      livePrice: liveQuote?.price ?? null,
+    })
+  }, [chapter.key, symbol, signals, setup_read, setup, risk, stop, drawdown, recovery, liquidity, bars, extras, watchlist.symbols, liveQuote])
 
   useEffect(() => {
     setLiveQuote(null)
@@ -241,6 +296,8 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
 
       <ChapterNav chapters={TICKER_CHAPTERS} current={chapter.key} hrefFor={hrefFor} />
       <ChapterHead chapter={chapter} index={index} total={TICKER_CHAPTERS.length} />
+
+      {chapter.key === 'brief' && <Brief brief={briefData} hrefFor={hrefFor} />}
 
       {chapter.key === 'layers' && (
       <Section title={<Explain term="confluence">Confluence: technical, fundamental, macro</Explain>}>

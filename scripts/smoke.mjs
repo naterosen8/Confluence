@@ -82,7 +82,7 @@ const PAGES = [
   '/methodology/glossary',
   '/feedback',
   '/nope',
-  ...['layers', 'signals', 'record', 'balance-sheet', 'risk', 'what-if', 'share'].map((c) => `/ticker/NVDA/${c}`),
+  ...['brief', 'layers', 'signals', 'record', 'balance-sheet', 'risk', 'what-if', 'share'].map((c) => `/ticker/NVDA/${c}`),
   '/ticker/BTC%2FUSD/risk',
   '/ticker/INTC/record',
 ]
@@ -145,6 +145,16 @@ for (const value of ['3', '0.5', '2']) {
   await page.waitForTimeout(200)
 }
 if (!(await page.locator('.sizer-caps tbody tr').count())) note(where, 'no size ceilings listed')
+
+where = 'ticker: brief'
+await open('/ticker/NVDA')
+where = 'ticker: brief'
+if (!(await page.locator('.brief-headline').count())) note(where, 'the brief did not render as chapter one')
+if ((await page.locator('.brief-section').count()) < 2) note(where, 'the brief rendered with almost nothing in it')
+const briefText = await page.locator('.brief').innerText()
+// The one thing this page must never become.
+if (/\b(buy|sell it|go long|short it|we recommend)\b/i.test(briefText)) note(where, 'the brief reads as a recommendation')
+if (!/lean/i.test(briefText)) note(where, 'the brief never states what the readings lean')
 
 where = 'ticker: published record'
 await open('/ticker/NVDA/record')

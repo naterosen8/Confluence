@@ -18,6 +18,13 @@
 // straight through goes from the strongest claim to the weakest.
 export const TICKER_CHAPTERS = [
   {
+    key: 'brief',
+    label: 'Brief',
+    basis: 'current',
+    blurb:
+      'The whole instrument on one screen, in one voice: where price sits, what the readings lean and what that lean has been worth, what holding it has been like, and what else you hold that is the same trade. Nothing here is computed — every figure is assembled from the chapters that follow.',
+  },
+  {
     key: 'layers',
     label: 'Layers',
     basis: 'current',
