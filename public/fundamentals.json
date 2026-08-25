@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-24T23:00:19.357Z",
+  "generatedAt": "2026-08-25T22:17:02.213Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -8758,20 +8758,6 @@
       "entityName": "HOME DEPOT, INC.",
       "quarters": [
         {
-          "asOf": "2023-07-30",
-          "form": "10-Q",
-          "assets": 76387000000,
-          "liabilities": 75052000000,
-          "equity": 1335000000,
-          "currentAssets": 31830000000,
-          "currentLiabilities": 24227000000,
-          "cash": 2814000000,
-          "debt": 9749000000,
-          "shares": 1005376130,
-          "revenue": 42916000000,
-          "netIncome": 4659000000
-        },
-        {
           "asOf": "2023-10-29",
           "form": "10-Q",
           "assets": 75577000000,
@@ -8924,6 +8910,20 @@
           "shares": 996011466,
           "revenue": 41765000000,
           "netIncome": 3289000000
+        },
+        {
+          "asOf": "2026-08-02",
+          "form": "10-Q",
+          "assets": 109384000000,
+          "liabilities": 92767000000,
+          "equity": 16617000000,
+          "currentAssets": 37720000000,
+          "currentLiabilities": 34988000000,
+          "cash": 2085000000,
+          "debt": 9749000000,
+          "shares": 997116682,
+          "revenue": 47861000000,
+          "netIncome": 4766000000
         }
       ]
     },
