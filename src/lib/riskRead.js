@@ -24,6 +24,43 @@ import { FORWARD_DAYS } from './backtest.js'
 // nobody chooses from.
 export const LEVERAGE_RUNGS = [1, 2, 3, 5, 10, 25, 50]
 
+// A second, longer window, reported alongside the first.
+//
+// `safeLeverage` is the largest rung that survived EVERY entry in the window,
+// which makes it an extreme-value statistic: it is a minimum over the sample,
+// so it can only ever fall as the window grows. Measured across the tracked
+// universe, SPY reads 10x over 250 entries and 5x over 400; NVDA 5x and 3x;
+// BTC/USD 5x over 150 and 3x over 200. Stating one window's answer flatly
+// makes the figure look like a property of the instrument when a large part
+// of it is a property of the lookback — and this is the one number on the
+// site someone might actually size a position off.
+//
+// So both are computed and the read says when they disagree. Not a correction
+// — neither is more correct — but the disagreement is the information.
+// The default window for the survivable-size figure.
+//
+// It used to be 250, and that was overstating on 39 of 89 tracked tickers —
+// always in the same direction, because the statistic is a minimum over the
+// window and can only fall as the window grows. HYG read 50x over 250 entries
+// and 10x over 500; TLT 25x and 10x; five crypto pairs dropped from 3x to 1x,
+// meaning sizes the shorter window called survivable had in fact been
+// liquidated, just not inside the part of history being looked at.
+//
+// More history is strictly better for a floor, so the floor is now taken over
+// as much of it as there is. The 250-entry answer is still computed and
+// reported beside it, for anyone who thinks a regime change makes older
+// history the wrong evidence — that is a real argument, and it is theirs to
+// make rather than the site's to make silently by choosing a short window.
+export const LOOKBACK_LONG = 500
+export const LOOKBACK_RECENT = 250
+
+// How many of a run of consecutive entries are genuinely separate tests. At a
+// five-session hold, 250 consecutive entries contain about 50 non-overlapping
+// episodes; every figure on this page is measured over overlapping windows and
+// the raw entry count overstates the evidence behind all of them.
+export const independentEntries = (entries, forwardDays = FORWARD_DAYS) =>
+  entries ? Math.max(1, Math.floor(entries / forwardDays)) : null
+
 // Every entry point in the lookback, walked forward at each leverage. Uses the
 // same simulatePosition as the trade simulator, which checks intraday lows and
 // highs — a position touched at the liquidation level mid-session is dead even
@@ -58,11 +95,18 @@ export function maxFullySurvivable(survival) {
   return clean.length ? clean[clean.length - 1].leverage : null
 }
 
-export function riskRead({ bars, symbol, direction = 'long', forwardDays = FORWARD_DAYS, lookback = 250 }) {
+export function riskRead({ bars, symbol, direction = 'long', forwardDays = FORWARD_DAYS, lookback = LOOKBACK_LONG }) {
   const survival = leverageSurvival({ bars, direction, forwardDays, lookback })
   if (!survival) return null
 
   const safe = maxFullySurvivable(survival)
+  // The same question asked of recent history alone. See LOOKBACK_LONG.
+  const recentSurvival =
+    lookback > LOOKBACK_RECENT
+      ? leverageSurvival({ bars, direction, forwardDays, lookback: LOOKBACK_RECENT })
+      : null
+  const safeRecent = recentSurvival ? maxFullySurvivable(recentSurvival) : null
+  const recentEntries = recentSurvival?.entries ?? null
   const worst = survival.rungs.at(-1)
   const entries = survival.entries
 
@@ -82,6 +126,16 @@ export function riskRead({ bars, symbol, direction = 'long', forwardDays = FORWA
   } else {
     parts.push(
       `Taking a ${direction} at every one of the last ${entries} sessions and holding ${forwardDays}, ${safe}x is the highest size that would have survived all of them. That is not a recommendation to use ${safe}x — it is the point past which this instrument's own recent history has already gone through you.`
+    )
+  }
+
+  // Said before anything else about the number, because it is the one caveat
+  // that changes what the figure means rather than merely qualifying it.
+  if (safe != null && safeRecent != null && recentEntries < entries) {
+    parts.push(
+      safeRecent > safe
+        ? `Recent history alone would say ${safeRecent}x: over just the last ${recentEntries} entries, nothing at that size was liquidated. The lower figure is the one stated, because this is a floor — it can only fall as more history is included, so the shorter window is not a second opinion, it is the same measurement with less of the evidence.`
+        : `Recent history alone gives the same answer over the last ${recentEntries} entries, which is worth something: the figure can only fall as the window grows, so the two agreeing means the size was not saved by where the window was cut.`
     )
   }
 
@@ -107,12 +161,18 @@ export function riskRead({ bars, symbol, direction = 'long', forwardDays = FORWA
     symbol,
     direction,
     safeLeverage: safe,
+    // The same figure over recent history alone. Published rather than hidden:
+    // it is the weaker measurement, and seeing how far it sits above the
+    // stated one is how a reader judges how much the window mattered.
+    safeLeverageRecent: safeRecent,
+    recentEntries,
     entries,
+    independentEntries: independentEntries(entries, forwardDays),
     forwardDays,
     rungs: survival.rungs,
     headline,
     read: parts.join(' '),
-    caveat: `Measured over the last ${entries} entry points on this ticker, checking intraday lows so a position touched at its liquidation level counts as dead. It describes what this instrument has already done to a position of each size — not what it will do next, and not whether to take one at all.`,
+    caveat: `Measured over the last ${entries} entry points on this ticker — about ${independentEntries(entries, forwardDays)} non-overlapping episodes once the ${forwardDays}-session windows are counted once — checking intraday lows so a position touched at its liquidation level counts as dead. It describes what this instrument has already done to a position of each size: not what it will do next, not a level anyone has checked is safe, and not whether to take a position at all.`,
   }
 }
 

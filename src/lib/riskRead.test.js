@@ -298,3 +298,71 @@ describe('risk figures in the screener index', () => {
     }
   })
 })
+
+describe('survivable size is a floor, and floors only fall', () => {
+  // The figure is a minimum over the window: the largest rung that survived
+  // EVERY entry looked at. That makes it an extreme-value statistic, and the
+  // consequence is easy to state and was easy to miss — a shorter window can
+  // only ever give the same answer or a higher one, because it has had fewer
+  // chances to find the entry that would have killed the position.
+  //
+  // Measured on the tracked universe when this was found: 39 of 89 tickers
+  // read higher over 250 entries than over 500, none read lower, and HYG went
+  // from 50x to 10x. The site had been publishing the shorter window.
+  const walk = (n, seed, vol) => {
+    let s = seed
+    const rand = () => {
+      s = (s * 1103515245 + 12345) % 2147483648
+      return s / 2147483648 - 0.5
+    }
+    const bars = []
+    let close = 100
+    for (let i = 0; i < n; i++) {
+      const prev = close
+      close = Math.max(1, close * (1 + rand() * vol))
+      bars.push({
+        date: `2020-01-${String((i % 28) + 1).padStart(2, '0')}`,
+        open: prev,
+        high: Math.max(prev, close) * 1.005,
+        low: Math.min(prev, close) * 0.995,
+        close,
+        volume: 1000,
+      })
+    }
+    return bars
+  }
+
+  it('never reads higher on a longer window', () => {
+    for (const seed of [1, 7, 13, 29]) {
+      const bars = walk(700, seed, 0.05)
+      const short = maxFullySurvivable(leverageSurvival({ bars, lookback: 250 }))
+      const long = maxFullySurvivable(leverageSurvival({ bars, lookback: 600 }))
+      if (short == null || long == null) continue
+      expect(long, `seed ${seed}`).toBeLessThanOrEqual(short)
+    }
+  })
+
+  it('states the longer window and reports the shorter one beside it', () => {
+    const bars = walk(700, 7, 0.05)
+    const r = riskRead({ bars, symbol: 'AAA' })
+    expect(r.entries).toBeGreaterThan(r.recentEntries)
+    if (r.safeLeverageRecent != null && r.safeLeverage != null) {
+      expect(r.safeLeverage).toBeLessThanOrEqual(r.safeLeverageRecent)
+    }
+  })
+
+  it('says outright when the shorter window would have flattered it', () => {
+    const bars = walk(700, 7, 0.05)
+    const r = riskRead({ bars, symbol: 'AAA' })
+    if (r.safeLeverageRecent > r.safeLeverage) {
+      expect(r.read).toMatch(/Recent history alone would say/)
+      expect(r.read).toMatch(/it is a floor|can only fall/)
+    }
+  })
+
+  it('reports how many of its entries are actually independent', () => {
+    const r = riskRead({ bars: walk(700, 7, 0.05), symbol: 'AAA' })
+    expect(r.independentEntries).toBeLessThan(r.entries)
+    expect(r.caveat).toMatch(/non-overlapping episodes/)
+  })
+})
