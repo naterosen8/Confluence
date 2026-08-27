@@ -253,8 +253,26 @@ export default function Methodology() {
             sides of every valuation ratio are measured at different moments.
           </li>
           <li>
-            The ticker list is a fixed, curated set. That avoids survivorship bias in the sense that nothing is
-            removed for performing badly, but it is not a random or representative sample of the market.
+            <strong>The ticker list is survivorship-biased, and this page used to claim the opposite.</strong> It said
+            a fixed curated set "avoids survivorship bias in the sense that nothing is removed for performing badly."
+            That is backwards. The selection already happened, at the end of the sample: these eighty-nine names were
+            chosen because they are recognisable <em>today</em>, which means every one of them survived to be chosen.
+            The list this site would have assembled in 2022 contained names that are not here, and they are missing
+            precisely because of what happened to them. Nothing being removed going forward does not undo a list
+            picked at the finish line.
+          </li>
+          <li>
+            That bias runs through every figure computed from these bars. A drift baseline of "price rose in 57% of
+            five-session windows" is measured on instruments that made it to the present; so is every win rate
+            compared against it. It cannot be corrected with the data here — a free market-data tier does not carry
+            delisted names — so it is stated rather than fixed. Read every base rate on this site as conditional on
+            the instrument having survived.
+          </li>
+          <li>
+            A "five-session hold" is not the same span of time across the board. Crypto trades every day, so five
+            sessions is five calendar days; an equity's five sessions span seven, and eleven across a long weekend.
+            Every cross-instrument comparison here — the screener's size and drawdown columns, the base rates — is
+            therefore comparing holds of different real duration.
           </li>
           <li>
             Backtests ignore fees, spread, slippage and taxes, and assume every signal is acted on mechanically.

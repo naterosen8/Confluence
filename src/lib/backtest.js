@@ -244,11 +244,41 @@ export function backtestByScore(bars, spyBars, { forwardDays = FORWARD_DAYS } = 
   // a stock that rose most weeks looks predictive purely because the stock
   // rose most weeks.
   const bucketBaseline = driftBaseline(closes, forwardDays)
+
+  // And the regime-matched column gets a regime-matched baseline.
+  //
+  // It did not, which meant a win rate measured only on days when the market
+  // looked like today was compared against drift measured across every regime
+  // the instrument has seen. Those are different populations: an instrument
+  // drifts at a different rate in an uptrend than in a downtrend, so the bar
+  // the signal had to clear was whatever the historical mixture happened to
+  // be rather than the bar that belongs to it.
+  //
+  // The current magnitude is modest and, unusually for the errors found in
+  // this file, not consistently self-serving — measured across the tracked
+  // universe it moved the bar up for some tickers and down for others. It is
+  // fixed because comparing a conditional rate against an unconditional one
+  // is wrong regardless of which way it happens to lean today.
+  const regimeCloses = []
+  for (let i = 0; i < closes.length - forwardDays; i++) {
+    const regime = regimeAt(regimeDates, regimeMap, bars[i].date)
+    if (regime && currentRegime && regime === currentRegime) regimeCloses.push(i)
+  }
+  const regimeBaseline = regimeCloses.length
+    ? {
+        wins: regimeCloses.filter((i) => closes[i + forwardDays] > closes[i]).length,
+        total: regimeCloses.length,
+      }
+    : null
+
   const rows = [...buckets.entries()]
     .map(([score, occ]) => ({
       score,
       all: summarize(occ.all, bucketBaseline),
-      regimeMatched: summarize(occ.regimeMatched, bucketBaseline),
+      // Falls back to the all-regime baseline only when the current regime has
+      // too little history to have a drift of its own — reported as the same
+      // number rather than as a silently different comparison.
+      regimeMatched: summarize(occ.regimeMatched, regimeBaseline ?? bucketBaseline),
     }))
     .sort((a, b) => b.score - a.score)
 
