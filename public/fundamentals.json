@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T22:17:02.213Z",
+  "generatedAt": "2026-08-28T04:39:22.390Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -354,20 +354,6 @@
       "entityName": "NVIDIA CORP",
       "quarters": [
         {
-          "asOf": "2023-07-30",
-          "form": "10-Q",
-          "assets": 49555000000,
-          "liabilities": 22054000000,
-          "equity": 27501000000,
-          "currentAssets": 28797000000,
-          "currentLiabilities": 10334000000,
-          "cash": 16023000000,
-          "debt": 9705000000,
-          "shares": 2470000000,
-          "revenue": 13507000000,
-          "netIncome": 6188000000
-        },
-        {
           "asOf": "2023-10-29",
           "form": "10-Q",
           "assets": 54148000000,
@@ -520,6 +506,20 @@
           "shares": 24300000000,
           "revenue": 81615000000,
           "netIncome": 58321000000
+        },
+        {
+          "asOf": "2026-07-26",
+          "form": "10-Q",
+          "assets": 320272000000,
+          "liabilities": 91288000000,
+          "equity": 228984000000,
+          "currentAssets": 197412000000,
+          "currentLiabilities": 43019000000,
+          "cash": 71565000000,
+          "debt": 33366000000,
+          "shares": 24200000000,
+          "revenue": 96221000000,
+          "netIncome": 59688000000
         }
       ]
     },
@@ -1398,20 +1398,6 @@
       "entityName": "Salesforce, Inc.",
       "quarters": [
         {
-          "asOf": "2023-07-31",
-          "form": "10-Q",
-          "assets": 92447000000,
-          "liabilities": 34365000000,
-          "equity": 58082000000,
-          "currentAssets": 21138000000,
-          "currentLiabilities": 20805000000,
-          "cash": 6851779000,
-          "debt": 9423000000,
-          "shares": 974000000,
-          "revenue": 8603000000,
-          "netIncome": 1267000000
-        },
-        {
           "asOf": "2023-10-31",
           "form": "10-Q",
           "assets": 91022000000,
@@ -1564,6 +1550,20 @@
           "shares": 923000000,
           "revenue": 11133000000,
           "netIncome": 2107000000
+        },
+        {
+          "asOf": "2026-07-31",
+          "form": "10-Q",
+          "assets": 109620000000,
+          "liabilities": 71242000000,
+          "equity": 38378000000,
+          "currentAssets": 22083000000,
+          "currentLiabilities": 26336000000,
+          "cash": 8389779000,
+          "debt": 39288000000,
+          "shares": 819000000,
+          "revenue": 11345000000,
+          "netIncome": 3526000000
         }
       ]
     },
@@ -11365,22 +11365,8 @@
     },
     "DE": {
       "cik": 315189,
-      "entityName": "DEERE FUNDING CANADA Corp",
+      "entityName": "DEERE & CO",
       "quarters": [
-        {
-          "asOf": "2023-07-30",
-          "form": "10-Q",
-          "assets": 103397000000,
-          "liabilities": 80245000000,
-          "equity": 23048000000,
-          "currentAssets": null,
-          "currentLiabilities": null,
-          "cash": 6576000000,
-          "debt": 49590000000,
-          "shares": 288000577,
-          "revenue": 15801000000,
-          "netIncome": 2978000000
-        },
         {
           "asOf": "2023-10-29",
           "form": "10-K",
@@ -11534,6 +11520,20 @@
           "shares": 269937425,
           "revenue": 13369000000,
           "netIncome": 1773000000
+        },
+        {
+          "asOf": "2026-08-02",
+          "form": "10-Q",
+          "assets": 107607000000,
+          "liabilities": 79566000000,
+          "equity": 27990000000,
+          "currentAssets": null,
+          "currentLiabilities": null,
+          "cash": 8928000000,
+          "debt": 49562000000,
+          "shares": 269625412,
+          "revenue": 12608000000,
+          "netIncome": 1379000000
         }
       ]
     },
