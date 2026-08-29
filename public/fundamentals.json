@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-28T04:39:22.390Z",
+  "generatedAt": "2026-08-29T03:24:58.231Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -8410,20 +8410,6 @@
       "entityName": "WALMART INC.",
       "quarters": [
         {
-          "asOf": "2023-07-31",
-          "form": "10-Q",
-          "assets": 255121000000,
-          "liabilities": 175565000000,
-          "equity": 79556000000,
-          "currentAssets": 82032000000,
-          "currentLiabilities": 99220000000,
-          "cash": 13888000000,
-          "debt": 39703000000,
-          "shares": 2692835112,
-          "revenue": 160280000000,
-          "netIncome": 7891000000
-        },
-        {
           "asOf": "2023-10-31",
           "form": "10-Q",
           "assets": 259174000000,
@@ -8576,6 +8562,20 @@
           "shares": 7972402501,
           "revenue": 175684000000,
           "netIncome": 5330000000
+        },
+        {
+          "asOf": "2026-07-31",
+          "form": "10-Q",
+          "assets": 293914000000,
+          "liabilities": 195676000000,
+          "equity": 98238000000,
+          "currentAssets": 88703000000,
+          "currentLiabilities": 115630000000,
+          "cash": 11529000000,
+          "debt": 39932000000,
+          "shares": 7958079155,
+          "revenue": 186100000000,
+          "netIncome": 6366000000
         }
       ]
     },
@@ -9451,22 +9451,8 @@
     },
     "TGT": {
       "cik": 27419,
-      "entityName": "TARGET CORPORATION",
+      "entityName": "Target Corporation",
       "quarters": [
-        {
-          "asOf": "2023-07-29",
-          "form": "10-Q",
-          "assets": 53206000000,
-          "liabilities": 41216000000,
-          "equity": 11990000000,
-          "currentAssets": 16098000000,
-          "currentLiabilities": 19332000000,
-          "cash": 4023000000,
-          "debt": 14815000000,
-          "shares": 461559612,
-          "revenue": 24773000000,
-          "netIncome": 835000000
-        },
         {
           "asOf": "2023-10-28",
           "form": "10-Q",
@@ -9620,12 +9606,26 @@
           "shares": 452855589,
           "revenue": 25443000000,
           "netIncome": 781000000
+        },
+        {
+          "asOf": "2026-08-01",
+          "form": "10-Q",
+          "assets": 61235000000,
+          "liabilities": 43392000000,
+          "equity": 17843000000,
+          "currentAssets": 20928000000,
+          "currentLiabilities": 21180000000,
+          "cash": 7291000000,
+          "debt": 14815000000,
+          "shares": 454191112,
+          "revenue": 26539000000,
+          "netIncome": 1877000000
         }
       ]
     },
     "PG": {
       "cik": 80424,
-      "entityName": "PROCTER & GAMBLE CO",
+      "entityName": "The Procter & Gamble Company",
       "quarters": [
         {
           "asOf": "2023-09-30",
