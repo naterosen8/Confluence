@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-01T23:37:55.915Z",
+  "generatedAt": "2026-09-02T23:38:52.929Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -3916,20 +3916,6 @@
       "entityName": "CISCO SYSTEMS, INC.",
       "quarters": [
         {
-          "asOf": "2023-07-29",
-          "form": "10-K",
-          "assets": 101852000000,
-          "liabilities": 57499000000,
-          "equity": 44353000000,
-          "currentAssets": 43348000000,
-          "currentLiabilities": 31309000000,
-          "cash": 26146000000,
-          "debt": 8391000000,
-          "shares": 4075058155,
-          "revenue": null,
-          "netIncome": null
-        },
-        {
           "asOf": "2023-10-28",
           "form": "10-Q",
           "assets": 98782000000,
@@ -4029,7 +4015,7 @@
         },
         {
           "asOf": "2025-07-26",
-          "form": "10-Q",
+          "form": "10-K",
           "assets": 122291000000,
           "liabilities": 75448000000,
           "equity": 46843000000,
@@ -4082,6 +4068,20 @@
           "shares": 3949893042,
           "revenue": 15841000000,
           "netIncome": 3373000000
+        },
+        {
+          "asOf": "2026-07-25",
+          "form": "10-K",
+          "assets": 129637000000,
+          "liabilities": 79352000000,
+          "equity": 50285000000,
+          "currentAssets": 38665000000,
+          "currentLiabilities": 41525000000,
+          "cash": 15918000000,
+          "debt": 22872000000,
+          "shares": 3941434665,
+          "revenue": null,
+          "netIncome": null
         }
       ]
     },
