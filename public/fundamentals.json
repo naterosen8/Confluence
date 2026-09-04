@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-03T23:34:20.887Z",
+  "generatedAt": "2026-09-04T23:19:11.131Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -8755,7 +8755,7 @@
     },
     "HD": {
       "cik": 354950,
-      "entityName": "HOME DEPOT, INC.",
+      "entityName": "The Home Depot, Inc.",
       "quarters": [
         {
           "asOf": "2023-10-29",
