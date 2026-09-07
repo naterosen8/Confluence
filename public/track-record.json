@@ -11129,7 +11129,13 @@
     "symbol": "BTC/USD",
     "verdict": "leaning-up",
     "score": 1,
-    "price": 78581.29
+    "price": 78581.29,
+    "outcome": {
+      "resolvedDate": "2026-09-05",
+      "exitPrice": 79831.75,
+      "returnPct": 1.5912948234878894,
+      "correct": true
+    }
   },
   {
     "date": "2026-08-31",
@@ -11213,7 +11219,13 @@
     "symbol": "ETH/USD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 2467.65
+    "price": 2467.65,
+    "outcome": {
+      "resolvedDate": "2026-09-05",
+      "exitPrice": 2480.34,
+      "returnPct": 0.5142544526168644,
+      "correct": true
+    }
   },
   {
     "date": "2026-08-31",
@@ -11311,7 +11323,13 @@
     "symbol": "LINK/USD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 11.325
+    "price": 11.325,
+    "outcome": {
+      "resolvedDate": "2026-09-05",
+      "exitPrice": 12.049,
+      "returnPct": 6.392935982339957,
+      "correct": true
+    }
   },
   {
     "date": "2026-08-31",
@@ -11479,7 +11497,13 @@
     "symbol": "SOL/USD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 103.06
+    "price": 103.06,
+    "outcome": {
+      "resolvedDate": "2026-09-05",
+      "exitPrice": 103.18,
+      "returnPct": 0.11643702697458232,
+      "correct": true
+    }
   },
   {
     "date": "2026-08-31",
@@ -11563,7 +11587,13 @@
     "symbol": "XRP/USD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 1.3798
+    "price": 1.3798,
+    "outcome": {
+      "resolvedDate": "2026-09-05",
+      "exitPrice": 1.4124,
+      "returnPct": 2.362661255254398,
+      "correct": true
+    }
   },
   {
     "date": "2026-09-01",
@@ -11633,7 +11663,13 @@
     "symbol": "BTC/USD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 77439
+    "price": 77439,
+    "outcome": {
+      "resolvedDate": "2026-09-06",
+      "exitPrice": 80341.83,
+      "returnPct": 3.748537558594509,
+      "correct": true
+    }
   },
   {
     "date": "2026-09-01",
@@ -11808,7 +11844,13 @@
     "symbol": "LINK/USD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 11.234
+    "price": 11.234,
+    "outcome": {
+      "resolvedDate": "2026-09-06",
+      "exitPrice": 13.233,
+      "returnPct": 17.794196190137086,
+      "correct": true
+    }
   },
   {
     "date": "2026-09-01",
@@ -11962,7 +12004,13 @@
     "symbol": "SOL/USD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 100
+    "price": 100,
+    "outcome": {
+      "resolvedDate": "2026-09-06",
+      "exitPrice": 106.55,
+      "returnPct": 6.549999999999997,
+      "correct": true
+    }
   },
   {
     "date": "2026-09-01",
@@ -12263,7 +12311,13 @@
     "symbol": "LINK/USD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 11.119
+    "price": 11.119,
+    "outcome": {
+      "resolvedDate": "2026-09-07",
+      "exitPrice": 12.742,
+      "returnPct": 14.596636388164413,
+      "correct": true
+    }
   },
   {
     "date": "2026-09-02",
@@ -12424,7 +12478,13 @@
     "symbol": "SOL/USD",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 100.43
+    "price": 100.43,
+    "outcome": {
+      "resolvedDate": "2026-09-07",
+      "exitPrice": 103.96,
+      "returnPct": 3.5148859902419463,
+      "correct": true
+    }
   },
   {
     "date": "2026-09-02",
@@ -12985,5 +13045,40 @@
     "verdict": "leaning-up",
     "score": 2,
     "price": 162.21
+  },
+  {
+    "date": "2026-09-06",
+    "symbol": "ADA/USD",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 0.2234
+  },
+  {
+    "date": "2026-09-06",
+    "symbol": "AVAX/USD",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 7.908
+  },
+  {
+    "date": "2026-09-06",
+    "symbol": "DOGE/USD",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 0.0909
+  },
+  {
+    "date": "2026-09-06",
+    "symbol": "LINK/USD",
+    "verdict": "aligned-up",
+    "score": 3,
+    "price": 13.233
+  },
+  {
+    "date": "2026-09-06",
+    "symbol": "SOL/USD",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 106.55
   }
 ]
