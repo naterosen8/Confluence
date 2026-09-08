@@ -4,13 +4,25 @@
 
 A screener that spent months testing whether reading charts tells you which way price goes next, published every call in advance, and reports the answer on its front page instead of burying it. The answer, in four independent ways, is no. What it offers instead is the part that *is* measurable: what size an instrument has already liquidated, where a stop stops firing on ordinary noise, how far under water a hold goes and for how long, whether you can get out at the screen price, and how much of a basket is really one position.
 
-## The product, in two pages
+## The product, in one question
 
-**`/` — the finding.** Every figure read from the published files at render time, none written down. That is load-bearing rather than tidy: a verdict with a hardcoded number in it is an opinion that was true once, and this one has to be able to change. If the record ever shows an edge, the page is obliged to say so — and it says so with *more* suspicion than the alternative, not less. `lib/verdict.js`, and a test runs it over two unrelated datasets and requires every number in the output to move.
+**`/` — "What are you about to buy?"** A ticker box, and three things worth knowing before you put money on it:
 
-**`/check` — the tool.** A ticker, what you have, what you will lose on one idea. Six answers, none of them directional. It will not tell you whether to take the position, and the front page explains at length why it has no view worth having.
+> **1x** — biggest size that survived · *At 2x, this has already wiped out a position.*
+> **4.8%** — typical dip while you hold · *Expect to be down about 5% at some point.*
+> **55%** — never recovered · *55% of the time it never came back.*
 
-Everything else is depth: the screener (all 89 instruments), overlap, the full track record, the methodology and glossary. The confluence score survives, demoted and labelled — deleting it would delete the exhibit the whole argument is about, and leaving it unqualified at the top of the site was what made the argument invisible.
+Then, placed where it becomes a live question rather than a lecture — right at the moment someone notices they were given three numbers and no verdict — the refusal, and a link to why.
+
+Three versions of this page have existed and the sequence is the argument for the third. First the **screener**, which put a badge reading "leaning up" in front of everyone before explaining the badge means nothing. Then the **finding**, which led with the evidence — right about the priority, wrong about the audience, because it asked someone to care about measurement before giving them a reason to. Now the **question**, because the person who most needs these numbers is about to put real money on a chart pattern, and every paragraph between them and "how big is too big" is a paragraph where they leave.
+
+Plain language is where a site like this would normally start lying, so `lib/plainRisk.js` has one rule: **plainer wording, identical claim.** The trap is specific and the first draft fell in it — *"Don't go above 3x"* reads beautifully and is a recommendation about size, which this site does not make; *"At 3x, this has already wiped out a position"* is the same length and is a fact. Tests assert the sentences never instruct, never name a direction, and use none of the vocabulary the rest of the site runs on.
+
+**`/why` — the evidence.** Six measurements from four independent sources, every figure read from the published files at render time. Nothing on it is written down: a verdict with a hardcoded number is an opinion that was true once, and this one has to be able to change. A test runs it over two unrelated datasets and requires every number in the output to move; on its first run the only survivor was `95`, the confidence level, which is the correct answer.
+
+**`/check` — the sizing tool.** What you have, what you'd lose on one idea, and the ceilings the answer runs into.
+
+Everything else is depth: the screener, overlap, the full track record, the methodology and glossary. The confluence score survives, demoted and labelled — deleting it would delete the exhibit the whole argument is about.
 
 ## Stack
 

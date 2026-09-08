@@ -74,6 +74,8 @@ async function open(path) {
 
 const PAGES = [
   '/',
+  '/?symbol=NVDA',
+  '/why',
   '/check',
   '/check?symbol=NVDA',
   '/screener',
@@ -94,14 +96,29 @@ for (const p of PAGES) await open(p)
 // --- The interactive surfaces, which is the point of running a browser -----
 
 await open('/')
-where = 'home: the argument'
+where = 'home: ask and answer'
 await open('/')
-where = 'home: the argument'
-const home = await page.locator('main').innerText()
-if (!(await page.locator('.evidence-row').count())) note(where, 'the front page rendered no evidence')
+where = 'home: ask and answer'
+if (!(await page.locator('#ask-symbol').count())) note(where, 'the front page has no ticker box')
+await page.locator('#ask-symbol').fill('DOGE/USD')
+await page.locator('.ask-form button').click()
+await page.waitForSelector('.ask-answer', { timeout: 20000 })
+await page.waitForTimeout(800)
+const answers = await page.locator('.ask-answer').count()
+if (answers < 3) note(where, `only ${answers} answers shown, expected at least three`)
+const ask = await page.locator('main').innerText()
+// Plain language: none of the site's vocabulary may reach this page.
+for (const jargon of ['ATR', 'percentile', 'Wilson', 'p-value', 'drift']) {
+  if (new RegExp(`\\b${jargon}\\b`, 'i').test(ask)) note(where, `front page used the word "${jargon}"`)
+}
+// And it must still refuse, with the refusal reachable.
+if (!/haven.t told you whether to buy/i.test(ask)) note(where, 'the front page does not state the refusal')
+if (!(await page.locator('a[href="/why"]').count())) note(where, 'no route from the refusal to the evidence')
+
+where = 'why: the argument'
+await open('/why')
+where = 'why: the argument'
 if ((await page.locator('.evidence-row').count()) < 4) note(where, 'fewer than four independent checks shown')
-// The finding has to be on the front door, not two clicks away.
-if (!/predict|measurement|edge/i.test(home)) note(where, 'the front page never states the finding')
 if (!(await page.locator('a[href="/check"]').count())) note(where, 'no route from the argument to the tool')
 
 where = 'risk check'

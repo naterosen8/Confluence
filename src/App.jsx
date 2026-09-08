@@ -16,6 +16,7 @@ import NotFound from './pages/NotFound'
 // bundle either. What loads first is the argument.
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const RiskCheck = lazy(() => import('./pages/RiskCheck'))
+const Why = lazy(() => import('./pages/Why'))
 const TickerDetail = lazy(() => import('./pages/TickerDetail'))
 const TrackRecord = lazy(() => import('./pages/TrackRecord'))
 const Overlap = lazy(() => import('./pages/Overlap'))
@@ -43,6 +44,7 @@ function RoutedContent() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/check" element={<RiskCheck />} />
+          <Route path="/why" element={<Why />} />
           {/* The screener moved off the front door. Anyone who bookmarked it
               lands on the finding instead, which is the point of the move. */}
           <Route path="/screener" element={<Dashboard />} />
@@ -97,12 +99,10 @@ export default function App() {
           <Link to="/" className="brand">
             Confluence
           </Link>
-          <span className="tagline">Technical analysis, measured — and it does not predict direction</span>
+          <span className="tagline">What a stock has already done to people who bought it</span>
           <nav className="site-nav">
-            <Link to="/check">Risk check</Link>
             <Link to="/screener">Screener</Link>
-            <Link to="/overlap">Overlap</Link>
-            <Link to="/track-record">Track record</Link>
+            <Link to="/why">Does any of it work?</Link>
             <Link to="/methodology">How to read this</Link>
             <FeedbackLink>Feedback</FeedbackLink>
             <ThemeToggle />

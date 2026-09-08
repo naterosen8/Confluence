@@ -3155,3 +3155,179 @@ kbd {
 .check-head h2 a:hover {
   color: var(--accent);
 }
+
+/* ==========================================================================
+   Ask — the front door
+   ========================================================================== */
+
+/* One question, one box, and nothing else competing with it. Everything on
+   this page after the answer is smaller than the answer. */
+.ask-lede {
+  padding: var(--s7) 0 var(--s5);
+  max-width: 52ch;
+}
+
+/* The heading wants a narrow measure; the input and its button want to sit on
+   one line. Constraining the whole block to the heading's width pushed the
+   button underneath, which made the primary action look like an afterthought. */
+.ask-lede h1,
+.ask-hint {
+  max-width: 20ch;
+}
+
+.ask-hint {
+  max-width: 52ch;
+}
+
+.ask-lede h1 {
+  margin: 0 0 var(--s5);
+  font-size: clamp(1.9rem, 5vw, 2.9rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.ask-form {
+  display: flex;
+  gap: var(--s3);
+  flex-wrap: wrap;
+}
+
+.ask-form input {
+  flex: 1 1 200px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: var(--s3) var(--s4);
+  text-transform: uppercase;
+}
+
+.ask-form input::placeholder {
+  color: var(--dim);
+  text-transform: none;
+  font-weight: 400;
+}
+
+.ask-form input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--accent);
+}
+
+.ask-form .home-cta {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.ask-form .home-cta:disabled {
+  background: var(--raised);
+  color: var(--dim);
+  cursor: not-allowed;
+}
+
+.ask-hint {
+  margin: var(--s4) 0 0;
+  line-height: 1.6;
+}
+
+.ask-subject {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  padding-top: var(--s4);
+  border-top: 1px solid var(--border);
+}
+
+.ask-subject h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+.ask-subject h2 .muted {
+  font-weight: 400;
+  font-size: 1.05rem;
+}
+
+.ask-answers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s5);
+  margin: var(--s5) 0;
+}
+
+/* The number sits beside the sentence rather than above it, so the sentence
+   is what gets read — the figure is a handle, not the point. */
+.ask-answer {
+  display: flex;
+  gap: var(--s5);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.ask-figure {
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+}
+
+.ask-figure strong {
+  font-size: 2.1rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ask-answer-body {
+  flex: 1 1 340px;
+}
+
+.ask-answer-body h3 {
+  margin: 0 0 var(--s2);
+  font-size: 1.12rem;
+  line-height: 1.35;
+}
+
+.ask-answer-body p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 62ch;
+}
+
+.ask-refusal {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-md);
+  padding: var(--s4) var(--s5);
+  background: var(--panel);
+  max-width: 68ch;
+}
+
+.ask-refusal h3 {
+  margin: 0 0 var(--s2);
+  font-size: 1.05rem;
+}
+
+.ask-refusal p {
+  margin: 0 0 var(--s3);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.ask-refusal p:last-child {
+  margin-bottom: 0;
+}
+
+.ask-more {
+  margin-top: var(--s5);
+}
