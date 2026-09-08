@@ -14,6 +14,9 @@ const call = (symbol, date, { verdict = 'leaning-up', correct = true, returnPct 
 })
 
 const day = (n) => `2026-01-${String(n).padStart(2, '0')}`
+// A distinct date per index, rolling through months so a sample larger than
+// one month still produces unique days.
+const spread = (i) => `2026-${String(Math.floor(i / 28) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`
 
 describe('bySymbol', () => {
   const log = [
@@ -72,8 +75,10 @@ describe('bySymbol', () => {
 describe('symbolRecord', () => {
   const resolved = (n, hits) =>
     bySymbol(
+      // Dates must stay distinct as n grows past a month, or entries collide
+      // and the counts stop meaning what the test thinks they mean.
       Array.from({ length: n }, (_, i) =>
-        call('AAA', day((i % 28) + 1), { correct: i < hits, returnPct: i < hits ? 2 : -2 })
+        call('AAA', spread(i), { correct: i < hits, returnPct: i < hits ? 2 : -2 })
       )
     ).AAA
 
@@ -89,19 +94,24 @@ describe('symbolRecord', () => {
   })
 
   it('quotes one once there is enough to quote', () => {
-    const r = symbolRecord(resolved(MIN_FOR_RATE, 6), 'AAA')
+    // Hits derived from the threshold rather than hardcoded. These read as
+    // parameterised on MIN_FOR_RATE and were not — raising it from 10 to 25
+    // broke them, because 6 of 10 is 60% and 6 of 25 is not.
+    const hits = Math.round(MIN_FOR_RATE * 0.6)
+    const r = symbolRecord(resolved(MIN_FOR_RATE, hits), 'AAA')
     expect(r.enough).toBe(true)
-    expect(r.rate).toBeCloseTo(60, 6)
+    expect(r.rate).toBeCloseTo((hits / MIN_FOR_RATE) * 100, 6)
     expect(r.interval.low).toBeLessThan(r.rate)
     expect(r.interval.high).toBeGreaterThan(r.rate)
   })
 
   it('measures against the ticker’s own drift, not a coin flip', () => {
-    const r = symbolRecord(resolved(MIN_FOR_RATE, 6), 'AAA')
+    const hits = Math.round(MIN_FOR_RATE * 0.6)
+    const r = symbolRecord(resolved(MIN_FOR_RATE, hits), 'AAA')
     // Every hit rose and every miss fell, so drift equals the hit rate here
     // and the gap is exactly zero — which is the point: a call that is only
     // right when price rises has shown nothing.
-    expect(r.drift).toBeCloseTo(60, 6)
+    expect(r.drift).toBeCloseTo((hits / MIN_FOR_RATE) * 100, 6)
     expect(r.gap.point).toBeCloseTo(0, 6)
     expect(r.gap.distinguishable).toBe(false)
   })
@@ -181,5 +191,42 @@ describe('published values survive a JSON round trip', () => {
       call('BBB', day(3), { returnPct: -4.005 }),
     ])
     expect(JSON.parse(JSON.stringify(idx))).toEqual(idx)
+  })
+})
+
+describe('the threshold is a judgement, so it is pinned', () => {
+  // Local copy: the one in `symbolRecord` is scoped to that block.
+  const resolved = (n, hits) =>
+    bySymbol(
+      Array.from({ length: n }, (_, i) =>
+        call('AAA', spread(i), { correct: i < hits, returnPct: i < hits ? 2 : -2 })
+      )
+    ).AAA
+
+  // It was 10, chosen before any ticker had reached it — a guess about what
+  // ten would look like rather than an observation. When 52 tickers crossed it
+  // at once the answer was SLB reading "100% of 10" against a drift of 100%,
+  // and a median interval width of fifty percentage points across all 52.
+  it('is high enough that a handful of calls cannot print a percentage', () => {
+    expect(MIN_FOR_RATE).toBeGreaterThanOrEqual(25)
+  })
+
+  it('prints no rate at ten, however lopsided the calls', () => {
+    const perfect = symbolRecord(resolved(10, 10), 'AAA')
+    expect(perfect.rate).toBeNull()
+    expect(perfect.enough).toBe(false)
+    // The calls are still there to read, and the drift beside them is what
+    // exposes a perfect record as meaningless.
+    expect(perfect.calls.length).toBeGreaterThan(0)
+    expect(tickerRecordRead(perfect)).toMatch(/no hit rate is quoted/)
+  })
+
+  it('still refuses to call a quoted rate evidence', () => {
+    const hits = Math.round(MIN_FOR_RATE * 0.6)
+    const r = symbolRecord(resolved(MIN_FOR_RATE, hits), 'AAA')
+    // A rate gets printed, and the gap against drift still decides whether it
+    // means anything. Printing is not the same as concluding.
+    expect(r.rate).not.toBeNull()
+    expect(r.gap.distinguishable).toBe(false)
   })
 })

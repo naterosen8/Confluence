@@ -28,13 +28,25 @@ export const PER_SYMBOL_LIMIT = 12
 
 // Below this, no rate is stated. Not "stated with a caveat" — not stated.
 //
-// A percentage printed beside a sample of three is read as a percentage. The
-// interval around it spans nearly the whole range and the caveat explaining
-// that sits underneath in smaller text, which is not a fair fight. Ten is
-// still far too few to conclude anything, and above it the figure is always
-// shown against this ticker's own drift with the interval on the difference —
-// but at least at ten there is a number rather than an anecdote.
-export const MIN_FOR_RATE = 10
+// A percentage printed beside a small sample is read as a percentage. The
+// interval around it spans most of the range and the caveat explaining that
+// sits underneath in smaller text, which is not a fair fight.
+//
+// This was 10, set while writing that ten is "still far too few to conclude
+// anything" — which should have been the tell. The threshold was chosen before
+// any ticker had reached it, so it was a guess about what ten would look like
+// rather than an observation. When the record grew and 52 tickers crossed it
+// at once, what ten actually produced was: SLB "100% of 10" with an interval
+// of 72-100 and a drift of 100%, T and VZ at 90%, TSLA at 7%, and a median
+// interval width across all 52 of fifty percentage points. A page reading
+// "100%" is not rescued by the bracket beside it.
+//
+// Twenty-five is still not enough to conclude anything — nothing about this
+// ticker's sample size makes the rate meaningful, and the gap against drift
+// with its own interval remains the only figure that carries information. It
+// is the point at which a number is worth printing at all rather than the
+// point at which it starts being evidence.
+export const MIN_FOR_RATE = 25
 
 const decidable = (entries) => entries.filter((e) => isCounted(e) && e.outcome && e.outcome.correct !== null)
 
