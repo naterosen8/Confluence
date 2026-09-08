@@ -12,6 +12,7 @@
 // Needs Playwright, which is not a dependency — run it by hand after a change
 // to the positioning, not on every sync.
 import fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
 
 let chromium
 for (const spec of ['playwright', '/opt/node22/lib/node_modules/playwright/index.js']) {
@@ -52,7 +53,10 @@ if (overflow > 0) {
   process.exit(1)
 }
 
-const out = new URL('../public/og-image.png', import.meta.url)
+// A string, not a URL — page.screenshot takes a filesystem path, and passing
+// the URL object threw. Caught by running the script, which the commit that
+// added it had not done.
+const out = fileURLToPath(new URL('../public/og-image.png', import.meta.url))
 await page.screenshot({ path: out })
 await browser.close()
 console.log(`Wrote og-image.png — ${summary.resolvedCount} calls, ${summary.overall.winRate.toFixed(1)}%, ${distinguishable} distinguishable.`)
