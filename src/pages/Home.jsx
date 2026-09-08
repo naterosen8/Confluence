@@ -5,12 +5,13 @@ import { computeSignals, atrSeries } from '../lib/indicators'
 import { riskRead, stopRead, drawdownRead, recoveryRead } from '../lib/riskRead'
 import { liquidityRead } from '../lib/liquidityRead'
 import { plainRisks } from '../lib/plainRisk'
+import { guide, LEVERAGE_ANSWERS, HORIZON_ANSWERS } from '../lib/guided'
 import { useBars } from '../lib/useMarketData'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { price as fmtPrice, rate } from '../lib/format'
 import { useTrackSummary } from '../lib/useTrackSummary'
 
-// The front door: one question, one box.
+// The front door: three short questions, then the one number that matters.
 //
 // Three versions of this page have now existed. The screener, which put a
 // verdict badge reading "leaning up" in front of everyone before explaining
@@ -18,14 +19,59 @@ import { useTrackSummary } from '../lib/useTrackSummary'
 // — right about the priority, wrong about the audience, because it asked
 // someone to care about measurement before giving them any reason to.
 //
-// This one asks what they are about to buy. The person who most needs these
-// numbers is about to put real money on a chart pattern; they did not arrive
-// wanting a thesis, and every paragraph between them and "how big is too big"
-// is a paragraph where they leave.
+// This one asks what they are about to buy — and then two things about how,
+// because the answers change which measurement they need. Showing all three at
+// once was the previous version's mistake: the person paying cash read a
+// paragraph about 2x liquidation that cannot happen to them, and the person
+// about to use 10x got the only number that matters as one panel of three.
+//
+// Nothing is hidden. Everything not promoted sits behind a control that is
+// always visible, and the page says it is ordered rather than pretending to be
+// complete. Demoting a true number is an editorial call; hiding one is a
+// different thing.
 //
 // The argument is not gone, it moved to where it lands: the moment someone
 // notices they have been given three numbers and no recommendation. That is
 // when "why won't you tell me?" is a live question rather than a lecture.
+
+function Step({ label, options, value, onPick }) {
+  return (
+    <fieldset className="step">
+      <legend>{label}</legend>
+      <div className="step-options">
+        {options.map((o) => (
+          <button
+            key={o.key}
+            type="button"
+            className={`step-option${value === o.key ? ' step-option-active' : ''}`}
+            aria-pressed={value === o.key}
+            onClick={() => onPick(o.key)}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  )
+}
+
+function Answer({ risk, lead }) {
+  return (
+    <section className={`ask-answer${lead ? ' ask-answer-lead' : ''}`}>
+      {risk.figure && (
+        <div className="ask-figure">
+          <strong>{risk.figure}</strong>
+          <span className="muted small">{risk.label}</span>
+        </div>
+      )}
+      <div className="ask-answer-body">
+        <h3>{risk.headline}</h3>
+        <p>{risk.body}</p>
+        {risk.why && <p className="ask-why muted small">{risk.why}</p>}
+      </div>
+    </section>
+  )
+}
 
 export default function Home() {
   useDocumentTitle('Confluence')
@@ -35,6 +81,15 @@ export default function Home() {
   const symbol = (params.get('symbol') || '').toUpperCase()
   const [draft, setDraft] = useState(symbol)
   useEffect(() => setDraft(symbol), [symbol])
+
+  const leverage = params.get('lev') || ''
+  const horizon = params.get('hold') || ''
+  const [showAll, setShowAll] = useState(false)
+  const setParam = (k, v) => {
+    const next = new URLSearchParams(params)
+    next.set(k, v)
+    setParams(next)
+  }
 
   const known = useMemo(() => rows.map((r) => r.symbol), [rows])
   const tracked = symbol && known.includes(symbol)
@@ -56,6 +111,11 @@ export default function Home() {
       }),
     }
   }, [ready, symbol, rows])
+
+  const guided = useMemo(
+    () => (read ? guide({ leverage, horizon, risks: read.risks }) : null),
+    [read, leverage, horizon]
+  )
 
   const submit = (e) => {
     e.preventDefault()
@@ -114,54 +174,74 @@ export default function Home() {
             <span className="muted small">last close {fmtPrice(read.price)}</span>
           </div>
 
-          <div className="ask-answers">
-            {read.risks.map((r) => (
-              <section key={r.key} className="ask-answer">
-                {r.figure && (
-                  <div className="ask-figure">
-                    <strong>{r.figure}</strong>
-                    <span className="muted small">{r.label}</span>
-                  </div>
+          {/* Two questions, inline. They decide which measurement leads —
+              see lib/guided.js for why these two and not others. */}
+          <div className="steps">
+            <Step
+              label="Are you borrowing to buy it?"
+              options={LEVERAGE_ANSWERS}
+              value={leverage}
+              onPick={(k) => setParam('lev', k)}
+            />
+            {leverage && (
+              <Step
+                label="How long do you plan to hold?"
+                options={HORIZON_ANSWERS}
+                value={horizon}
+                onPick={(k) => setParam('hold', k)}
+              />
+            )}
+          </div>
+
+          {guided && (
+            <>
+              <div className="ask-answers">
+                <Answer risk={guided.lead} lead />
+                {(showAll ? [...guided.supporting, ...guided.rest] : guided.supporting).map((r) => (
+                  <Answer key={r.key} risk={r} />
+                ))}
+              </div>
+
+              <p className="muted small">
+                {guided.note}{' '}
+                {guided.rest.length > 0 && !showAll && (
+                  <button type="button" className="link-button" onClick={() => setShowAll(true)}>
+                    Show the {guided.rest.length} not shown
+                  </button>
                 )}
-                <div className="ask-answer-body">
-                  <h3>{r.headline}</h3>
-                  <p>{r.body}</p>
-                </div>
-              </section>
-            ))}
-          </div>
+                {showAll && ' Showing everything measured.'}
+              </p>
 
-          {/* The refusal, placed where it is a live question rather than a
-              lecture: they have just been given three numbers and no verdict,
-              and this is the moment they notice. */}
-          <div className="ask-refusal">
-            <h3>We haven’t told you whether to buy it.</h3>
-            {/* Both figures read from the published record. Writing "49.8%"
-                here — which the first version did — puts a number that was
-                true once on the most-read page on the site, and it is exactly
-                the thing lib/verdict.js exists to prevent. */}
-            <p>
-              That’s deliberate. This site tests whether the usual chart signals predict which way price goes:{' '}
-              {summary?.resolvedCount ? (
-                <>
-                  every call published before the outcome was known, {summary.resolvedCount.toLocaleString()} of them
-                  resolved so far, and the hit rate is {rate(summary.overall.winRate, 1)} — a coin flip.
-                </>
-              ) : (
-                <>every call published before the outcome was known, and scored automatically five sessions later.</>
-              )}{' '}
-              Anyone telling you otherwise is selling something.
-            </p>
-            <p>
-              <Link to="/why">See the evidence →</Link>
-            </p>
-          </div>
+              {/* The refusal, placed where it is a live question rather than a
+                  lecture: they have just been given an answer and no verdict,
+                  and this is the moment they notice. */}
+              <div className="ask-refusal">
+                <h3>We haven’t told you whether to buy it.</h3>
+                <p>
+                  That’s deliberate. This site tests whether the usual chart signals predict which way price goes:{' '}
+                  {summary?.resolvedCount ? (
+                    <>
+                      every call published before the outcome was known,{' '}
+                      {summary.resolvedCount.toLocaleString()} of them resolved so far, and the hit rate is{' '}
+                      {rate(summary.overall.winRate, 1)} — a coin flip.
+                    </>
+                  ) : (
+                    <>every call published before the outcome was known, and scored automatically five sessions later.</>
+                  )}{' '}
+                  Anyone telling you otherwise is selling something.
+                </p>
+                <p>
+                  <Link to="/why">See the evidence →</Link>
+                </p>
+              </div>
 
-          <p className="muted small ask-more">
-            <Link to={`/check?symbol=${encodeURIComponent(symbol)}`}>Work out a position size</Link> from what you
-            have and what you’d risk · <Link to={`/ticker/${encodeURIComponent(symbol)}`}>Everything on {symbol}</Link>{' '}
-            · <Link to="/screener">All {known.length} tracked</Link>
-          </p>
+              <p className="muted small ask-more">
+                <Link to={`/check?symbol=${encodeURIComponent(symbol)}`}>Work out a position size</Link> ·{' '}
+                <Link to={`/ticker/${encodeURIComponent(symbol)}`}>Everything on {symbol}</Link> ·{' '}
+                <Link to="/screener">All {known.length} tracked</Link>
+              </p>
+            </>
+          )}
         </>
       )}
     </div>

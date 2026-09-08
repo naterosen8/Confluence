@@ -74,7 +74,8 @@ async function open(path) {
 
 const PAGES = [
   '/',
-  '/?symbol=NVDA',
+  '/?symbol=NVDA&lev=cash&hold=months',
+  '/?symbol=NVDA&lev=large&hold=days',
   '/why',
   '/check',
   '/check?symbol=NVDA',
@@ -102,10 +103,31 @@ where = 'home: ask and answer'
 if (!(await page.locator('#ask-symbol').count())) note(where, 'the front page has no ticker box')
 await page.locator('#ask-symbol').fill('DOGE/USD')
 await page.locator('.ask-form button').click()
-await page.waitForSelector('.ask-answer', { timeout: 20000 })
-await page.waitForTimeout(800)
+await page.waitForSelector('.step', { timeout: 20000 })
+await page.waitForTimeout(500)
+// Nothing is answered until both questions are, so that the ordering is
+// never based on a guess about the reader.
+if (await page.locator('.ask-answer').count()) note(where, 'answers shown before the questions were asked')
+await page.locator('.step-option', { hasText: 'No, paying cash' }).click()
+await page.waitForTimeout(250)
+if (await page.locator('.ask-answer').count()) note(where, 'answers shown after only one question')
+await page.locator('.step-option', { hasText: 'Months or longer' }).click()
+await page.waitForSelector('.ask-answer')
+await page.waitForTimeout(600)
 const answers = await page.locator('.ask-answer').count()
-if (answers < 3) note(where, `only ${answers} answers shown, expected at least three`)
+if (answers < 2) note(where, `only ${answers} answers shown`)
+// A cash buyer must not be told what a leveraged position would do to them.
+const cash = await page.locator('.ask-answers').innerText()
+if (/wiped out a position/i.test(cash)) note(where, 'cash buyer led with a liquidation number')
+if (/borrow/i.test(cash)) note(where, 'cash buyer told about the cost of borrowing')
+// But it must still be reachable, not deleted.
+const more = page.locator('button', { hasText: /Show the \d+ not shown/ })
+if (!(await more.count())) note(where, 'the demoted measurements are not reachable')
+await more.click()
+await page.waitForTimeout(300)
+if (!/wiped out a position/i.test(await page.locator('.ask-answers').innerText())) {
+  note(where, 'showing everything did not reveal the demoted measurement')
+}
 const ask = await page.locator('main').innerText()
 // Plain language: none of the site's vocabulary may reach this page.
 for (const jargon of ['ATR', 'percentile', 'Wilson', 'p-value', 'drift']) {

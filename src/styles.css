@@ -3331,3 +3331,77 @@ kbd {
 .ask-more {
   margin-top: var(--s5);
 }
+
+/* The two questions. Chips rather than a select: three options each, and a
+   dropdown would hide the shape of the choice behind a click. */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  margin: var(--s5) 0;
+}
+
+.step {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.step legend {
+  padding: 0;
+  margin-bottom: var(--s2);
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.step-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+
+.step-option {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.9rem;
+  padding: var(--s2) var(--s4);
+  cursor: pointer;
+}
+
+.step-option:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.step-option-active {
+  background: var(--accent-wash);
+  border-color: var(--accent);
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* The promoted answer is bigger than the rest. That is the whole point of
+   asking the questions — everything else stays readable but stops competing. */
+.ask-answer-lead .ask-figure strong {
+  font-size: 3rem;
+}
+
+.ask-answer-lead .ask-answer-body h3 {
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.ask-answer-lead .ask-answer-body p {
+  font-size: 1.03rem;
+}
+
+/* Why this one is where it is. Set apart from the measurement, because the
+   measurement is a fact and this is an editorial judgement about relevance. */
+.ask-why {
+  margin-top: var(--s2);
+  padding-left: var(--s3);
+  border-left: 2px solid var(--border);
+}

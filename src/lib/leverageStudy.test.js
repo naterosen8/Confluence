@@ -10,9 +10,15 @@ describe('liquidationPrice', () => {
     expect(liquidationPrice(100, 'long', 10)).toBe(90)
   })
 
-  it('makes an unleveraged position unliquidatable', () => {
+  // This used to assert Infinity for a 1x short — "an unborrowed short can
+  // never be wiped out" — which is false, and the test was the reason the bug
+  // survived. It asserted what the code did rather than what the arithmetic
+  // says, so it locked the mistake in instead of catching it. See the
+  // first-principles derivation in pnl.test.js, which is deliberately written
+  // from the balance sheet rather than from the implementation.
+  it('liquidates an unborrowed short when price doubles, and an unborrowed long only at zero', () => {
     expect(liquidationPrice(100, 'long', 1)).toBe(0)
-    expect(liquidationPrice(100, 'short', 1)).toBe(Infinity)
+    expect(liquidationPrice(100, 'short', 1)).toBe(200)
   })
 })
 

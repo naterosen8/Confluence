@@ -82,9 +82,32 @@ export function marketImpactEstimate({ bars, notional, lookback = 20 }) {
 //
 // Real venues liquidate earlier, at a maintenance margin above zero equity,
 // so this threshold is optimistic in the holder's favour.
+// Derived rather than asserted, because this is the one number on the site
+// someone could lose money by trusting:
+//
+//   LONG.  Equity E, leverage N, notional P = N·E, shares S = P/p0, and debt
+//   P − E. Equity at price p is S·p − debt = N·E·p/p0 − E(N−1), which reaches
+//   zero at p/p0 = 1 − 1/N. So the adverse move that wipes the position out is
+//   exactly 1/N: 50% at 2x, 20% at 5x, 2% at 50x.
+//
+//   SHORT. Sell S shares at p0, hold P + E in cash, owe S shares. Equity at p
+//   is P + E − S·p = E(N+1) − N·E·p/p0, zero at p/p0 = 1 + 1/N. Same magnitude
+//   of move, opposite side.
+//
+// The general formula is correct at N = 1 in both directions — a 1x long dies
+// only if price reaches zero, and a 1x short dies if price doubles — so the
+// special case that used to sit here was not just unnecessary, it was wrong.
+// It returned Infinity for a 1x short, which says a short held without
+// borrowing can never be wiped out. It can: price doubling does it, and the
+// simulator lets people open exactly that position.
 export function liquidationPrice(entryPrice, direction, leverage) {
-  if (leverage <= 1) return direction === 'long' ? 0 : Infinity
-  return direction === 'long' ? entryPrice * (1 - 1 / leverage) : entryPrice * (1 + 1 / leverage)
+  if (!(leverage > 0)) return direction === 'long' ? 0 : Infinity
+  if (direction === 'long') {
+    // Below 1x there is no price at which equity hits zero before price does,
+    // and a negative price is not a thing.
+    return Math.max(0, entryPrice * (1 - 1 / leverage))
+  }
+  return entryPrice * (1 + 1 / leverage)
 }
 
 // Walks the real price path forward from entry and stops at the first

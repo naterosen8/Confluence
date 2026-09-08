@@ -4,17 +4,27 @@
 
 A screener that spent months testing whether reading charts tells you which way price goes next, published every call in advance, and reports the answer on its front page instead of burying it. The answer, in four independent ways, is no. What it offers instead is the part that *is* measurable: what size an instrument has already liquidated, where a stop stops firing on ordinary noise, how far under water a hold goes and for how long, whether you can get out at the screen price, and how much of a basket is really one position.
 
-## The product, in one question
+## The product, in three questions
 
-**`/` — "What are you about to buy?"** A ticker box, and three things worth knowing before you put money on it:
+**`/`** asks what you are about to buy, then two things about how:
 
-> **1x** — biggest size that survived · *At 2x, this has already wiped out a position.*
-> **4.8%** — typical dip while you hold · *Expect to be down about 5% at some point.*
-> **55%** — never recovered · *55% of the time it never came back.*
+```
+What are you about to buy?     →  DOGE/USD
+Are you borrowing to buy it?   →  No, paying cash
+How long will you hold?        →  Months or longer
+```
 
-Then, placed where it becomes a live question rather than a lecture — right at the moment someone notices they were given three numbers and no verdict — the refusal, and a link to why.
+and then leads with the one measurement that answers *their* question:
 
-Three versions of this page have existed and the sequence is the argument for the third. First the **screener**, which put a badge reading "leaning up" in front of everyone before explaining the badge means nothing. Then the **finding**, which led with the evidence — right about the priority, wrong about the audience, because it asked someone to care about measurement before giving them a reason to. Now the **question**, because the person who most needs these numbers is about to put real money on a chart pattern, and every paragraph between them and "how big is too big" is a paragraph where they leave.
+> **4.8%** — Typical dip while you hold
+> **Expect to be down about 5% at some point.** …The worst went 26% down. If being 5% down would make you sell, this is the size where that happens.
+> *Paying cash means nothing can force you out, so the real risk is selling because it got uncomfortable. This is how uncomfortable.*
+
+Answer "yes, more than 3x" instead and the wipeout level leads, sized bigger than everything else, because for that person it is the only number that matters until it is settled.
+
+**The numbers never change — only which one leads.** Showing all of them at once was the previous version's mistake: the cash buyer read a paragraph about 2x liquidation that cannot happen to them, and the person about to use 10x got the only number that matters as one panel of three. Correct numbers, wrong emphasis, and the wrong emphasis is how a page full of true things ends up useless.
+
+Nothing is hidden. Everything demoted sits behind a control that is always visible, and the page states what the ordering was based on — a filtered view that does not say it is filtered is a shorter page pretending to be the whole one. Demoting a true number is an editorial call; hiding one is a different thing, and `lib/guided.js` does the first only.
 
 Plain language is where a site like this would normally start lying, so `lib/plainRisk.js` has one rule: **plainer wording, identical claim.** The trap is specific and the first draft fell in it — *"Don't go above 3x"* reads beautifully and is a recommendation about size, which this site does not make; *"At 3x, this has already wiped out a position"* is the same length and is a fact. Tests assert the sentences never instruct, never name a direction, and use none of the vocabulary the rest of the site runs on.
 
@@ -211,6 +221,19 @@ It exists because of what is on the other side: a screener that says "aligned up
 Eight points, deliberately concrete rather than legalese — a boilerplate wall gets scrolled past, and the only version that does anything is one people read. They include the three the site is most on the hook for: that its own measurements find no predictive edge, that the simulator flatters leveraged outcomes because it charges no funding, spread or slippage, and that the position-size panel is arithmetic on numbers you type in rather than a suggestion to take the position it returns.
 
 Acceptance is stored in `localStorage` with a **version**. If the terms change materially the version goes up and everyone is asked again, because consent to one set of terms is not consent to a different set. It is on 2: adding a panel that turns measurements into a share count is a new kind of output, so everyone who accepted the earlier list is asked to read this one. Storage failures (Safari private mode throws rather than returning null) all resolve to "ask again", never to a crash or a silent pass. A footer button re-opens the terms and withdraws the acceptance.
+
+## The liquidation arithmetic
+
+The one number here someone could lose money by trusting, so it is derived in the source rather than asserted:
+
+> **Long.** Equity E, leverage N, notional P = N·E, shares S = P/p₀, debt P − E. Equity at price p is S·p − debt = N·E·p/p₀ − E(N−1), zero at **p/p₀ = 1 − 1/N**.
+> **Short.** Sell S at p₀, hold P + E in cash, owe S shares. Equity is P + E − S·p = E(N+1) − N·E·p/p₀, zero at **p/p₀ = 1 + 1/N**.
+
+So the adverse move that wipes a position out is exactly **1/N** — 50% at 2x, 20% at 5x, 2% at 50x. Checked against the balance sheet at every rung the site offers, in a test written from the derivation rather than from the implementation, because a test that agrees with the code proves only that they share any mistake.
+
+That is not hypothetical here. `liquidationPrice` had a special case returning **Infinity for a 1x short** — "an unborrowed short can never be wiped out" — which is false: it dies when price doubles, and the simulator lets people open exactly that position. The general formula is correct at N = 1 in both directions, so the special case was not merely unnecessary but wrong. **The existing test asserted `Infinity` was correct**, which is why the bug survived: it encoded what the code did rather than what the arithmetic says.
+
+Liquidation is checked against **intraday lows and highs**, not closes — a leveraged position dies the moment price touches the level, so a session that spikes through and closes back above still ends it. Two things this is still optimistic about, both stated on the site: real venues liquidate at a maintenance margin *above* zero equity, and a gap straight through the level can leave you owing more than your stake, while the simulation caps the loss at everything you put in.
 
 ## Where the site does give direct advice
 

@@ -88,7 +88,7 @@ export function plainRecovery(recovery) {
             0
           )}% of the time it had still not returned to the buying price three months later. The rest took about ${days} day${
             days === 1 ? '' : 's'
-          }. Waiting it out is not free if you are borrowing to hold it.`
+          }.`
         : `When it fell far enough to hurt, it took about ${days} day${
             days === 1 ? '' : 's'
           } to get back — but ${never.toFixed(0)}% of the time it still had not, three months on.`,
@@ -96,6 +96,12 @@ export function plainRecovery(recovery) {
     label: never >= 25 ? 'Never recovered' : 'Usually back within',
   }
 }
+
+// The cost of waiting out a fall, which only exists if you borrowed to hold
+// it. Kept out of the measurement sentence and handed to the layer that knows
+// the reader's situation — the cash buyer was being told "not free if you are
+// borrowing" immediately after saying they were not.
+export const WAITING_COSTS = 'Waiting it out is not free when you have borrowed to hold it — the cost runs every day.'
 
 // Whether you could get out at the price on the screen. Only worth saying when
 // the answer is no — for a mega-cap it is noise.

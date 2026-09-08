@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { computePnl, evaluatePosition, marketImpactEstimate } from './pnl'
+import { computePnl, evaluatePosition, marketImpactEstimate, liquidationPrice } from './pnl'
+import { LEVERAGE_RUNGS } from './riskRead.js'
 import { simulatePosition } from './leverageStudy'
 
 const bar = (date, close, low = close, high = close) => ({ date, open: close, high, low, close, volume: 1 })
@@ -226,5 +227,59 @@ describe('the "−34% should have liquidated" report', () => {
     })
     expect(r.liquidationAt).toBeNull()
     expect(r.liquidated).toBe(false)
+  })
+})
+
+describe('liquidation price, derived from first principles', () => {
+  // Independent of the implementation on purpose: if both the code and the
+  // test encode the same mistake, neither catches it. These come from the
+  // balance sheet, not from liquidationPrice.
+  //
+  //   LONG.  equity(p) = N·E·p/p0 − E(N−1)  →  zero at p/p0 = 1 − 1/N
+  //   SHORT. equity(p) = E(N+1) − N·E·p/p0  →  zero at p/p0 = 1 + 1/N
+  const truthLong = (p0, N) => Math.max(0, p0 * (1 - 1 / N))
+  const truthShort = (p0, N) => p0 * (1 + 1 / N)
+
+  it('matches the derivation at every rung the site offers', () => {
+    for (const N of LEVERAGE_RUNGS) {
+      expect(liquidationPrice(100, 'long', N), `long ${N}x`).toBeCloseTo(truthLong(100, N), 9)
+      expect(liquidationPrice(100, 'short', N), `short ${N}x`).toBeCloseTo(truthShort(100, N), 9)
+    }
+  })
+
+  it('wipes out on an adverse move of exactly 1/N', () => {
+    for (const N of [2, 3, 5, 10, 25, 50]) {
+      const move = (100 - liquidationPrice(100, 'long', N)) / 100
+      expect(move, `${N}x`).toBeCloseTo(1 / N, 9)
+    }
+  })
+
+  // The bug this replaced: a 1x short returned Infinity, meaning "can never be
+  // wiped out". A 1x short is wiped out when price doubles, and the simulator
+  // lets people open exactly that position.
+  it('liquidates an unborrowed short when price doubles', () => {
+    expect(liquidationPrice(100, 'short', 1)).toBe(200)
+    expect(liquidationPrice(37.5, 'short', 1)).toBe(75)
+  })
+
+  it('never liquidates an unborrowed long above zero', () => {
+    expect(liquidationPrice(100, 'long', 1)).toBe(0)
+    expect(liquidationPrice(100, 'long', 0.5)).toBe(0)
+  })
+
+  it('scales with the entry price rather than assuming a hundred', () => {
+    for (const p0 of [0.09, 37.5, 230.36, 64350.52]) {
+      expect(liquidationPrice(p0, 'long', 5)).toBeCloseTo(p0 * 0.8, 9)
+      expect(liquidationPrice(p0, 'short', 5)).toBeCloseTo(p0 * 1.2, 9)
+    }
+  })
+
+  it('is monotonic — more leverage means a nearer liquidation', () => {
+    let previous = -Infinity
+    for (const N of LEVERAGE_RUNGS) {
+      const price = liquidationPrice(100, 'long', N)
+      expect(price, `${N}x`).toBeGreaterThanOrEqual(previous)
+      previous = price
+    }
   })
 })

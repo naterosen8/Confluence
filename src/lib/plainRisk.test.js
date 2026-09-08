@@ -61,7 +61,10 @@ describe('plainRecovery', () => {
     const p = plainRecovery(recovery({ neverRecoveredPct: 55, medianSessions: 7 }))
     expect(p.headline).toMatch(/55% of the time it never came back/)
     expect(p.label).toBe('Never recovered')
-    expect(p.body).toMatch(/not free if you are borrowing/)
+    // The cost-of-waiting clause moved to guided.js, which knows whether the
+    // reader actually borrowed. It was being shown to cash buyers immediately
+    // after they said they were not borrowing.
+    expect(p.body).not.toMatch(/borrow/i)
   })
 })
 
