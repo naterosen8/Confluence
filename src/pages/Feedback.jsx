@@ -88,7 +88,7 @@ export default function Feedback() {
           open, and the raw data behind every figure is committed as{' '}
           <a href="/screener.json">screener.json</a> and <a href="/track-record.json">track-record.json</a>.
         </p>
-        <Link to="/" className="back-link">
+        <Link to="/screener" className="back-link">
           ← Back to the screener
         </Link>
       </div>

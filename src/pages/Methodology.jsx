@@ -49,7 +49,7 @@ export default function Methodology() {
 
   return (
     <div className="methodology">
-      <Link to="/" className="back-link">
+      <Link to="/screener" className="back-link">
         ← Back to screener
       </Link>
 

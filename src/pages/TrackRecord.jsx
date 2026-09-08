@@ -6,6 +6,7 @@ import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { pct, rate, price } from '../lib/format'
 import { RECENT_LIMIT } from '../lib/trackRecordSummary'
 import Explain from '../components/Explain'
+import { loadTrackSummary } from '../lib/useTrackSummary'
 import { clusterRead, overstatement } from '../lib/clustering'
 
 // Reads the precomputed summary rather than the raw log. The log only ever
@@ -19,9 +20,11 @@ export default function TrackRecord() {
   const [summary, setSummary] = useState(null)
   const [loadError, setLoadError] = useState(null)
 
+  // Shared with the home page's verdict. Two fetches of the same file would
+  // mean the two pages could disagree about what the record says, which is the
+  // one disagreement this site cannot afford.
   useEffect(() => {
-    fetch('/track-record-summary.json')
-      .then((res) => (res.ok ? res.json() : null))
+    loadTrackSummary()
       .then((data) => setSummary(data ?? { resolvedCount: 0, pendingCount: 0, recent: [] }))
       .catch(() => setLoadError('Could not load the track record right now.'))
   }, [])
@@ -29,7 +32,7 @@ export default function TrackRecord() {
   if (loadError) {
     return (
       <div>
-        <Link to="/" className="back-link">
+        <Link to="/screener" className="back-link">
           ← Back to screener
         </Link>
         <h1>Track record</h1>
@@ -41,7 +44,7 @@ export default function TrackRecord() {
   if (!summary) {
     return (
       <div>
-        <Link to="/" className="back-link">
+        <Link to="/screener" className="back-link">
           ← Back to screener
         </Link>
         <h1>Track record</h1>
@@ -57,7 +60,7 @@ export default function TrackRecord() {
 
   return (
     <div>
-      <Link to="/" className="back-link">
+      <Link to="/screener" className="back-link">
         ← Back to screener
       </Link>
 

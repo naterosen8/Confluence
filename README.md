@@ -1,8 +1,16 @@
 # Confluence
 
-A live technical-analysis **screener** across a curated list of tickers — RSI, MACD, and moving-average trend, combined into a single "confluence" verdict per symbol.
+**Technical analysis, measured — and it does not predict direction.**
 
-This is deliberately **not** a signal service or a "time the market" tool. Indicators are lagging by construction and every other trader sees the same numbers — TA doesn't fail because people lack access to it. What it's good for is scanning many tickers at once to see where indicators currently agree or disagree, faster than checking each one by hand.
+A screener that spent months testing whether reading charts tells you which way price goes next, published every call in advance, and reports the answer on its front page instead of burying it. The answer, in four independent ways, is no. What it offers instead is the part that *is* measurable: what size an instrument has already liquidated, where a stop stops firing on ordinary noise, how far under water a hold goes and for how long, whether you can get out at the screen price, and how much of a basket is really one position.
+
+## The product, in two pages
+
+**`/` — the finding.** Every figure read from the published files at render time, none written down. That is load-bearing rather than tidy: a verdict with a hardcoded number in it is an opinion that was true once, and this one has to be able to change. If the record ever shows an edge, the page is obliged to say so — and it says so with *more* suspicion than the alternative, not less. `lib/verdict.js`, and a test runs it over two unrelated datasets and requires every number in the output to move.
+
+**`/check` — the tool.** A ticker, what you have, what you will lose on one idea. Six answers, none of them directional. It will not tell you whether to take the position, and the front page explains at length why it has no view worth having.
+
+Everything else is depth: the screener (all 89 instruments), overlap, the full track record, the methodology and glossary. The confluence score survives, demoted and labelled — deleting it would delete the exhibit the whole argument is about, and leaving it unqualified at the top of the site was what made the argument invisible.
 
 ## Stack
 

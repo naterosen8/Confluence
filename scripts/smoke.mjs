@@ -74,6 +74,9 @@ async function open(path) {
 
 const PAGES = [
   '/',
+  '/check',
+  '/check?symbol=NVDA',
+  '/screener',
   '/overlap',
   '/overlap?symbols=SPY,QQQ,NVDA,TLT,XOM',
   '/track-record',
@@ -91,6 +94,30 @@ for (const p of PAGES) await open(p)
 // --- The interactive surfaces, which is the point of running a browser -----
 
 await open('/')
+where = 'home: the argument'
+await open('/')
+where = 'home: the argument'
+const home = await page.locator('main').innerText()
+if (!(await page.locator('.evidence-row').count())) note(where, 'the front page rendered no evidence')
+if ((await page.locator('.evidence-row').count()) < 4) note(where, 'fewer than four independent checks shown')
+// The finding has to be on the front door, not two clicks away.
+if (!/predict|measurement|edge/i.test(home)) note(where, 'the front page never states the finding')
+if (!(await page.locator('a[href="/check"]').count())) note(where, 'no route from the argument to the tool')
+
+where = 'risk check'
+await open('/check?symbol=NVDA')
+where = 'risk check'
+if ((await page.locator('.plain-read').count()) < 4) note(where, 'risk check rendered fewer than four reads')
+await page.locator('.sizer-inputs input').first().fill('100000')
+await page.locator('.sizer-inputs input').nth(1).fill('1')
+await page.locator('.sizer-inputs input').nth(1).blur()
+await page.waitForTimeout(400)
+if (!(await page.locator('.sizer-grid .stat').count())) note(where, 'sizing produced nothing')
+const check = await page.locator('main').innerText()
+if (/\b(buy|sell it|go long|short it|we recommend)\b/i.test(check)) note(where, 'the risk check reads as a recommendation')
+
+where = 'screener: filter'
+await open('/screener')
 where = 'screener: filter'
 await page.locator('#screener-q').fill('NVDA')
 await page.waitForTimeout(400)

@@ -14,7 +14,7 @@ export default function NotFound({ title = 'Page not found', message, children }
       <h1>{title}</h1>
       <p className="muted">{message || "That page isn't part of this app."}</p>
       {children}
-      <Link to="/" className="button-primary not-found-cta">
+      <Link to="/screener" className="button-primary not-found-cta">
         Back to screener
       </Link>
     </div>

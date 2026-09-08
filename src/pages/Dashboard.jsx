@@ -299,6 +299,16 @@ export default function Dashboard() {
           no top-level heading for a screen reader to land on. */}
       <div className="page-head">
         <h1>Screener</h1>
+        {/* The confluence column is kept and labelled rather than deleted.
+            Removing it would remove the exhibit the whole argument is about;
+            leaving it unqualified at the top of the site was what made the
+            argument invisible. */}
+        <div className="callout demoted-note">
+          <strong>The Confluence column is the exhibit, not the product.</strong> It is what a conventional screener
+          says, and this site has spent months measuring whether it means anything.{' '}
+          <Link to="/">It does not</Link> — so sort by the risk columns, which describe what an instrument will do to
+          a position, and treat the lean as the thing being tested rather than as a finding.
+        </div>
         <p className="muted small">
           {rows.length} tickers, each scored on the same checks and shown with the record behind them. Click any
           symbol for the full read.

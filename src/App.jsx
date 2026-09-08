@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
-import Dashboard from './pages/Dashboard'
+import Home from './pages/Home'
 import NotFound from './pages/NotFound'
 
 // The screener is the page every visit starts on, so it stays in the entry
@@ -12,6 +12,10 @@ import NotFound from './pages/NotFound'
 // and parsed before the first table row painted, by everyone — including the
 // large majority who only ever look at the screener. The router is the natural
 // seam, because these are already separate URLs.
+// The screener is no longer the landing page, so it is no longer in the entry
+// bundle either. What loads first is the argument.
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const RiskCheck = lazy(() => import('./pages/RiskCheck'))
 const TickerDetail = lazy(() => import('./pages/TickerDetail'))
 const TrackRecord = lazy(() => import('./pages/TrackRecord'))
 const Overlap = lazy(() => import('./pages/Overlap'))
@@ -37,7 +41,11 @@ function RoutedContent() {
           page-level failure gets. */}
       <Suspense fallback={<p className="muted" style={{ padding: '24px 0' }}>Loading…</p>}>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/check" element={<RiskCheck />} />
+          {/* The screener moved off the front door. Anyone who bookmarked it
+              lands on the finding instead, which is the point of the move. */}
+          <Route path="/screener" element={<Dashboard />} />
           <Route path="/ticker/:symbol" element={<TickerDetail />} />
           {/* Each chapter is its own URL, so a page can be linked to, opened
               in a new tab, and walked with the browser's own back button. */}
@@ -89,10 +97,11 @@ export default function App() {
           <Link to="/" className="brand">
             Confluence
           </Link>
-          <span className="tagline">A live TA screener — not a signal service</span>
+          <span className="tagline">Technical analysis, measured — and it does not predict direction</span>
           <nav className="site-nav">
+            <Link to="/check">Risk check</Link>
+            <Link to="/screener">Screener</Link>
             <Link to="/overlap">Overlap</Link>
-            <Link to="/my-trades">My trades</Link>
             <Link to="/track-record">Track record</Link>
             <Link to="/methodology">How to read this</Link>
             <FeedbackLink>Feedback</FeedbackLink>
@@ -103,8 +112,8 @@ export default function App() {
         <main>{dataReady ? <RoutedContent /> : <p className="muted" style={{ padding: '24px 0' }}>Loading…</p>}</main>
 
         <footer className="site-footer">
-          Indicators are lagging by construction and everyone else sees the same numbers. This is a screening tool
-          to scan many tickers at once, not investment advice.{' '}
+          Indicators are lagging by construction and everyone else sees the same numbers. This site measures whether
+          they predict anything and publishes the answer; it is not investment advice.{' '}
           {/* The whole site rests on its numbers being checkable, which is
               worth nothing without a visible way to say one is wrong. */}
           <FeedbackLink>Spotted a number that looks wrong?</FeedbackLink>{' '}

@@ -73,7 +73,7 @@ function TickerAnalysis({ symbol, meta, chapterKey }) {
   if (!barsReady) {
     return (
       <div>
-        <Link to="/" className="back-link">
+        <Link to="/screener" className="back-link">
           ← Back to screener
         </Link>
         <h1>{symbol}</h1>
@@ -92,7 +92,7 @@ function TickerAnalysis({ symbol, meta, chapterKey }) {
   if (!hasRealData(symbol)) {
     return (
       <div>
-        <Link to="/" className="back-link">
+        <Link to="/screener" className="back-link">
           ← Back to screener
         </Link>
         <h1>{symbol}</h1>
@@ -209,7 +209,7 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
 
   return (
     <div>
-      <Link to="/" className="back-link">
+      <Link to="/screener" className="back-link">
         ← Back to screener
       </Link>
 

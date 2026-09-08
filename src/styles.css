@@ -2992,3 +2992,166 @@ kbd {
   padding-left: var(--s3);
   max-width: 68ch;
 }
+
+/* ==========================================================================
+   Home — the argument
+   ========================================================================== */
+
+.home-lede {
+  padding: var(--s6) 0 var(--s5);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--s5);
+}
+
+.home-eyebrow {
+  margin: 0 0 var(--s3);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.home-lede h1 {
+  margin: 0 0 var(--s4);
+  font-size: clamp(1.7rem, 4.5vw, 2.6rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  max-width: 20ch;
+}
+
+.home-blurb {
+  margin: 0 0 var(--s3);
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  max-width: 62ch;
+}
+
+/* The evidence reads as a list of findings, not as a scoreboard — no colour
+   carrying the verdict, because "nothing found" is the ordinary result here
+   and painting it red would frame the honest answer as a failure. */
+.evidence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  margin: var(--s4) 0;
+}
+
+.evidence-row {
+  border-left: 2px solid var(--border-strong);
+  padding-left: var(--s4);
+}
+
+.evidence-found {
+  border-left-color: var(--warn);
+}
+
+.evidence-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s2) var(--s3);
+  margin-bottom: var(--s1);
+}
+
+.evidence-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.evidence-finding {
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.evidence-row p {
+  margin: 0;
+  max-width: 68ch;
+}
+
+.home-cta {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: var(--s3) var(--s5);
+  border-radius: var(--r-md);
+  text-decoration: none;
+}
+
+.home-cta:hover {
+  background: var(--accent-dim);
+}
+
+.home-links {
+  line-height: 1.7;
+  max-width: 68ch;
+}
+
+.home-links li {
+  margin-bottom: var(--s2);
+}
+
+.demoted-note {
+  margin-top: var(--s3);
+}
+
+/* ==========================================================================
+   Risk check
+   ========================================================================== */
+
+.check-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  align-items: flex-end;
+  margin-bottom: var(--s5);
+}
+
+.check-form label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+}
+
+.check-form input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: var(--s2) var(--s3);
+  min-width: 180px;
+}
+
+.check-form input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.check-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  margin-bottom: var(--s4);
+}
+
+.check-head h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.check-head h2 a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.check-head h2 a:hover {
+  color: var(--accent);
+}

@@ -160,7 +160,7 @@ export default function MyTrades() {
         error ? null : <p className="muted">Loading trades…</p>
       ) : trades.length === 0 ? (
         <p className="muted">
-          No simulated trades yet. Open one from any <Link to="/">ticker's page</Link>.
+          No simulated trades yet. Open one from any <Link to="/screener">ticker's page</Link>.
         </p>
       ) : (
         <>

@@ -139,7 +139,7 @@ export default function Overlap() {
 
   return (
     <div>
-      <Link to="/" className="back-link">
+      <Link to="/screener" className="back-link">
         ← Back to screener
       </Link>
 
