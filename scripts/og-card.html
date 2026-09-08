@@ -1,0 +1,36 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@import url('');
+* { margin:0; padding:0; box-sizing:border-box }
+body {
+  width:1200px; height:630px;
+  background:
+    radial-gradient(900px 600px at 88% 12%, rgba(20,184,166,.10), transparent 60%),
+    #0a0e13;
+  color:#e8ecf1;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  display:flex; flex-direction:column; justify-content:flex-start;
+  padding: 56px 76px; position:relative; overflow:hidden;
+}
+.brand { display:flex; align-items:center; gap:14px; margin-bottom:34px }
+.mark { width:44px; height:44px; border-radius:11px; background:#14b8a6; display:flex; align-items:center; justify-content:center }
+.mark svg { display:block }
+.brand span { font-size:26px; font-weight:600; letter-spacing:-.01em; color:#aab4c2 }
+h1 { font-size:56px; line-height:1.08; letter-spacing:-.03em; font-weight:700; max-width:19ch; margin-bottom:22px }
+h1 em { font-style:normal; color:#14b8a6 }
+p { font-size:22px; line-height:1.45; color:#aab4c2; max-width:44ch }
+.stats { display:flex; gap:56px; margin-top:auto; padding-top:28px; border-top:1px solid #232c38 }
+.stat b { display:block; font-size:34px; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums }
+.stat span { font-size:16px; color:#7c8794 }
+</style></head><body>
+  <div class="brand">
+    <div class="mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 17l5-6 4 4 4-7 5 5" stroke="#0a0e13" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span>Confluence</span>
+  </div>
+  <h1>What a stock has <em>already done</em> to people who bought it</h1>
+  <p>How big is too big, how far down it goes, and whether it comes back — measured, not predicted.</p>
+  <div class="stats">
+    <div class="stat"><b id="calls">—</b><span>calls published in advance</span></div>
+    <div class="stat"><b id="hit">—</b><span>hit rate — a coin flip</span></div>
+    <div class="stat"><b id="dist">—</b><span>tickers with a provable edge</span></div>
+  </div>
+</body></html>

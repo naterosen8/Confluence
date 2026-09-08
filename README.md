@@ -354,6 +354,8 @@ Every derived file the site publishes now has a guard that **recomputes it from 
 
 The brief gets its own guard, because it makes a claim about the code: *"every figure here is computed, tested and caveated on one of them, and none of it is new."* Tests assemble the brief from real bars and assert each figure equals what the source read produces, that a lean never appears in a paragraph without the measurement beside it, and — across all 89 tracked symbols, whatever the readings say — that it never reads as a recommendation.
 
+`npm run build-og` regenerates the link-preview card from the published record — it is the one asset that goes stale silently, and it sold the old product for a while after the site stopped being that product. It refuses to write a card whose text would be cut off.
+
 `npm run smoke` is the general version and needs a preview server and Playwright (not a dependency — it is a large install for something run by hand). It walks all 17 pages checking for uncaught exceptions, unrendered `NaN`/`undefined`, and horizontal overflow, then clicks the things unit tests cannot reach: the filter box at speed, the column picker, the sort headers, the keyboard shortcuts, the CSV download, the position sizer's dropdown and the overlap basket. Both guards were confirmed by reintroducing the original bug and watching them fail.
 
 ## Deploying

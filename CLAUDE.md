@@ -1,8 +1,42 @@
 # Confluence
 
-A technical-analysis screener that measures its own predictive power and does not
-find any. Everything below is a fact about this project that is expensive to
-rediscover — not general advice.
+A technical-analysis screener that measured its own predictive power, did not
+find any, and turned that into the product. Everything below is a fact about
+this project that is expensive to rediscover — not general advice.
+
+## The shape
+
+`/` asks what someone is about to buy and two things about how (borrowing?
+holding how long?), then leads with the one measurement those answers make
+relevant. `/why` is the evidence that nothing here predicts direction. `/check`
+turns the measurements into a share count. Everything else is depth.
+
+Three rules follow from that shape and are easy to break while trying to be
+helpful:
+
+- **Plainer wording, identical claim.** `lib/plainRisk.js` writes the front page
+  in words with no vocabulary in them. "Don't go above 3x" reads beautifully and
+  is a recommendation about size; "At 3x, this has already wiped out a position"
+  is the same length and is a fact. The first draft got this wrong.
+- **Demote, never hide.** `lib/guided.js` reorders by relevance. Anything not
+  promoted stays behind a control that is always visible, and the page says what
+  the ordering was based on.
+- **Nothing on the front pages is written down.** Every figure is read from the
+  published files at render time — see `lib/verdict.js`. A hardcoded number is
+  an opinion that was true once. This has been broken once, by hardcoding a hit
+  rate into the refusal copy.
+
+## The liquidation arithmetic
+
+The one number here someone could lose money by trusting. Derived, not asserted:
+a long's equity is N·E·p/p0 − E(N−1), zero at **p/p0 = 1 − 1/N**; a short's is
+E(N+1) − N·E·p/p0, zero at **1 + 1/N**. The adverse move that wipes a position
+out is exactly **1/N**.
+
+Test it against that derivation, never against the implementation. A special
+case here returned `Infinity` for a 1x short — "an unborrowed short can never be
+wiped out", which is false, it dies when price doubles — and **the existing test
+asserted `Infinity` was correct**, which is why it survived.
 
 ## The line the site does not cross
 

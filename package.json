@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "rebuild": "node scripts/rebuild-derived.mjs",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "build-og": "node scripts/build-og.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.2",
