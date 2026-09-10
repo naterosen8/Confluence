@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-09T23:34:46.948Z",
+  "generatedAt": "2026-09-10T23:28:36.327Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -2674,21 +2674,6 @@
       "entityName": "Broadcom Inc.",
       "quarters": [
         {
-          "asOf": "2023-07-30",
-          "form": "10-Q",
-          "assets": 71595000000,
-          "liabilities": 49516000000,
-          "equity": 22079000000,
-          "equityBasis": "derived",
-          "currentAssets": 18333000000,
-          "currentLiabilities": 7345000000,
-          "cash": 12055000000,
-          "debt": 42035000000,
-          "shares": 412685405,
-          "revenue": 8876000000,
-          "netIncome": 3303000000
-        },
-        {
           "asOf": "2023-10-29",
           "form": "10-K",
           "assets": 72861000000,
@@ -2852,6 +2837,21 @@
           "shares": 4734668184,
           "revenue": 22187000000,
           "netIncome": 9310000000
+        },
+        {
+          "asOf": "2026-08-02",
+          "form": "10-Q",
+          "assets": 188148000000,
+          "liabilities": 88458000000,
+          "equity": 99690000000,
+          "equityBasis": "derived",
+          "currentAssets": 52173000000,
+          "currentLiabilities": 20838000000,
+          "cash": 23975000000,
+          "debt": 59419000000,
+          "shares": 4757580198,
+          "revenue": 29591000000,
+          "netIncome": 13088000000
         }
       ]
     },
@@ -4435,22 +4435,8 @@
     },
     "PANW": {
       "cik": 1327567,
-      "entityName": "PALO ALTO NETWORKS, INC",
+      "entityName": "Palo Alto Networks, Inc",
       "quarters": [
-        {
-          "asOf": "2023-07-31",
-          "form": "10-K",
-          "assets": 14501100000,
-          "liabilities": 12752700000,
-          "equity": 1748400000,
-          "currentAssets": 6048000000,
-          "currentLiabilities": 7737500000,
-          "cash": 2390000000,
-          "debt": 1991500000,
-          "shares": 305854824,
-          "revenue": null,
-          "netIncome": null
-        },
         {
           "asOf": "2023-10-31",
           "form": "10-Q",
@@ -4501,7 +4487,7 @@
           "equity": 5169000000,
           "currentAssets": 6849700000,
           "currentLiabilities": 7682700000,
-          "cash": 2578800000,
+          "cash": 2578600000,
           "debt": 1991500000,
           "shares": 323800000,
           "revenue": null,
@@ -4551,7 +4537,7 @@
         },
         {
           "asOf": "2025-07-31",
-          "form": "10-Q",
+          "form": "10-K",
           "assets": 23576000000,
           "liabilities": 15752000000,
           "equity": 7824000000,
@@ -4604,6 +4590,20 @@
           "shares": 816000000,
           "revenue": 3002000000,
           "netIncome": -177000000
+        },
+        {
+          "asOf": "2026-07-31",
+          "form": "10-K",
+          "assets": 48460000000,
+          "liabilities": 20968000000,
+          "equity": 27492000000,
+          "currentAssets": 8643000000,
+          "currentLiabilities": 9923000000,
+          "cash": 3071000000,
+          "debt": 1991500000,
+          "shares": 815000000,
+          "revenue": null,
+          "netIncome": null
         }
       ]
     },
