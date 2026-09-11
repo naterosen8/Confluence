@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T23:28:36.327Z",
+  "generatedAt": "2026-09-11T23:35:20.852Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -2860,20 +2860,6 @@
       "entityName": "Oracle Corporation",
       "quarters": [
         {
-          "asOf": "2023-08-31",
-          "form": "10-Q",
-          "assets": 136662000000,
-          "liabilities": 134292000000,
-          "equity": 2370000000,
-          "currentAssets": 22166000000,
-          "currentLiabilities": 25357000000,
-          "cash": 12083000000,
-          "debt": 4061000000,
-          "shares": 2714259000,
-          "revenue": 12453000000,
-          "netIncome": 2420000000
-        },
-        {
           "asOf": "2023-11-30",
           "form": "10-Q",
           "assets": 134324000000,
@@ -3015,7 +3001,7 @@
         },
         {
           "asOf": "2026-05-31",
-          "form": "10-K",
+          "form": "10-Q",
           "assets": 261759000000,
           "liabilities": 219251000000,
           "equity": 42508000000,
@@ -3026,6 +3012,20 @@
           "shares": 2876046000,
           "revenue": null,
           "netIncome": null
+        },
+        {
+          "asOf": "2026-08-31",
+          "form": "10-Q",
+          "assets": 303259000000,
+          "liabilities": 236487000000,
+          "equity": 66772000000,
+          "currentAssets": 55630000000,
+          "currentLiabilities": 47514000000,
+          "cash": 37077000000,
+          "debt": 7199000000,
+          "shares": 2880471000,
+          "revenue": 19345000000,
+          "netIncome": 4760000000
         }
       ]
     },
@@ -4957,7 +4957,7 @@
     },
     "UBER": {
       "cik": 1543151,
-      "entityName": "UBER TECHNOLOGIES, INC.",
+      "entityName": "Uber Technologies, Inc",
       "quarters": [
         {
           "asOf": "2023-09-30",
