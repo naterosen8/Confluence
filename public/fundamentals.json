@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T00:23:37.156Z",
+  "generatedAt": "2026-09-22T23:51:53.682Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -3034,20 +3034,6 @@
       "entityName": "ADOBE INC.",
       "quarters": [
         {
-          "asOf": "2023-09-01",
-          "form": "10-Q",
-          "assets": 29090000000,
-          "liabilities": 13314000000,
-          "equity": 15776000000,
-          "currentAssets": 10410000000,
-          "currentLiabilities": 8334000000,
-          "cash": 7516000000,
-          "debt": 1900000000,
-          "shares": 455800000,
-          "revenue": 4890000000,
-          "netIncome": 1403000000
-        },
-        {
           "asOf": "2023-12-01",
           "form": "10-K",
           "assets": 29779000000,
@@ -3200,6 +3186,20 @@
           "shares": 404200000,
           "revenue": 6618000000,
           "netIncome": 1712000000
+        },
+        {
+          "asOf": "2026-08-28",
+          "form": "10-Q",
+          "assets": 29981000000,
+          "liabilities": 18217000000,
+          "equity": 11764000000,
+          "currentAssets": 9158000000,
+          "currentLiabilities": 11888000000,
+          "cash": 5639000000,
+          "debt": 3497000000,
+          "shares": 397500000,
+          "revenue": 6760000000,
+          "netIncome": 1827000000
         }
       ]
     },
