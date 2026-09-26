@@ -264,6 +264,14 @@ export const GLOSSARY = {
     isNot:
       'Not evidence about the setup as a whole — these are single mechanisms in isolation, tested one ticker at a time, usually on very few occurrences. Several are also correlated with each other, so agreement between two cards is not two findings.',
   },
+  stackReplay: {
+    term: 'A fixed amount every week',
+    basis: 'hypothetical',
+    what: 'The same dollar amount put in every week over a window you pick, replayed at real closing prices, and what the pile was worth at each close compared with what had gone in.',
+    how: 'Each week the amount goes in at the close of the first session on or after the scheduled day. The window ending on the last sync is shown, then the same window replayed from every other start date the history allows, with how many of those windows are actually separate.',
+    isNot:
+      "Not a plan, and not evidence that a schedule works. The single sentence depends mostly on the start date, which is why every other start date is shown beside it — and those overlap, so hundreds of start dates are one or two stretches of history, not hundreds of trials. No fees, spread or tax. The instruments here were picked from names that are still trading, so the history leans toward ones that survived.",
+  },
   simulatedTrade: {
     term: 'Simulated trade',
     basis: 'hypothetical',

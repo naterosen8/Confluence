@@ -3405,3 +3405,82 @@ kbd {
   padding-left: var(--s3);
   border-left: 2px solid var(--border);
 }
+
+/* A fixed amount every week */
+.stack-replay {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stack-sentence {
+  font-size: 1.05rem;
+  line-height: 2.4;
+  color: var(--text-secondary);
+}
+
+.stack-sentence select,
+.stack-sentence input {
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  padding: 6px 10px;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.stack-sentence strong {
+  color: var(--text);
+}
+
+.stack-money {
+  white-space: nowrap;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.stack-sentence .stack-money input[type='number'] {
+  width: 5.5em;
+  margin-left: 2px;
+  padding: 4px 8px;
+}
+
+.stack-chart {
+  width: 100%;
+  height: 200px;
+  display: block;
+}
+
+.stack-chart-fill {
+  fill: var(--accent-wash);
+}
+
+.stack-chart-value {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.stack-chart-invested {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.stack-key {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  vertical-align: middle;
+  border-top: 2px solid var(--accent);
+}
+
+.stack-key-invested {
+  border-top: 2px dashed var(--muted);
+  margin-left: 10px;
+}

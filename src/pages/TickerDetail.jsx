@@ -27,6 +27,7 @@ import SetupRead from '../components/SetupRead'
 import ConfluencePanel from '../components/ConfluencePanel'
 import Explain from '../components/Explain'
 import SimulateTradeForm from '../components/SimulateTradeForm'
+import StackReplay from '../components/StackReplay'
 import NotFound from './NotFound'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
 import { useBars } from '../lib/useMarketData'
@@ -576,6 +577,12 @@ function TickerAnalysisBody({ symbol, meta, chapterKey }) {
       </>)}
 
       {chapter.key === 'what-if' && (<>
+      {/* First, because it is the only replay here with no borrowing and no
+          timing: the same amount, every week, whatever the price did. */}
+      <Section title={<Explain term="stackReplay">A fixed amount every week</Explain>}>
+        <StackReplay symbol={symbol} bars={bars} />
+      </Section>
+
       <Section title={<Explain term="simulatedTrade">Simulate a trade</Explain>}>
         <SimulateTradeForm symbol={symbol} currentPrice={liveQuote?.price ?? signals.price} />
       </Section>
