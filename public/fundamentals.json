@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-02T01:09:19.079Z",
+  "generatedAt": "2026-10-03T00:46:24.680Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -9280,20 +9280,6 @@
       "entityName": "NIKE, Inc.",
       "quarters": [
         {
-          "asOf": "2023-08-31",
-          "form": "10-Q",
-          "assets": 36786000000,
-          "liabilities": 22815000000,
-          "equity": 13971000000,
-          "currentAssets": 24250000000,
-          "currentLiabilities": 8461000000,
-          "cash": 8761000000,
-          "debt": 8929000000,
-          "shares": 855351589,
-          "revenue": 12939000000,
-          "netIncome": 1450000000
-        },
-        {
           "asOf": "2023-11-30",
           "form": "10-Q",
           "assets": 37203000000,
@@ -9435,7 +9421,7 @@
         },
         {
           "asOf": "2026-05-31",
-          "form": "10-K",
+          "form": "10-Q",
           "assets": 38410000000,
           "liabilities": 23545000000,
           "equity": 14865000000,
@@ -9446,6 +9432,20 @@
           "shares": 855351589,
           "revenue": null,
           "netIncome": null
+        },
+        {
+          "asOf": "2026-08-31",
+          "form": "10-Q",
+          "assets": 37794000000,
+          "liabilities": 22574000000,
+          "equity": 15220000000,
+          "currentAssets": 23673000000,
+          "currentLiabilities": 11409000000,
+          "cash": 9486000000,
+          "debt": 7893000000,
+          "shares": 855351589,
+          "revenue": 11213000000,
+          "netIncome": 712000000
         }
       ]
     },
