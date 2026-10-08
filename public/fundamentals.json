@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-07T01:03:09.407Z",
+  "generatedAt": "2026-10-08T01:18:42.427Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -8584,20 +8584,6 @@
       "entityName": "COSTCO WHOLESALE CORP /NEW",
       "quarters": [
         {
-          "asOf": "2023-09-03",
-          "form": "10-K",
-          "assets": 68994000000,
-          "liabilities": 43936000000,
-          "equity": 25058000000,
-          "currentAssets": 35879000000,
-          "currentLiabilities": 33583000000,
-          "cash": 15234000000,
-          "debt": 6458000000,
-          "shares": 443148481,
-          "revenue": null,
-          "netIncome": null
-        },
-        {
           "asOf": "2023-11-26",
           "form": "10-Q",
           "assets": 73723000000,
@@ -8697,7 +8683,7 @@
         },
         {
           "asOf": "2025-08-31",
-          "form": "10-Q",
+          "form": "10-K",
           "assets": 77099000000,
           "liabilities": 47935000000,
           "equity": 29164000000,
@@ -8750,6 +8736,20 @@
           "shares": 443652540,
           "revenue": 70527000000,
           "netIncome": 2192000000
+        },
+        {
+          "asOf": "2026-08-30",
+          "form": "10-K",
+          "assets": 89045000000,
+          "liabilities": 53242000000,
+          "equity": 35803000000,
+          "currentAssets": 46582000000,
+          "currentLiabilities": 43952000000,
+          "cash": 21301000000,
+          "debt": 6162000000,
+          "shares": 443478804,
+          "revenue": null,
+          "netIncome": null
         }
       ]
     },
