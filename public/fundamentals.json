@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-08T01:18:42.427Z",
+  "generatedAt": "2026-10-09T01:29:27.192Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -9976,20 +9976,6 @@
       "entityName": "PepsiCo, Inc.",
       "quarters": [
         {
-          "asOf": "2023-09-09",
-          "form": "10-Q",
-          "assets": 99953000000,
-          "liabilities": 80983000000,
-          "equity": 18806000000,
-          "currentAssets": 28649000000,
-          "currentLiabilities": 32660000000,
-          "cash": 10283000000,
-          "debt": 37957000000,
-          "shares": 1376580611,
-          "revenue": 23453000000,
-          "netIncome": 3092000000
-        },
-        {
           "asOf": "2023-12-30",
           "form": "10-K",
           "assets": 100495000000,
@@ -10142,6 +10128,20 @@
           "shares": 1366768315,
           "revenue": 24181000000,
           "netIncome": 2981000000
+        },
+        {
+          "asOf": "2026-09-05",
+          "form": "10-Q",
+          "assets": 111976000000,
+          "liabilities": 89489000000,
+          "equity": 22292000000,
+          "currentAssets": 32559000000,
+          "currentLiabilities": 34529000000,
+          "cash": 11163000000,
+          "debt": 43921000000,
+          "shares": 1364891558,
+          "revenue": 25274000000,
+          "netIncome": 3048000000
         }
       ]
     },
