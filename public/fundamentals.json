@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T01:29:27.192Z",
+  "generatedAt": "2026-10-13T02:50:11.096Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -3742,20 +3742,6 @@
       "entityName": "Micron Technology, Inc.",
       "quarters": [
         {
-          "asOf": "2023-08-31",
-          "form": "10-K",
-          "assets": 64254000000,
-          "liabilities": 20134000000,
-          "equity": 44120000000,
-          "currentAssets": 21244000000,
-          "currentLiabilities": 4765000000,
-          "cash": 9594000000,
-          "debt": 3624000000,
-          "shares": 1095301608,
-          "revenue": null,
-          "netIncome": null
-        },
-        {
           "asOf": "2023-11-30",
           "form": "10-Q",
           "assets": 63776000000,
@@ -3855,7 +3841,7 @@
         },
         {
           "asOf": "2025-08-28",
-          "form": "10-Q",
+          "form": "10-K",
           "assets": 82798000000,
           "liabilities": 28633000000,
           "equity": 54165000000,
@@ -3908,6 +3894,20 @@
           "shares": 1127734051,
           "revenue": 41456000000,
           "netIncome": 28243000000
+        },
+        {
+          "asOf": "2026-09-03",
+          "form": "10-K",
+          "assets": 195888000000,
+          "liabilities": 57510000000,
+          "equity": 138378000000,
+          "currentAssets": 91070000000,
+          "currentLiabilities": 27482000000,
+          "cash": 43434000000,
+          "debt": 3624000000,
+          "shares": 1129393151,
+          "revenue": null,
+          "netIncome": null
         }
       ]
     },
