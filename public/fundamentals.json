@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13T02:50:11.096Z",
+  "generatedAt": "2026-10-14T00:36:52.966Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -9973,7 +9973,7 @@
     },
     "PEP": {
       "cik": 77476,
-      "entityName": "PepsiCo, Inc.",
+      "entityName": "PEPSICO INC",
       "quarters": [
         {
           "asOf": "2023-12-30",
