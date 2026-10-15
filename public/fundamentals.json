@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-15T00:11:12.972Z",
+  "generatedAt": "2026-10-15T23:55:42.469Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -9625,7 +9625,7 @@
     },
     "PG": {
       "cik": 80424,
-      "entityName": "The Procter & Gamble Company",
+      "entityName": "PROCTER & GAMBLE Co",
       "quarters": [
         {
           "asOf": "2023-09-30",
