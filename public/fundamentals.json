@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-16T23:55:10.638Z",
+  "generatedAt": "2026-10-20T00:39:57.752Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -873,7 +873,7 @@
     },
     "TSLA": {
       "cik": 1318605,
-      "entityName": "Tesla, Inc.",
+      "entityName": "TESLA, INC.",
       "quarters": [
         {
           "asOf": "2023-09-30",
