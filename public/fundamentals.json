@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-20T00:39:57.752Z",
+  "generatedAt": "2026-10-21T00:11:10.303Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -10669,22 +10669,8 @@
     },
     "GE": {
       "cik": 40545,
-      "entityName": "GENERAL ELECTRIC CO",
+      "entityName": "GENERAL ELECTRIC COMPANY",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 156662000000,
-          "liabilities": 126830000000,
-          "equity": 28665000000,
-          "currentAssets": 56434000000,
-          "currentLiabilities": 48164000000,
-          "cash": 43299000000,
-          "debt": 1334000000,
-          "shares": 1088386043,
-          "revenue": 9302000000,
-          "netIncome": 352000000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-K",
@@ -10838,6 +10824,20 @@
           "shares": 1037562513,
           "revenue": 13349000000,
           "netIncome": 2370000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 127195000000,
+          "liabilities": 109444000000,
+          "equity": 17522000000,
+          "currentAssets": 41528000000,
+          "currentLiabilities": 42395000000,
+          "cash": 43299000000,
+          "debt": 22804000000,
+          "shares": 1033351921,
+          "revenue": 14118000000,
+          "netIncome": 2288000000
         }
       ]
     },
@@ -10845,20 +10845,6 @@
       "cik": 101829,
       "entityName": "RTX CORPORATION",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 162443000000,
-          "liabilities": 91197000000,
-          "equity": 69596000000,
-          "currentAssets": 46518000000,
-          "currentLiabilities": 45002000000,
-          "cash": 6193000000,
-          "debt": 31289000000,
-          "shares": 1437901284,
-          "revenue": 13464000000,
-          "netIncome": -984000000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-K",
@@ -11012,6 +10998,20 @@
           "shares": 1347758144,
           "revenue": 24708000000,
           "netIncome": 2139000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 176596000000,
+          "liabilities": 105604000000,
+          "equity": 69250000000,
+          "currentAssets": 66069000000,
+          "currentLiabilities": 63198000000,
+          "cash": 9880000000,
+          "debt": 41078000000,
+          "shares": 1349440548,
+          "revenue": 24965000000,
+          "netIncome": 2583000000
         }
       ]
     },
@@ -11716,20 +11716,6 @@
       "entityName": "GENERAL MOTORS COMPANY",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 281705000000,
-          "liabilities": 202978000000,
-          "equity": 74475000000,
-          "currentAssets": 110721000000,
-          "currentLiabilities": 96820000000,
-          "cash": 32273000000,
-          "debt": null,
-          "shares": 1375905293,
-          "revenue": 40498000000,
-          "netIncome": 3064000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 273064000000,
@@ -11882,6 +11868,20 @@
           "shares": 901665195,
           "revenue": 43762000000,
           "netIncome": 1305000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 289183000000,
+          "liabilities": 224664000000,
+          "equity": 62806000000,
+          "currentAssets": 115867000000,
+          "currentLiabilities": 106330000000,
+          "cash": 30245000000,
+          "debt": null,
+          "shares": 877451541,
+          "revenue": 45706000000,
+          "netIncome": 3335000000
         }
       ]
     },
