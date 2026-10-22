@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T00:11:10.303Z",
+  "generatedAt": "2026-10-22T00:15:36.940Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -177,7 +177,7 @@
     },
     "MSFT": {
       "cik": 789019,
-      "entityName": "MICROSOFT CORPORATION",
+      "entityName": "Microsoft Corporation",
       "quarters": [
         {
           "asOf": "2023-09-30",
@@ -1221,22 +1221,8 @@
     },
     "NFLX": {
       "cik": 1065280,
-      "entityName": "NETFLIX INC",
+      "entityName": "Netflix, Inc.",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 49501786000,
-          "liabilities": 27394159000,
-          "equity": 22107627000,
-          "currentAssets": 10779474000,
-          "currentLiabilities": 8338718000,
-          "cash": 7867446000,
-          "debt": 13900754000,
-          "shares": 437679669,
-          "revenue": 8541668000,
-          "netIncome": 1677422000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-K",
@@ -1390,6 +1376,20 @@
           "shares": 4163939676,
           "revenue": 12559938000,
           "netIncome": 3401414000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 58681954000,
+          "liabilities": 29395701000,
+          "equity": 29286253000,
+          "currentAssets": 13222337000,
+          "currentLiabilities": 12300860000,
+          "cash": 8222953000,
+          "debt": 12657598000,
+          "shares": 4106325903,
+          "revenue": 12874176000,
+          "netIncome": 3663927000
         }
       ]
     },
@@ -1743,7 +1743,7 @@
     },
     "BAC": {
       "cik": 70858,
-      "entityName": "BofA Finance LLC",
+      "entityName": "BANK OF AMERICA CORP /DE/",
       "quarters": [
         {
           "asOf": "2023-09-30",
@@ -2128,20 +2128,6 @@
       "entityName": "Johnson & Johnson",
       "quarters": [
         {
-          "asOf": "2023-10-01",
-          "form": "10-Q",
-          "assets": 166061000000,
-          "liabilities": 94833000000,
-          "equity": 71228000000,
-          "currentAssets": 53703000000,
-          "currentLiabilities": 44370000000,
-          "cash": 23511000000,
-          "debt": 27602000000,
-          "shares": 2598969594,
-          "revenue": 21351000000,
-          "netIncome": 26028000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 167558000000,
@@ -2294,6 +2280,20 @@
           "shares": 2407216971,
           "revenue": 25310000000,
           "netIncome": 5534000000
+        },
+        {
+          "asOf": "2026-09-27",
+          "form": "10-Q",
+          "assets": 197425000000,
+          "liabilities": 115896000000,
+          "equity": 81529000000,
+          "currentAssets": 56351000000,
+          "currentLiabilities": 55457000000,
+          "cash": 17228000000,
+          "debt": 37799000000,
+          "shares": 2409898597,
+          "revenue": 25399000000,
+          "netIncome": 210000000
         }
       ]
     },
@@ -8407,7 +8407,7 @@
     },
     "WMT": {
       "cik": 104169,
-      "entityName": "WALMART INC.",
+      "entityName": "Walmart Inc.",
       "quarters": [
         {
           "asOf": "2023-10-31",
@@ -12412,20 +12412,6 @@
       "entityName": "AT&T INC.",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 406698000000,
-          "liabilities": 288843000000,
-          "equity": 117855000000,
-          "currentAssets": 35620000000,
-          "currentLiabilities": 51684000000,
-          "cash": 9430000000,
-          "debt": 63767000000,
-          "shares": 7149000000,
-          "revenue": 30350000000,
-          "netIncome": 3495000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 407060000000,
@@ -12578,6 +12564,20 @@
           "shares": 6948338835,
           "revenue": 31558000000,
           "netIncome": 4627000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 445871000000,
+          "liabilities": 323117000000,
+          "equity": 122754000000,
+          "currentAssets": 52345000000,
+          "currentLiabilities": 60275000000,
+          "cash": 12657000000,
+          "debt": 63767000000,
+          "shares": 6852385650,
+          "revenue": 32322000000,
+          "netIncome": 891000000
         }
       ]
     },
