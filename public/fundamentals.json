@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T00:15:36.940Z",
+  "generatedAt": "2026-10-23T00:14:08.953Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -873,22 +873,8 @@
     },
     "TSLA": {
       "cik": 1318605,
-      "entityName": "TESLA, INC.",
+      "entityName": "Tesla, Inc.",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 93941000000,
-          "liabilities": 39446000000,
-          "equity": 53466000000,
-          "currentAssets": 45026000000,
-          "currentLiabilities": 26640000000,
-          "cash": 26077000000,
-          "debt": 648441000,
-          "shares": 3173994467,
-          "revenue": 23350000000,
-          "netIncome": 1853000000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-K",
@@ -1042,6 +1028,20 @@
           "shares": 3755723871,
           "revenue": 28236000000,
           "netIncome": 1114000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 157517000000,
+          "liabilities": 67628000000,
+          "equity": 89289000000,
+          "currentAssets": 70402000000,
+          "currentLiabilities": 40492000000,
+          "cash": 45447000000,
+          "debt": 648441000,
+          "shares": 3949547394,
+          "revenue": 28046000000,
+          "netIncome": 787000000
         }
       ]
     },
@@ -1743,7 +1743,7 @@
     },
     "BAC": {
       "cik": 70858,
-      "entityName": "BANK OF AMERICA CORP /DE/",
+      "entityName": "BofA Finance LLC",
       "quarters": [
         {
           "asOf": "2023-09-30",
@@ -2488,21 +2488,6 @@
       "entityName": "Meta Platforms, Inc.",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 216274000000,
-          "liabilities": 73401000000,
-          "equity": 142873000000,
-          "currentAssets": 78378000000,
-          "currentLiabilities": 30531000000,
-          "cash": 61123000000,
-          "debt": 18383000000,
-          "shares": 2623000000,
-          "sharesBasis": "weighted-average",
-          "revenue": 34146000000,
-          "netIncome": 11583000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 229623000000,
@@ -2666,6 +2651,21 @@
           "sharesBasis": "weighted-average",
           "revenue": 60801000000,
           "netIncome": 15848000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 478836000000,
+          "liabilities": 206450000000,
+          "equity": 272386000000,
+          "currentAssets": 119900000000,
+          "currentLiabilities": 63011000000,
+          "cash": 82449000000,
+          "debt": 83669000000,
+          "shares": 2568000000,
+          "sharesBasis": "weighted-average",
+          "revenue": 64601000000,
+          "netIncome": 9860000000
         }
       ]
     },
@@ -4087,22 +4087,8 @@
     },
     "IBM": {
       "cik": 51143,
-      "entityName": "INTERNATIONAL BUSINESS MACHINES CORP",
+      "entityName": "INTERNATIONAL BUSINESS MACHINES CORPORATION",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 129321000000,
-          "liabilities": 106165000000,
-          "equity": 23081000000,
-          "currentAssets": 27705000000,
-          "currentLiabilities": 30606000000,
-          "cash": 8150000000,
-          "debt": 53975000000,
-          "shares": 913118581,
-          "revenue": 14752000000,
-          "netIncome": 1704000000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-K",
@@ -4256,6 +4242,20 @@
           "shares": 942134390,
           "revenue": 17162000000,
           "netIncome": 2165000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 155011000000,
+          "liabilities": 118805000000,
+          "equity": 35537000000,
+          "currentAssets": 31192000000,
+          "currentLiabilities": 36485000000,
+          "cash": 10126000000,
+          "debt": 61951000000,
+          "shares": 945120805,
+          "revenue": 17103000000,
+          "netIncome": 2190000000
         }
       ]
     },
@@ -9625,22 +9625,8 @@
     },
     "PG": {
       "cik": 80424,
-      "entityName": "PROCTER & GAMBLE Co",
+      "entityName": "PROCTER & GAMBLE CO",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 122531000000,
-          "liabilities": 74517000000,
-          "equity": 48014000000,
-          "currentAssets": 24940000000,
-          "currentLiabilities": 37158000000,
-          "cash": 9304000000,
-          "debt": 28020000000,
-          "shares": 2356886211,
-          "revenue": 21871000000,
-          "netIncome": 4521000000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-Q",
@@ -9783,7 +9769,7 @@
         },
         {
           "asOf": "2026-06-30",
-          "form": "10-K",
+          "form": "10-Q",
           "assets": 126521000000,
           "liabilities": 72210000000,
           "equity": 54311000000,
@@ -9794,6 +9780,20 @@
           "shares": 2328598978,
           "revenue": null,
           "netIncome": null
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 133132000000,
+          "liabilities": 77795000000,
+          "equity": 55337000000,
+          "currentAssets": 32508000000,
+          "currentLiabilities": 44996000000,
+          "cash": 9304000000,
+          "debt": 28354000000,
+          "shares": 2317783143,
+          "revenue": 23276000000,
+          "netIncome": 4731000000
         }
       ]
     },
@@ -11020,20 +11020,6 @@
       "entityName": "LOCKHEED MARTIN CORPORATION",
       "quarters": [
         {
-          "asOf": "2023-09-24",
-          "form": "10-Q",
-          "assets": 56666000000,
-          "liabilities": 47392000000,
-          "equity": 9274000000,
-          "currentAssets": 23322000000,
-          "currentLiabilities": 17193000000,
-          "cash": 3554000000,
-          "debt": 17389000000,
-          "shares": 251831462,
-          "revenue": 16878000000,
-          "netIncome": 1684000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 52456000000,
@@ -11186,6 +11172,20 @@
           "shares": 230563608,
           "revenue": 20063000000,
           "netIncome": 1836000000
+        },
+        {
+          "asOf": "2026-09-27",
+          "form": "10-Q",
+          "assets": 64510000000,
+          "liabilities": 54447000000,
+          "equity": 10063000000,
+          "currentAssets": 31001000000,
+          "currentLiabilities": 24540000000,
+          "cash": 5963000000,
+          "debt": 20498000000,
+          "shares": 230790753,
+          "revenue": 20711000000,
+          "netIncome": 1845000000
         }
       ]
     },
@@ -12760,20 +12760,6 @@
       "entityName": "COMCAST CORPORATION",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 261072000000,
-          "liabilities": 178447000000,
-          "equity": 82625000000,
-          "currentAssets": 24141000000,
-          "currentLiabilities": 34468000000,
-          "cash": 6756000000,
-          "debt": 2978000000,
-          "shares": 2063073161,
-          "revenue": 30115000000,
-          "netIncome": 4046000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 264811000000,
@@ -12926,6 +12912,20 @@
           "shares": 2063073161,
           "revenue": 29940000000,
           "netIncome": 3526000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 257769000000,
+          "liabilities": 165240000000,
+          "equity": 92529000000,
+          "currentAssets": 25223000000,
+          "currentLiabilities": 30719000000,
+          "cash": 7611000000,
+          "debt": 3560000000,
+          "shares": 2063073161,
+          "revenue": 29298000000,
+          "netIncome": 3448000000
         }
       ]
     }
