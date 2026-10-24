@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-23T00:14:08.953Z",
+  "generatedAt": "2026-10-24T00:05:23.238Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -3568,20 +3568,6 @@
       "entityName": "TEXAS INSTRUMENTS INCORPORATED",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 31638000000,
-          "liabilities": 15007000000,
-          "equity": 16631000000,
-          "currentAssets": 15097000000,
-          "currentLiabilities": 2652000000,
-          "cash": 8948000000,
-          "debt": 11222000000,
-          "shares": 907966327,
-          "revenue": 4532000000,
-          "netIncome": 1709000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 32348000000,
@@ -3734,6 +3720,20 @@
           "shares": 910092791,
           "revenue": 5463000000,
           "netIncome": 1980000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 36839000000,
+          "liabilities": 17654000000,
+          "equity": 19185000000,
+          "currentAssets": 16880000000,
+          "currentLiabilities": 3017000000,
+          "cash": 8142000000,
+          "debt": 13555000000,
+          "shares": 913247686,
+          "revenue": 6055000000,
+          "netIncome": 2425000000
         }
       ]
     },
@@ -6493,22 +6493,8 @@
     },
     "AXP": {
       "cik": 4962,
-      "entityName": "AMERICAN EXPRESS CO",
+      "entityName": "AMERICAN EXPRESS COMPANY",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 250587000000,
-          "liabilities": 223263000000,
-          "equity": 27324000000,
-          "currentAssets": null,
-          "currentLiabilities": null,
-          "cash": 43524000000,
-          "debt": 46447000000,
-          "shares": 736458872,
-          "revenue": 9377000000,
-          "netIncome": 2451000000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-K",
@@ -6662,6 +6648,20 @@
           "shares": 682326443,
           "revenue": 11212000000,
           "netIncome": 3110000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 310275000000,
+          "liabilities": 274478000000,
+          "equity": 35797000000,
+          "currentAssets": null,
+          "currentLiabilities": null,
+          "cash": 43680000000,
+          "debt": 58538000000,
+          "shares": 675309833,
+          "revenue": 11232000000,
+          "netIncome": 3712000000
         }
       ]
     },
