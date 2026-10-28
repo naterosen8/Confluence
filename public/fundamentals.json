@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T00:49:46.811Z",
+  "generatedAt": "2026-10-28T00:47:09.990Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -4435,7 +4435,7 @@
     },
     "PANW": {
       "cik": 1327567,
-      "entityName": "Palo Alto Networks, Inc",
+      "entityName": "Palo Alto Networks, Inc.",
       "quarters": [
         {
           "asOf": "2023-10-31",
@@ -6493,7 +6493,7 @@
     },
     "AXP": {
       "cik": 4962,
-      "entityName": "AMERICAN EXPRESS COMPANY",
+      "entityName": "AMERICAN EXPRESS CO",
       "quarters": [
         {
           "asOf": "2023-12-31",
@@ -6670,34 +6670,6 @@
       "entityName": "PayPal Holdings, Inc.",
       "quarters": [
         {
-          "asOf": "2023-06-30",
-          "form": "10-Q",
-          "assets": 74579000000,
-          "liabilities": 54918000000,
-          "equity": 19661000000,
-          "currentAssets": 54125000000,
-          "currentLiabilities": 41754000000,
-          "cash": 9902000000,
-          "debt": 10549000000,
-          "shares": 1115713968,
-          "revenue": 7287000000,
-          "netIncome": 1029000000
-        },
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 76440000000,
-          "liabilities": 56700000000,
-          "equity": 19740000000,
-          "currentAssets": 56635000000,
-          "currentLiabilities": 43442000000,
-          "cash": 11547000000,
-          "debt": 10640000000,
-          "shares": 1098037471,
-          "revenue": 7418000000,
-          "netIncome": 1020000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 82166000000,
@@ -6818,7 +6790,7 @@
           "currentAssets": 59759000000,
           "currentLiabilities": 46443000000,
           "cash": 10422000000,
-          "debt": 9987000000,
+          "debt": 11583000000,
           "shares": 935651953,
           "revenue": null,
           "netIncome": null
@@ -6832,10 +6804,38 @@
           "currentAssets": 59995000000,
           "currentLiabilities": 47637000000,
           "cash": 9342000000,
-          "debt": 9409000000,
+          "debt": 11005000000,
           "shares": 920664542,
           "revenue": 8353000000,
           "netIncome": 1113000000
+        },
+        {
+          "asOf": "2026-06-30",
+          "form": "10-Q",
+          "assets": 82737000000,
+          "liabilities": 62917000000,
+          "equity": 19820000000,
+          "currentAssets": 62346000000,
+          "currentLiabilities": 48406000000,
+          "cash": 11256000000,
+          "debt": 13400000000,
+          "shares": 882105493,
+          "revenue": 8682000000,
+          "netIncome": 1104000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 81622000000,
+          "liabilities": 62139000000,
+          "equity": 19483000000,
+          "currentAssets": 60549000000,
+          "currentLiabilities": 47890000000,
+          "cash": 10280000000,
+          "debt": 13472000000,
+          "shares": 855460874,
+          "revenue": 8584000000,
+          "netIncome": 1073000000
         }
       ]
     },
@@ -10324,20 +10324,6 @@
       "entityName": "THE BOEING COMPANY",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 134281000000,
-          "liabilities": 150998000000,
-          "equity": -16729000000,
-          "currentAssets": 106935000000,
-          "currentLiabilities": 93062000000,
-          "cash": 13372000000,
-          "debt": 56922000000,
-          "shares": 603203554,
-          "revenue": 18104000000,
-          "netIncome": -1636000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 137012000000,
@@ -10490,6 +10476,20 @@
           "shares": 788302331,
           "revenue": 24560000000,
           "netIncome": -444000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 170739000000,
+          "liabilities": 164177000000,
+          "equity": 6547000000,
+          "currentAssets": 129272000000,
+          "currentLiabilities": 113961000000,
+          "cash": 20714000000,
+          "debt": 50175000000,
+          "shares": 790370020,
+          "revenue": 24188000000,
+          "netIncome": -116000000
         }
       ]
     },
