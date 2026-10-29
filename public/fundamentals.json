@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T00:47:09.990Z",
+  "generatedAt": "2026-10-29T01:17:18.314Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -177,22 +177,8 @@
     },
     "MSFT": {
       "cik": 789019,
-      "entityName": "Microsoft Corporation",
+      "entityName": "MICROSOFT CORPORATION",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 445785000000,
-          "liabilities": 225071000000,
-          "equity": 220714000000,
-          "currentAssets": 207586000000,
-          "currentLiabilities": 124792000000,
-          "cash": 143951000000,
-          "debt": 45694000000,
-          "shares": 7429763722,
-          "revenue": 56517000000,
-          "netIncome": 22291000000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-Q",
@@ -335,7 +321,7 @@
         },
         {
           "asOf": "2026-06-30",
-          "form": "10-K",
+          "form": "10-Q",
           "assets": 758376000000,
           "liabilities": 315989000000,
           "equity": 442387000000,
@@ -346,6 +332,20 @@
           "shares": 7428434704,
           "revenue": null,
           "netIncome": null
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 779403000000,
+          "liabilities": 308894000000,
+          "equity": 470509000000,
+          "currentAssets": 186137000000,
+          "currentLiabilities": 151968000000,
+          "cash": 64509000000,
+          "debt": 35481000000,
+          "shares": 7425545491,
+          "revenue": 92279000000,
+          "netIncome": 36629000000
         }
       ]
     },
@@ -3565,7 +3565,7 @@
     },
     "TXN": {
       "cik": 97476,
-      "entityName": "TEXAS INSTRUMENTS INCORPORATED",
+      "entityName": "TEXAS INSTRUMENTS INC",
       "quarters": [
         {
           "asOf": "2023-12-31",
@@ -4261,22 +4261,8 @@
     },
     "NOW": {
       "cik": 1373715,
-      "entityName": "ServiceNow, Inc.",
+      "entityName": "SERVICENOW, INC.",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 15091000000,
-          "liabilities": 7909000000,
-          "equity": 7182000000,
-          "currentAssets": 6046000000,
-          "currentLiabilities": 5601000000,
-          "cash": 4067000000,
-          "debt": 1484000000,
-          "shares": 205000000,
-          "revenue": 2288000000,
-          "netIncome": 242000000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-K",
@@ -4430,6 +4416,20 @@
           "shares": 1034000000,
           "revenue": 3987000000,
           "netIncome": 298000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 31830000000,
+          "liabilities": 18734000000,
+          "equity": 13096000000,
+          "currentAssets": 8477000000,
+          "currentLiabilities": 11795000000,
+          "cash": 4607000000,
+          "debt": 1484000000,
+          "shares": 1038000000,
+          "revenue": 4106000000,
+          "netIncome": 277000000
         }
       ]
     },
@@ -5482,20 +5482,6 @@
       "entityName": "WELLS        FARGO & COMPANY/MN",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 1909261000000,
-          "liabilities": 1726888000000,
-          "equity": 180715000000,
-          "currentAssets": null,
-          "currentLiabilities": null,
-          "cash": 216716000000,
-          "debt": 190035000000,
-          "shares": 3658783337,
-          "revenue": 20857000000,
-          "netIncome": 5767000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 1932468000000,
@@ -5648,6 +5634,20 @@
           "shares": 3060189494,
           "revenue": 22622000000,
           "netIncome": 6407000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 2253291000000,
+          "liabilities": 2075414000000,
+          "equity": 175760000000,
+          "currentAssets": null,
+          "currentLiabilities": null,
+          "cash": 179360000000,
+          "debt": 182851000000,
+          "shares": 3023999336,
+          "revenue": 21870000000,
+          "netIncome": 5951000000
         }
       ]
     },
@@ -9625,7 +9625,7 @@
     },
     "PG": {
       "cik": 80424,
-      "entityName": "PROCTER & GAMBLE CO",
+      "entityName": "PROCTER & GAMBLE Co",
       "quarters": [
         {
           "asOf": "2023-12-31",
@@ -9802,34 +9802,6 @@
       "entityName": "COCA COLA CO",
       "quarters": [
         {
-          "asOf": "2023-06-30",
-          "form": "10-Q",
-          "assets": 98456000000,
-          "liabilities": 72443000000,
-          "equity": 26013000000,
-          "currentAssets": 27591000000,
-          "currentLiabilities": 24115000000,
-          "cash": 14912000000,
-          "debt": 36797000000,
-          "shares": 4324578189,
-          "revenue": 11972000000,
-          "netIncome": 2547000000
-        },
-        {
-          "asOf": "2023-09-29",
-          "form": "10-Q",
-          "assets": 97578000000,
-          "liabilities": 71253000000,
-          "equity": 26325000000,
-          "currentAssets": 27867000000,
-          "currentLiabilities": 24409000000,
-          "cash": 14231000000,
-          "debt": 36256000000,
-          "shares": 4324344812,
-          "revenue": 11953000000,
-          "netIncome": 3087000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 97703000000,
@@ -9968,6 +9940,34 @@
           "shares": 4300723069,
           "revenue": 12472000000,
           "netIncome": 3924000000
+        },
+        {
+          "asOf": "2026-07-03",
+          "form": "10-Q",
+          "assets": 107922000000,
+          "liabilities": 71772000000,
+          "equity": 36150000000,
+          "currentAssets": 32876000000,
+          "currentLiabilities": 25200000000,
+          "cash": 15255000000,
+          "debt": 36496000000,
+          "shares": 4302482418,
+          "revenue": 13380000000,
+          "netIncome": 4425000000
+        },
+        {
+          "asOf": "2026-10-02",
+          "form": "10-Q",
+          "assets": 107950000000,
+          "liabilities": 70578000000,
+          "equity": 37372000000,
+          "currentAssets": 33326000000,
+          "currentLiabilities": 24209000000,
+          "cash": 15802000000,
+          "debt": 36496000000,
+          "shares": 4302549243,
+          "revenue": 13380000000,
+          "netIncome": 4009000000
         }
       ]
     },
@@ -12064,20 +12064,6 @@
       "entityName": "SLB LIMITED/NV",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 45813000000,
-          "liabilities": 26106000000,
-          "equity": 19386000000,
-          "currentAssets": 17038000000,
-          "currentLiabilities": 12528000000,
-          "cash": 4419000000,
-          "debt": 13122000000,
-          "shares": 1423420641,
-          "revenue": 8310000000,
-          "netIncome": 1123000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 47957000000,
@@ -12230,6 +12216,20 @@
           "shares": 1484143231,
           "revenue": 8972000000,
           "netIncome": 786000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 56200000000,
+          "liabilities": 28987000000,
+          "equity": 26051000000,
+          "currentAssets": 20497000000,
+          "currentLiabilities": 14757000000,
+          "cash": 4102000000,
+          "debt": 13122000000,
+          "shares": 1476029613,
+          "revenue": 9449000000,
+          "netIncome": 735000000
         }
       ]
     },
