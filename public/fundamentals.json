@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T01:17:18.314Z",
+  "generatedAt": "2026-10-30T01:22:39.142Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -702,20 +702,6 @@
       "entityName": "Alphabet Inc.",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 396711000000,
-          "liabilities": 123509000000,
-          "equity": 273202000000,
-          "currentAssets": 176310000000,
-          "currentLiabilities": 86295000000,
-          "cash": 119935000000,
-          "debt": 3963000000,
-          "shares": 12541000000,
-          "revenue": null,
-          "netIncome": 19689000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 402392000000,
@@ -868,6 +854,20 @@
           "shares": 12230000000,
           "revenue": 119796000000,
           "netIncome": 112193000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 1003312000000,
+          "liabilities": 325763000000,
+          "equity": 677549000000,
+          "currentAssets": 374665000000,
+          "currentLiabilities": 134501000000,
+          "cash": 265098000000,
+          "debt": 126118000000,
+          "shares": 12294000000,
+          "revenue": 127577000000,
+          "netIncome": 26468000000
         }
       ]
     },
@@ -6322,20 +6322,6 @@
       "entityName": "Mastercard Incorporated",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 39674000000,
-          "liabilities": 33293000000,
-          "equity": 6311000000,
-          "currentAssets": 16983000000,
-          "currentLiabilities": 14519000000,
-          "cash": 6890000000,
-          "debt": 15566000000,
-          "shares": 122530193,
-          "revenue": 6533000000,
-          "netIncome": 3198000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 42448000000,
@@ -6488,6 +6474,20 @@
           "shares": 122530193,
           "revenue": 9277000000,
           "netIncome": 4388000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 58149000000,
+          "liabilities": 51409000000,
+          "equity": 6753000000,
+          "currentAssets": 24480000000,
+          "currentLiabilities": 24196000000,
+          "cash": 10147000000,
+          "debt": 23938000000,
+          "shares": 122530193,
+          "revenue": 9807000000,
+          "netIncome": 4628000000
         }
       ]
     },
@@ -6844,20 +6844,6 @@
       "entityName": "Coinbase Global, Inc.",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 127305595000,
-          "liabilities": 121384470000,
-          "equity": 5921125000,
-          "currentAssets": 123919222000,
-          "currentLiabilities": 118298786000,
-          "cash": 5100799000,
-          "debt": 3076599000,
-          "shares": 253640000,
-          "revenue": 674148000,
-          "netIncome": -2265000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 14753901000,
@@ -6963,7 +6949,7 @@
           "equity": 16023224000,
           "currentAssets": 22093189000,
           "currentLiabilities": 9189354000,
-          "cash": 9769670000,
+          "cash": 13083750000,
           "debt": 7201528000,
           "shares": 268736000,
           "revenue": 1868693000,
@@ -7010,6 +6996,20 @@
           "shares": 263782000,
           "revenue": 1220068000,
           "netIncome": -359468000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 27385314000,
+          "liabilities": 13445133000,
+          "equity": 13940181000,
+          "currentAssets": 17642333000,
+          "currentLiabilities": 7276571000,
+          "cash": 8820883000,
+          "debt": 5947844000,
+          "shares": 264756000,
+          "revenue": 1215582000,
+          "netIncome": 718697000
         }
       ]
     },
@@ -7017,20 +7017,6 @@
       "cik": 59478,
       "entityName": "ELI LILLY AND COMPANY",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 57915500000,
-          "liabilities": 46695100000,
-          "equity": 11220400000,
-          "currentAssets": 23007000000,
-          "currentLiabilities": 21998200000,
-          "cash": 2493900000,
-          "debt": 18936200000,
-          "shares": 949295173,
-          "revenue": 9498600000,
-          "netIncome": -57400000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-K",
@@ -7140,8 +7126,8 @@
           "cash": 9913500000,
           "debt": 41886200000,
           "shares": 946456759,
-          "revenue": 17600800000,
-          "netIncome": 5582500000
+          "revenue": 17601000000,
+          "netIncome": 5583000000
         },
         {
           "asOf": "2025-12-31",
@@ -7184,6 +7170,20 @@
           "shares": 941741406,
           "revenue": 22974000000,
           "netIncome": 7095000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 148072000000,
+          "liabilities": 107801000000,
+          "equity": 40271000000,
+          "currentAssets": 65263000000,
+          "currentLiabilities": 46996000000,
+          "cash": 5006600000,
+          "debt": 47998600000,
+          "shares": 941357065,
+          "revenue": 24397000000,
+          "netIncome": 6451000000
         }
       ]
     },
@@ -11542,34 +11542,6 @@
       "entityName": "Ford Motor Co",
       "quarters": [
         {
-          "asOf": "2023-06-30",
-          "form": "10-Q",
-          "assets": 265991000000,
-          "liabilities": 222385000000,
-          "equity": 43677000000,
-          "currentAssets": 121712000000,
-          "currentLiabilities": 101015000000,
-          "cash": 42821000000,
-          "debt": 291000000,
-          "shares": 3727332952,
-          "revenue": 44954000000,
-          "netIncome": 2016000000
-        },
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 268073000000,
-          "liabilities": 223797000000,
-          "equity": 44263000000,
-          "currentAssets": 121361000000,
-          "currentLiabilities": 100268000000,
-          "cash": 41115000000,
-          "debt": 291000000,
-          "shares": 3727332952,
-          "revenue": 43801000000,
-          "netIncome": 1173000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 273310000000,
@@ -11708,6 +11680,34 @@
           "shares": 3727332952,
           "revenue": 43253000000,
           "netIncome": 2551000000
+        },
+        {
+          "asOf": "2026-06-30",
+          "form": "10-Q",
+          "assets": 285531000000,
+          "liabilities": 249776000000,
+          "equity": 35719000000,
+          "currentAssets": 117491000000,
+          "currentLiabilities": 107933000000,
+          "cash": 31334000000,
+          "debt": 291000000,
+          "shares": 3727332952,
+          "revenue": 48296000000,
+          "netIncome": -1322000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 292484000000,
+          "liabilities": 255524000000,
+          "equity": 36923000000,
+          "currentAssets": 121277000000,
+          "currentLiabilities": 111967000000,
+          "cash": 34107000000,
+          "debt": 291000000,
+          "shares": 3727332952,
+          "revenue": 49526000000,
+          "netIncome": 2049000000
         }
       ]
     },
@@ -12583,22 +12583,8 @@
     },
     "VZ": {
       "cik": 732712,
-      "entityName": "VERIZON COMMUNICATIONS INC",
+      "entityName": "Verizon Communications Inc.",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 384830000000,
-          "liabilities": 285742000000,
-          "equity": 99088000000,
-          "currentAssets": 38119000000,
-          "currentLiabilities": 55677000000,
-          "cash": 4560000000,
-          "debt": 102608000000,
-          "shares": 4204101659,
-          "revenue": 33336000000,
-          "netIncome": 4762000000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-K",
@@ -12752,6 +12738,20 @@
           "shares": 4154775202,
           "revenue": 34253000000,
           "netIncome": 3835000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 415522000000,
+          "liabilities": 308230000000,
+          "equity": 107292000000,
+          "currentAssets": 41511000000,
+          "currentLiabilities": 66271000000,
+          "cash": 4845000000,
+          "debt": 113547000000,
+          "shares": 4144598336,
+          "revenue": 34313000000,
+          "netIncome": 5198000000
         }
       ]
     },
