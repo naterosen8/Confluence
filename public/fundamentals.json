@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-30T01:22:39.142Z",
+  "generatedAt": "2026-10-31T01:06:06.952Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -525,22 +525,8 @@
     },
     "AMZN": {
       "cik": 1018724,
-      "entityName": "AMAZON COM INC",
+      "entityName": "AMAZON.COM, INC.",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 486883000000,
-          "liabilities": 303910000000,
-          "equity": 182973000000,
-          "currentAssets": 142995000000,
-          "currentLiabilities": 145214000000,
-          "cash": 64169000000,
-          "debt": 67093000000,
-          "shares": 10317750796,
-          "revenue": 143083000000,
-          "netIncome": 9879000000
-        },
         {
           "asOf": "2023-12-31",
           "form": "10-K",
@@ -694,6 +680,20 @@
           "shares": 10757109436,
           "revenue": 200606000000,
           "netIncome": 62647000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 1243390000000,
+          "liabilities": 629789000000,
+          "equity": 613601000000,
+          "currentAssets": 255100000000,
+          "currentLiabilities": 257982000000,
+          "cash": 114226000000,
+          "debt": 179952000000,
+          "shares": 10786313572,
+          "revenue": 201944000000,
+          "netIncome": 20685000000
         }
       ]
     },
@@ -1746,20 +1746,6 @@
       "entityName": "BofA Finance LLC",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 3153090000000,
-          "liabilities": 2866026000000,
-          "equity": 287064000000,
-          "currentAssets": null,
-          "currentLiabilities": null,
-          "cash": 301006000000,
-          "debt": 290359000000,
-          "shares": 7946371758,
-          "revenue": 25167000000,
-          "netIncome": 7802000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 3180151000000,
@@ -1860,16 +1846,16 @@
         {
           "asOf": "2025-09-30",
           "form": "10-Q",
-          "assets": 3403716000000,
+          "assets": 3403149000000,
           "liabilities": 3099564000000,
-          "equity": 304152000000,
+          "equity": 302437000000,
           "currentAssets": null,
           "currentLiabilities": null,
           "cash": 301006000000,
           "debt": 311484000000,
           "shares": 7406947312,
-          "revenue": 28088000000,
-          "netIncome": 8469000000
+          "revenue": 29040000000,
+          "netIncome": 8332000000
         },
         {
           "asOf": "2025-12-31",
@@ -1912,6 +1898,20 @@
           "shares": 7096590651,
           "revenue": 31558000000,
           "netIncome": 9074000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 3427704000000,
+          "liabilities": 3130955000000,
+          "equity": 296749000000,
+          "currentAssets": null,
+          "currentLiabilities": null,
+          "cash": 301006000000,
+          "debt": 318687000000,
+          "shares": 6992748365,
+          "revenue": 29958000000,
+          "netIncome": 6933000000
         }
       ]
     },
@@ -3205,22 +3205,8 @@
     },
     "INTC": {
       "cik": 50863,
-      "entityName": "INTEL CORP",
+      "entityName": "Intel Corporation",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 188837000000,
-          "liabilities": 87024000000,
-          "equity": 101813000000,
-          "currentAssets": 43811000000,
-          "currentLiabilities": 28614000000,
-          "cash": 25279000000,
-          "debt": 47014000000,
-          "shares": 4188000000,
-          "revenue": 14158000000,
-          "netIncome": 297000000
-        },
         {
           "asOf": "2023-12-30",
           "form": "10-K",
@@ -3374,6 +3360,20 @@
           "shares": 5026000000,
           "revenue": 16128000000,
           "netIncome": -11033000000
+        },
+        {
+          "asOf": "2026-09-26",
+          "form": "10-Q",
+          "assets": 228574000000,
+          "liabilities": 113660000000,
+          "equity": 114914000000,
+          "currentAssets": 82574000000,
+          "currentLiabilities": 37396000000,
+          "cash": 54005000000,
+          "debt": 48816000000,
+          "shares": 5044000000,
+          "revenue": 16513000000,
+          "netIncome": 3320000000
         }
       ]
     },
@@ -7714,20 +7714,6 @@
       "entityName": "THERMO FISHER SCIENTIFIC INC.",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 97057000000,
-          "liabilities": 51729000000,
-          "equity": 45328000000,
-          "currentAssets": 23092000000,
-          "currentLiabilities": 14158000000,
-          "cash": 6153000000,
-          "debt": 23568000000,
-          "shares": 386372321,
-          "revenue": 10574000000,
-          "netIncome": 1695000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 98726000000,
@@ -7880,6 +7866,20 @@
           "shares": 369747286,
           "revenue": 11994000000,
           "netIncome": 1741000000
+        },
+        {
+          "asOf": "2026-09-26",
+          "form": "10-Q",
+          "assets": 114233000000,
+          "liabilities": 59472000000,
+          "equity": 54761000000,
+          "currentAssets": 25615000000,
+          "currentLiabilities": 14170000000,
+          "cash": 6061000000,
+          "debt": 21035000000,
+          "shares": 370515868,
+          "revenue": 12137000000,
+          "netIncome": 1727000000
         }
       ]
     },
@@ -8236,20 +8236,6 @@
       "entityName": "GILEAD SCIENCES, INC.",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 62373000000,
-          "liabilities": 40059000000,
-          "equity": 22314000000,
-          "currentAssets": 15980000000,
-          "currentLiabilities": 11945000000,
-          "cash": 6571000000,
-          "debt": 24982000000,
-          "shares": 1246014353,
-          "revenue": 7051000000,
-          "netIncome": 2180000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 62125000000,
@@ -8402,6 +8388,20 @@
           "shares": 1241569874,
           "revenue": 7803000000,
           "netIncome": -10496000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 51408000000,
+          "liabilities": 38368000000,
+          "equity": 13040000000,
+          "currentAssets": 16553000000,
+          "currentLiabilities": 12002000000,
+          "cash": 5412000000,
+          "debt": 26231000000,
+          "shares": 1239955155,
+          "revenue": 8300000000,
+          "netIncome": 2429000000
         }
       ]
     },
