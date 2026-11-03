@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-31T01:06:06.952Z",
+  "generatedAt": "2026-11-03T03:10:21.333Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -177,7 +177,7 @@
     },
     "MSFT": {
       "cik": 789019,
-      "entityName": "MICROSOFT CORPORATION",
+      "entityName": "MICROSOFT CORP",
       "quarters": [
         {
           "asOf": "2023-12-31",
@@ -1917,7 +1917,7 @@
     },
     "XOM": {
       "cik": 2115436,
-      "entityName": "ExxonMobil Holdings Corp",
+      "entityName": "ExxonMobil Holdings Corporation",
       "quarters": [
         {
           "asOf": "2025-12-31",
@@ -1946,6 +1946,20 @@
           "shares": 4111911960,
           "revenue": 116017000000,
           "netIncome": 14525000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 470917000000,
+          "liabilities": 198397000000,
+          "equity": 265789000000,
+          "currentAssets": 107625000000,
+          "currentLiabilities": 90209000000,
+          "cash": 12153000000,
+          "debt": 4523000000,
+          "shares": 4079222444,
+          "revenue": 113164000000,
+          "netIncome": 15413000000
         }
       ]
     },
@@ -2857,7 +2871,7 @@
     },
     "ORCL": {
       "cik": 1341439,
-      "entityName": "Oracle Corporation",
+      "entityName": "ORACLE CORP",
       "quarters": [
         {
           "asOf": "2023-11-30",
@@ -5134,20 +5148,6 @@
       "entityName": "The Goldman Sachs Group, Inc.",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 1577153000000,
-          "liabilities": 1459876000000,
-          "equity": 117277000000,
-          "currentAssets": null,
-          "currentLiabilities": null,
-          "cash": 239879000000,
-          "debt": 228723000000,
-          "shares": 329671083,
-          "revenue": 11817000000,
-          "netIncome": 2058000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 1641594000000,
@@ -5300,6 +5300,20 @@
           "shares": 295007421,
           "revenue": 20338000000,
           "netIncome": 6628000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 2180426000000,
+          "liabilities": 2055497000000,
+          "equity": 124929000000,
+          "currentAssets": null,
+          "currentLiabilities": null,
+          "cash": 176767000000,
+          "debt": 228723000000,
+          "shares": 291171408,
+          "revenue": 18679000000,
+          "netIncome": 5294000000
         }
       ]
     },
