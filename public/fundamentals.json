@@ -1,24 +1,10 @@
 {
-  "generatedAt": "2026-11-03T03:10:21.333Z",
+  "generatedAt": "2026-11-04T01:42:13.626Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
       "entityName": "Apple Inc.",
       "quarters": [
-        {
-          "asOf": "2023-09-30",
-          "form": "10-K",
-          "assets": 352583000000,
-          "liabilities": 290437000000,
-          "equity": 62146000000,
-          "currentAssets": 143566000000,
-          "currentLiabilities": 145308000000,
-          "cash": 61555000000,
-          "debt": 105103000000,
-          "shares": 15634232000,
-          "revenue": null,
-          "netIncome": null
-        },
         {
           "asOf": "2023-12-30",
           "form": "10-Q",
@@ -119,7 +105,7 @@
         },
         {
           "asOf": "2025-09-27",
-          "form": "10-Q",
+          "form": "10-K",
           "assets": 359241000000,
           "liabilities": 285508000000,
           "equity": 73733000000,
@@ -172,6 +158,20 @@
           "shares": 14687356000,
           "revenue": 109417000000,
           "netIncome": 29789000000
+        },
+        {
+          "asOf": "2026-09-26",
+          "form": "10-K",
+          "assets": 404548000000,
+          "liabilities": 292455000000,
+          "equity": 112093000000,
+          "currentAssets": 173857000000,
+          "currentLiabilities": 169915000000,
+          "cash": 56722000000,
+          "debt": 78114000000,
+          "shares": 14594180000,
+          "revenue": null,
+          "netIncome": null
         }
       ]
     },
@@ -1572,20 +1572,6 @@
       "entityName": "JPMORGAN CHASE & CO",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 3898333000000,
-          "liabilities": 3580962000000,
-          "equity": 317371000000,
-          "currentAssets": null,
-          "currentLiabilities": null,
-          "cash": 278793000000,
-          "debt": 269929000000,
-          "shares": 2891008341,
-          "revenue": 39874000000,
-          "netIncome": 13151000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 3875393000000,
@@ -1738,6 +1724,20 @@
           "shares": 2658186195,
           "revenue": 57347000000,
           "netIncome": 21155000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 5091545000000,
+          "liabilities": 4719177000000,
+          "equity": 372368000000,
+          "currentAssets": null,
+          "currentLiabilities": null,
+          "cash": 278793000000,
+          "debt": 269929000000,
+          "shares": 2655609509,
+          "revenue": 50172000000,
+          "netIncome": 15305000000
         }
       ]
     },
@@ -2316,21 +2316,6 @@
       "entityName": "UnitedHealth Group Incorporated",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 282063000000,
-          "liabilities": 188083000000,
-          "equity": 93980000000,
-          "equityBasis": "derived",
-          "currentAssets": 91905000000,
-          "currentLiabilities": 114179000000,
-          "cash": 44097000000,
-          "debt": 61699000000,
-          "shares": 926305139,
-          "revenue": 92361000000,
-          "netIncome": 5841000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 273720000000,
@@ -2494,6 +2479,21 @@
           "shares": 908144404,
           "revenue": 112032000000,
           "netIncome": 5484000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 312782000000,
+          "liabilities": 207237000000,
+          "equity": 105545000000,
+          "equityBasis": "derived",
+          "currentAssets": 85595000000,
+          "currentLiabilities": 115835000000,
+          "cash": 28549000000,
+          "debt": 72334000000,
+          "shares": 897594847,
+          "revenue": 112694000000,
+          "netIncome": 4110000000
         }
       ]
     },
@@ -4800,20 +4800,6 @@
       "entityName": "Palantir Technologies Inc.",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 4193417000,
-          "liabilities": 921520000,
-          "equity": 3190015000,
-          "currentAssets": 3809397000,
-          "currentLiabilities": 688925000,
-          "cash": 3283574000,
-          "debt": 0,
-          "shares": 2175241000,
-          "revenue": 558159000,
-          "netIncome": 71505000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 4522425000,
@@ -4966,6 +4952,20 @@
           "shares": 2402897000,
           "revenue": 1935464000,
           "netIncome": 1061890000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 13412976000,
+          "liabilities": 2067876000,
+          "equity": 11227981000,
+          "currentAssets": 12767770000,
+          "currentLiabilities": 1797716000,
+          "cash": 10561531000,
+          "debt": 0,
+          "shares": 2409153000,
+          "revenue": 2313411000,
+          "netIncome": 1128012000
         }
       ]
     },
@@ -7206,20 +7206,6 @@
       "entityName": "PFIZER INC",
       "quarters": [
         {
-          "asOf": "2023-10-01",
-          "form": "10-Q",
-          "assets": 215021000000,
-          "liabilities": 117817000000,
-          "equity": 96934000000,
-          "currentAssets": 74012000000,
-          "currentLiabilities": 31136000000,
-          "cash": 30878000000,
-          "debt": 63308000000,
-          "shares": 5645959570,
-          "revenue": 13491000000,
-          "netIncome": -2382000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 226501000000,
@@ -7372,6 +7358,20 @@
           "shares": 5699444169,
           "revenue": 15034000000,
           "netIncome": -248000000
+        },
+        {
+          "asOf": "2026-09-27",
+          "form": "10-Q",
+          "assets": 204544000000,
+          "liabilities": 115243000000,
+          "equity": 89001000000,
+          "currentAssets": 45009000000,
+          "currentLiabilities": 31726000000,
+          "cash": 29554000000,
+          "debt": 62601000000,
+          "shares": 5699673589,
+          "revenue": 16583000000,
+          "netIncome": 3242000000
         }
       ]
     },
@@ -7554,20 +7554,6 @@
       "entityName": "AbbVie Inc.",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 136221000000,
-          "liabilities": 124127000000,
-          "equity": 12094000000,
-          "currentAssets": 33224000000,
-          "currentLiabilities": 34773000000,
-          "cash": 13290000000,
-          "debt": 63128000000,
-          "shares": 1765046680,
-          "revenue": 13927000000,
-          "netIncome": 1778000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 134711000000,
@@ -7720,6 +7706,20 @@
           "shares": 1766792821,
           "revenue": 16990000000,
           "netIncome": 3613000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 147680000000,
+          "liabilities": 152263000000,
+          "equity": -4583000000,
+          "currentAssets": 37480000000,
+          "currentLiabilities": 43102000000,
+          "cash": 10802000000,
+          "debt": 64503000000,
+          "shares": 1767117285,
+          "revenue": 17404000000,
+          "netIncome": 4218000000
         }
       ]
     },
