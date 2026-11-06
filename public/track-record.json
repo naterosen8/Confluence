@@ -50442,21 +50442,39 @@
     "symbol": "AAPL",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 348.91
+    "price": 348.91,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 344.17,
+      "returnPct": -1.3585165228855605,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "ABBV",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 290.79
+    "price": 290.79,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 288.24,
+      "returnPct": -0.8769214897348641,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "ABT",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 104.57
+    "price": 104.57,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 113.6,
+      "returnPct": 8.635363871091137,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
@@ -50476,21 +50494,39 @@
     "symbol": "AMD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 566.42
+    "price": 566.42,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 404.4,
+      "returnPct": -28.60421595282652,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "AMGN",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 460.73
+    "price": 460.73,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 460.28,
+      "returnPct": -0.09767108718773371,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "AMZN",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 243.79
+    "price": 243.79,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 260.21,
+      "returnPct": 6.735304975593744,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
@@ -50510,28 +50546,52 @@
     "symbol": "AVGO",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 345
+    "price": 345,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 291.53,
+      "returnPct": -15.498550724637688,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "AXP",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 323.71
+    "price": 323.71,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 324.97,
+      "returnPct": 0.3892372802817484,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "BA",
     "verdict": "aligned-down",
     "score": -4,
-    "price": 172.65
+    "price": 172.65,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 172.5,
+      "returnPct": -0.08688097306690164,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "BLK",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 1176.24
+    "price": 1176.24,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 1170.67,
+      "returnPct": -0.47354281439161533,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
@@ -50551,77 +50611,143 @@
     "symbol": "C",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 125.76
+    "price": 125.76,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 118.45,
+      "returnPct": -5.812659033078882,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "CAT",
     "verdict": "aligned-down",
     "score": -3,
-    "price": 647.39
+    "price": 647.39,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 553.64,
+      "returnPct": -14.481224609586185,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "CMCSA",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 22.27
+    "price": 22.27,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 24.95,
+      "returnPct": 12.034126627750336,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "COIN",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 160.59
+    "price": 160.59,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 136.82,
+      "returnPct": -14.801668846129903,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "COP",
     "verdict": "aligned-up",
     "score": 6,
-    "price": 150.03
+    "price": 150.03,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 135.46,
+      "returnPct": -9.711391055122304,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "CRM",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 230.9
+    "price": 230.9,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 222.41,
+      "returnPct": -3.6769164140320525,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "CSCO",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 108.59
+    "price": 108.59,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 95.72,
+      "returnPct": -11.851920066304451,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "CVX",
     "verdict": "aligned-up",
     "score": 6,
-    "price": 231.46
+    "price": 231.46,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 212.93,
+      "returnPct": -8.005702929231832,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "DE",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 660
+    "price": 660,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 663.31,
+      "returnPct": 0.5015151515151433,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "DIA",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 522.73
+    "price": 522.73,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 514.27,
+      "returnPct": -1.6184263386451965,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "DIS",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 110.91
+    "price": 110.91,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 117.22,
+      "returnPct": 5.689297628707964,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
@@ -50654,77 +50780,143 @@
     "symbol": "F",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 12.36
+    "price": 12.36,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 12.53,
+      "returnPct": 1.375404530744336,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "GE",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 313.05
+    "price": 313.05,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 314.73,
+      "returnPct": 0.5366554863440367,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "GILD",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 165.61
+    "price": 165.61,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 167.57,
+      "returnPct": 1.18350341162972,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "GM",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 85.72
+    "price": 85.72,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 89.33,
+      "returnPct": 4.211385907606159,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "GOOGL",
     "verdict": "aligned-down",
     "score": -3,
-    "price": 283.82
+    "price": 283.82,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 282.57,
+      "returnPct": -0.44041998449721653,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "HD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 328.98
+    "price": 328.98,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 349.94,
+      "returnPct": 6.371207976168758,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "IBM",
     "verdict": "aligned-up",
     "score": 3,
-    "price": 258.28
+    "price": 258.28,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 247.11,
+      "returnPct": -4.324763822208441,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "INTC",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 92.07
+    "price": 92.07,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 52.25,
+      "returnPct": -43.24970131421744,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "JNJ",
     "verdict": "aligned-up",
     "score": 6,
-    "price": 275.2
+    "price": 275.2,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 272.32,
+      "returnPct": -1.0465116279069753,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "JPM",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 343.58
+    "price": 343.58,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 337.34,
+      "returnPct": -1.8161709063391378,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "KO",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 92.82
+    "price": 92.82,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 95.73,
+      "returnPct": 3.1351001939237353,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
@@ -50744,168 +50936,312 @@
     "symbol": "LLY",
     "verdict": "aligned-up",
     "score": 3,
-    "price": 1373.7
+    "price": 1373.7,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 1364.73,
+      "returnPct": -0.6529810002183902,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "LMT",
     "verdict": "aligned-up",
     "score": 3,
-    "price": 643.59
+    "price": 643.59,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 576.16,
+      "returnPct": -10.47716714057087,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "MA",
     "verdict": "aligned-up",
     "score": 6,
-    "price": 635.7
+    "price": 635.7,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 655.92,
+      "returnPct": 3.1807456347333507,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "MCD",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 257.38
+    "price": 257.38,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 278.04,
+      "returnPct": 8.027041728184017,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "META",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 624.52
+    "price": 624.52,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 605.08,
+      "returnPct": -3.1127906231986073,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "MRK",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 146.33
+    "price": 146.33,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 146.94,
+      "returnPct": 0.4168659878357036,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "MSFT",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 530.14
+    "price": 530.14,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 535.93,
+      "returnPct": 1.092164333949516,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "NFLX",
     "verdict": "aligned-down",
     "score": -4,
-    "price": 62.05
+    "price": 62.05,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 65.56,
+      "returnPct": 5.656728444802587,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "NKE",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 38.42
+    "price": 38.42,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 39.56,
+      "returnPct": 2.9672045809474246,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "NOW",
     "verdict": "leaning-down",
     "score": -1,
-    "price": 109.67
+    "price": 109.67,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 102.36,
+      "returnPct": -6.665450898148995,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "NVDA",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 213.66
+    "price": 213.66,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 181.6,
+      "returnPct": -15.0051483665637,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "ORCL",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 139.56
+    "price": 139.56,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 115.16,
+      "returnPct": -17.48351963313271,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "OXY",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 63.01
+    "price": 63.01,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 56.36,
+      "returnPct": -10.55388033645453,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "PANW",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 380.57
+    "price": 380.57,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 314.67,
+      "returnPct": -17.316131066558054,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "PEP",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 133.79
+    "price": 133.79,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 142.71,
+      "returnPct": 6.667164960011972,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "PFE",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 29.95
+    "price": 29.95,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 29.88,
+      "returnPct": -0.23372287145242165,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "PG",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 160.59
+    "price": 160.59,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 167.1,
+      "returnPct": 4.053801606575746,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "PLTR",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 196.42
+    "price": 196.42,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 154.99,
+      "returnPct": -21.09255676611342,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "PYPL",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 56.95
+    "price": 56.95,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 58.96,
+      "returnPct": 3.5294117647058787,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "QCOM",
     "verdict": "aligned-up",
     "score": 6,
-    "price": 185.41
+    "price": 185.41,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 156.75,
+      "returnPct": -15.457634431799793,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "RTX",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 199.4
+    "price": 199.4,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 191.88,
+      "returnPct": -3.7713139418254813,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "SBUX",
     "verdict": "aligned-up",
     "score": 3,
-    "price": 105.51
+    "price": 105.51,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 106.16,
+      "returnPct": 0.6160553502037641,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "SCHW",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 89.47
+    "price": 89.47,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 92.58,
+      "returnPct": 3.4760254834022573,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "SLB",
     "verdict": "aligned-up",
     "score": 6,
-    "price": 53.81
+    "price": 53.81,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 49.64,
+      "returnPct": -7.7494889425757325,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
@@ -50925,91 +51261,169 @@
     "symbol": "SPY",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 769.36
+    "price": 769.36,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 733,
+      "returnPct": -4.726006030986795,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "T",
     "verdict": "aligned-down",
     "score": -4,
-    "price": 20.92
+    "price": 20.92,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 21.82,
+      "returnPct": 4.302103250478004,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "TGT",
     "verdict": "leaning-down",
     "score": -2,
-    "price": 151.82
+    "price": 151.82,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 157.95,
+      "returnPct": 4.037676195494662,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "TLT",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 81.49
+    "price": 81.49,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 81.93,
+      "returnPct": 0.5399435513560094,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "TMO",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 709.18
+    "price": 709.18,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 676.94,
+      "returnPct": -4.546095490566556,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "TSLA",
     "verdict": "leaning-up",
     "score": 2,
-    "price": 403.3
+    "price": 403.3,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 343.69,
+      "returnPct": -14.780560376890655,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "TXN",
     "verdict": "aligned-up",
     "score": 3,
-    "price": 312.94
+    "price": 312.94,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 278.15,
+      "returnPct": -11.11714705694383,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "UBER",
     "verdict": "aligned-down",
     "score": -4,
-    "price": 65.74
+    "price": 65.74,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 68.78,
+      "returnPct": 4.624277456647409,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "UNH",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 410.91
+    "price": 410.91,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 395.72,
+      "returnPct": -3.696673237448589,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "UPS",
     "verdict": "aligned-up",
     "score": 3,
-    "price": 107.33
+    "price": 107.33,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 111.04,
+      "returnPct": 3.456629087859879,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "V",
     "verdict": "aligned-up",
     "score": 6,
-    "price": 410.54
+    "price": 410.54,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 422.59,
+      "returnPct": 2.9351585716373445,
+      "correct": true
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "WFC",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 84.81
+    "price": 84.81,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 84.8,
+      "returnPct": -0.011791062374725995,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-29",
     "symbol": "XOM",
     "verdict": "aligned-up",
     "score": 4,
-    "price": 183.29
+    "price": 183.29,
+    "outcome": {
+      "resolvedDate": "2026-11-05",
+      "exitPrice": 165.3,
+      "returnPct": -9.815047192972875,
+      "correct": false
+    }
   },
   {
     "date": "2026-10-30",
@@ -52609,10 +53023,59 @@
   },
   {
     "date": "2026-11-04",
+    "symbol": "AAPL",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 349.51
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "ABBV",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 294.83
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "ABT",
+    "verdict": "aligned-up",
+    "score": 3,
+    "price": 115.51
+  },
+  {
+    "date": "2026-11-04",
     "symbol": "ADA/USD",
     "verdict": "leaning-down",
     "score": -2,
     "price": 0.1973
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "ADBE",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 248.48
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "AMD",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 488.78
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "AMGN",
+    "verdict": "aligned-up",
+    "score": 3,
+    "price": 478.48
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "AMZN",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 266.03
   },
   {
     "date": "2026-11-04",
@@ -52623,6 +53086,34 @@
   },
   {
     "date": "2026-11-04",
+    "symbol": "AVGO",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 325.48
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "AXP",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 332.59
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "BA",
+    "verdict": "aligned-down",
+    "score": -4,
+    "price": 177
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "BLK",
+    "verdict": "aligned-up",
+    "score": 3,
+    "price": 1224.37
+  },
+  {
+    "date": "2026-11-04",
     "symbol": "BTC/USD",
     "verdict": "leaning-down",
     "score": -2,
@@ -52630,9 +53121,450 @@
   },
   {
     "date": "2026-11-04",
+    "symbol": "CAT",
+    "verdict": "aligned-down",
+    "score": -3,
+    "price": 591.3
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "CMCSA",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 24.85
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "COIN",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 151.5
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "CRM",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 227.11
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "CSCO",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 103.61
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "CVX",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 216.96
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "DE",
+    "verdict": "aligned-up",
+    "score": 6,
+    "price": 676.5
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "DIA",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 533.11
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "DIS",
+    "verdict": "aligned-up",
+    "score": 3,
+    "price": 118.95
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "F",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 12.67
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "GE",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 329.45
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "GILD",
+    "verdict": "aligned-up",
+    "score": 3,
+    "price": 174.48
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "GM",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 92.43
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "GOOGL",
+    "verdict": "aligned-down",
+    "score": -4,
+    "price": 288.93
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "GS",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 928
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "HD",
+    "verdict": "leaning-up",
+    "score": 1,
+    "price": 355.44
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "IBM",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 254.32
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "INTC",
+    "verdict": "leaning-down",
+    "score": -1,
+    "price": 58.27
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "IWM",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 284.02
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "JNJ",
+    "verdict": "aligned-up",
+    "score": 6,
+    "price": 276.32
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "JPM",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 352.11
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "KO",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 95.8
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "LLY",
+    "verdict": "aligned-up",
+    "score": 3,
+    "price": 1417.99
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "LMT",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 595.04
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "MA",
+    "verdict": "aligned-up",
+    "score": 3,
+    "price": 672.68
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "MCD",
+    "verdict": "leaning-up",
+    "score": 1,
+    "price": 280.22
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "META",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 630
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "MRK",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 150.36
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "MSFT",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 555.8
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "MU",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 795.23
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "NFLX",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 66.39
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "NKE",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 40.49
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "NOW",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 108.81
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "NVDA",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 200.13
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "ORCL",
+    "verdict": "aligned-down",
+    "score": -4,
+    "price": 123.73
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "OXY",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 57.33
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "PANW",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 348.04
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "PEP",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 142.42
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "PFE",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 30.79
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "PG",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 167.32
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "PLTR",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 171.7
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "PYPL",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 60.2
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "RTX",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 198.43
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "SBUX",
+    "verdict": "aligned-up",
+    "score": 3,
+    "price": 109.7
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "SLB",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 51.56
+  },
+  {
+    "date": "2026-11-04",
     "symbol": "SOL/USD",
     "verdict": "leaning-down",
     "score": -2,
     "price": 95.61
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "TGT",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 163.1
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "TLT",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 81.76
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "TMO",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 706.16
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "TSLA",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 385.19
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "TXN",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 311.49
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "UBER",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 69.87
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "UNH",
+    "verdict": "leaning-up",
+    "score": 2,
+    "price": 409.38
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "UPS",
+    "verdict": "aligned-up",
+    "score": 3,
+    "price": 114.31
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "V",
+    "verdict": "aligned-up",
+    "score": 3,
+    "price": 436.57
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "VZ",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 46.17
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "WFC",
+    "verdict": "aligned-up",
+    "score": 4,
+    "price": 87.43
+  },
+  {
+    "date": "2026-11-04",
+    "symbol": "WMT",
+    "verdict": "leaning-down",
+    "score": -1,
+    "price": 129.17
+  },
+  {
+    "date": "2026-11-05",
+    "symbol": "ADA/USD",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 0.1809
+  },
+  {
+    "date": "2026-11-05",
+    "symbol": "AVAX/USD",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 8.174
+  },
+  {
+    "date": "2026-11-05",
+    "symbol": "BTC/USD",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 76088.01
+  },
+  {
+    "date": "2026-11-05",
+    "symbol": "DOGE/USD",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 0.0712
+  },
+  {
+    "date": "2026-11-05",
+    "symbol": "SOL/USD",
+    "verdict": "leaning-down",
+    "score": -1,
+    "price": 89.33
+  },
+  {
+    "date": "2026-11-05",
+    "symbol": "XRP/USD",
+    "verdict": "leaning-down",
+    "score": -2,
+    "price": 1.2072
   }
 ]

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-05T01:44:05.995Z",
+  "generatedAt": "2026-11-06T01:51:57.848Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -1968,20 +1968,6 @@
       "entityName": "Chevron Corp",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 263927000000,
-          "liabilities": 97679000000,
-          "equity": 165265000000,
-          "currentAssets": 41732000000,
-          "currentLiabilities": 33263000000,
-          "cash": 5938000000,
-          "debt": 32548000000,
-          "shares": 1887748665,
-          "revenue": 51922000000,
-          "netIncome": 6526000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 261632000000,
@@ -2134,6 +2120,20 @@
           "shares": 1975771274,
           "revenue": 67199000000,
           "netIncome": 12072000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 333786000000,
+          "liabilities": 133809000000,
+          "equity": 194327000000,
+          "currentAssets": 56129000000,
+          "currentLiabilities": 41827000000,
+          "cash": 4008000000,
+          "debt": 32199000000,
+          "shares": 1965421686,
+          "revenue": 65237000000,
+          "netIncome": 9924000000
         }
       ]
     },
@@ -5322,20 +5322,6 @@
       "entityName": "MORGAN STANLEY",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 1169013000000,
-          "liabilities": 1068855000000,
-          "equity": 99211000000,
-          "currentAssets": null,
-          "currentLiabilities": null,
-          "cash": 108401000000,
-          "debt": 267084000000,
-          "shares": 1656966580,
-          "revenue": 13273000000,
-          "netIncome": 2408000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 1193693000000,
@@ -5488,6 +5474,20 @@
           "shares": 1577284817,
           "revenue": 21348000000,
           "netIncome": 5581000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 1692027000000,
+          "liabilities": 1573707000000,
+          "equity": 117109000000,
+          "currentAssets": null,
+          "currentLiabilities": null,
+          "cash": 138669000000,
+          "debt": 402331000000,
+          "shares": 1570566292,
+          "revenue": 20338000000,
+          "netIncome": 4909000000
         }
       ]
     },
@@ -6164,36 +6164,6 @@
       "entityName": "VISA INC.",
       "quarters": [
         {
-          "asOf": "2023-06-30",
-          "form": "10-Q",
-          "assets": 89234000000,
-          "liabilities": 50253000000,
-          "equity": 38981000000,
-          "equityBasis": "derived",
-          "currentAssets": 31670000000,
-          "currentLiabilities": 21230000000,
-          "cash": 19194000000,
-          "debt": 20560000000,
-          "shares": 469280842,
-          "revenue": 8123000000,
-          "netIncome": 4156000000
-        },
-        {
-          "asOf": "2023-09-30",
-          "form": "10-K",
-          "assets": 90499000000,
-          "liabilities": 51766000000,
-          "equity": 38733000000,
-          "equityBasis": "derived",
-          "currentAssets": 33532000000,
-          "currentLiabilities": 23098000000,
-          "cash": 19890000000,
-          "debt": 20463000000,
-          "shares": 469280842,
-          "revenue": null,
-          "netIncome": null
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-Q",
           "assets": 91409000000,
@@ -6300,7 +6270,7 @@
         },
         {
           "asOf": "2025-09-30",
-          "form": "10-Q",
+          "form": "10-K",
           "assets": 99627000000,
           "liabilities": 61718000000,
           "equity": 37909000000,
@@ -6342,6 +6312,36 @@
           "shares": 469280842,
           "revenue": 11230000000,
           "netIncome": 6021000000
+        },
+        {
+          "asOf": "2026-06-30",
+          "form": "10-Q",
+          "assets": 94590000000,
+          "liabilities": 59412000000,
+          "equity": 35178000000,
+          "equityBasis": "derived",
+          "currentAssets": 31002000000,
+          "currentLiabilities": 31467000000,
+          "cash": 15963000000,
+          "debt": 23858000000,
+          "shares": 469280842,
+          "revenue": 11633000000,
+          "netIncome": 5628000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-K",
+          "assets": 94360000000,
+          "liabilities": 58249000000,
+          "equity": 36111000000,
+          "equityBasis": "derived",
+          "currentAssets": 30486000000,
+          "currentLiabilities": 31588000000,
+          "cash": 16542000000,
+          "debt": 22071000000,
+          "shares": 469280842,
+          "revenue": null,
+          "netIncome": null
         }
       ]
     },
@@ -11918,20 +11918,6 @@
       "entityName": "ConocoPhillips",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 93651000000,
-          "liabilities": 45906000000,
-          "equity": 47745000000,
-          "currentAssets": 17181000000,
-          "currentLiabilities": 10338000000,
-          "cash": 9446000000,
-          "debt": 23678000000,
-          "shares": 1187407942,
-          "revenue": 12599000000,
-          "netIncome": 2798000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 95924000000,
@@ -12084,6 +12070,20 @@
           "shares": 1201337479,
           "revenue": 18088000000,
           "netIncome": 3931000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 126073000000,
+          "liabilities": 60082000000,
+          "equity": 65991000000,
+          "currentAssets": 20868000000,
+          "currentLiabilities": 13745000000,
+          "cash": 9929000000,
+          "debt": 23675000000,
+          "shares": 1182335057,
+          "revenue": 17201000000,
+          "netIncome": 4001000000
         }
       ]
     },
