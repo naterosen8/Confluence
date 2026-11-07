@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-06T01:51:57.848Z",
+  "generatedAt": "2026-11-07T01:11:37.029Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -5844,20 +5844,6 @@
       "entityName": "SCHWAB CHARLES CORP",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 475204000000,
-          "liabilities": 437420000000,
-          "equity": 37784000000,
-          "currentAssets": null,
-          "currentLiabilities": null,
-          "cash": 33251000000,
-          "debt": 18914000000,
-          "shares": 1288641882,
-          "revenue": 4606000000,
-          "netIncome": 1125000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 493178000000,
@@ -6010,6 +5996,20 @@
           "shares": 1739135507,
           "revenue": 7072000000,
           "netIncome": 2800000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 520674000000,
+          "liabilities": 469228000000,
+          "equity": 51446000000,
+          "currentAssets": null,
+          "currentLiabilities": null,
+          "cash": 36657000000,
+          "debt": 18914000000,
+          "shares": 1729335714,
+          "revenue": 7171000000,
+          "netIncome": 2906000000
         }
       ]
     },
@@ -8960,20 +8960,6 @@
       "entityName": "McDONALD’S CORPORATION",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 52089300000,
-          "liabilities": 56944300000,
-          "equity": -4855000000,
-          "currentAssets": 6850000000,
-          "currentLiabilities": 4002700000,
-          "cash": 3903800000,
-          "debt": 37274600000,
-          "shares": 725342030,
-          "revenue": 6692000000,
-          "netIncome": 2317000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 56147000000,
@@ -9126,6 +9112,20 @@
           "shares": 707641531,
           "revenue": 7099000000,
           "netIncome": 2362000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 60657000000,
+          "liabilities": 61000000000,
+          "equity": -343000000,
+          "currentAssets": 4723000000,
+          "currentLiabilities": 3828000000,
+          "cash": 1600500000,
+          "debt": 40545000000,
+          "shares": 705784744,
+          "revenue": 7157000000,
+          "netIncome": 2486000000
         }
       ]
     },
