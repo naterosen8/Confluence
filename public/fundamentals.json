@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-07T01:11:37.029Z",
+  "generatedAt": "2026-11-10T03:51:56.834Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -12266,20 +12266,6 @@
       "entityName": "OCCIDENTAL PETROLEUM CORPORATION",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-Q",
-          "assets": 71827000000,
-          "liabilities": 42515000000,
-          "equity": 29312000000,
-          "currentAssets": 8266000000,
-          "currentLiabilities": 8941000000,
-          "cash": 611000000,
-          "debt": 19143000000,
-          "shares": 880370837,
-          "revenue": 7271000000,
-          "netIncome": 1375000000
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-K",
           "assets": 74008000000,
@@ -12385,10 +12371,10 @@
           "equity": 36261000000,
           "currentAssets": 8812000000,
           "currentLiabilities": 9421000000,
-          "cash": 2159000000,
+          "cash": 2141000000,
           "debt": 21846000000,
           "shares": 984439742,
-          "revenue": 6682000000,
+          "revenue": 5578000000,
           "netIncome": 842000000
         },
         {
@@ -12432,6 +12418,20 @@
           "shares": 994634701,
           "revenue": 7053000000,
           "netIncome": 2996000000
+        },
+        {
+          "asOf": "2026-09-30",
+          "form": "10-Q",
+          "assets": 79804000000,
+          "liabilities": 36639000000,
+          "equity": 43165000000,
+          "currentAssets": 11005000000,
+          "currentLiabilities": 7947000000,
+          "cash": 3884000000,
+          "debt": 12625000000,
+          "shares": 999637371,
+          "revenue": 7079000000,
+          "netIncome": 1821000000
         }
       ]
     },
