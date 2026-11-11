@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10T03:51:56.834Z",
+  "generatedAt": "2026-11-11T01:31:27.815Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -8957,7 +8957,7 @@
     },
     "MCD": {
       "cik": 63908,
-      "entityName": "McDONALD’S CORPORATION",
+      "entityName": "MCDONALDS CORP",
       "quarters": [
         {
           "asOf": "2023-12-31",
