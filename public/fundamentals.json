@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T02:31:55.873Z",
+  "generatedAt": "2026-11-13T02:10:52.595Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -9134,20 +9134,6 @@
       "entityName": "Starbucks Corporation",
       "quarters": [
         {
-          "asOf": "2023-10-01",
-          "form": "10-K",
-          "assets": 29445500000,
-          "liabilities": 37433300000,
-          "equity": -7994800000,
-          "currentAssets": 7303400000,
-          "currentLiabilities": 9345300000,
-          "cash": 3579000000,
-          "debt": 15366200000,
-          "shares": 1145400000,
-          "revenue": null,
-          "netIncome": null
-        },
-        {
           "asOf": "2023-12-31",
           "form": "10-Q",
           "assets": 29179700000,
@@ -9247,7 +9233,7 @@
         },
         {
           "asOf": "2025-09-28",
-          "form": "10-Q",
+          "form": "10-K",
           "assets": 32019700000,
           "liabilities": 40108900000,
           "equity": -8096600000,
@@ -9300,6 +9286,20 @@
           "shares": 1139700000,
           "revenue": 9322700000,
           "netIncome": 1045300000
+        },
+        {
+          "asOf": "2026-09-27",
+          "form": "10-K",
+          "assets": 28389900000,
+          "liabilities": 36051700000,
+          "equity": -7669100000,
+          "currentAssets": 7671400000,
+          "currentLiabilities": 10113800000,
+          "cash": 3361800000,
+          "debt": 13276900000,
+          "shares": 1140000000,
+          "revenue": null,
+          "netIncome": null
         }
       ]
     },
