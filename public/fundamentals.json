@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T01:42:50.882Z",
+  "generatedAt": "2026-11-17T04:13:36.552Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -4101,7 +4101,7 @@
     },
     "IBM": {
       "cik": 51143,
-      "entityName": "INTERNATIONAL BUSINESS MACHINES CORPORATION",
+      "entityName": "INTERNATIONAL BUSINESS MACHINES CORP",
       "quarters": [
         {
           "asOf": "2023-12-31",
