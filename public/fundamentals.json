@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T04:13:36.552Z",
+  "generatedAt": "2026-11-18T03:10:45.739Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -3930,20 +3930,6 @@
       "entityName": "CISCO SYSTEMS, INC.",
       "quarters": [
         {
-          "asOf": "2023-10-28",
-          "form": "10-Q",
-          "assets": 98782000000,
-          "liabilities": 53572000000,
-          "equity": 45210000000,
-          "currentAssets": 39659000000,
-          "currentLiabilities": 27035000000,
-          "cash": 23523000000,
-          "debt": 7650000000,
-          "shares": 4054857783,
-          "revenue": 14668000000,
-          "netIncome": 3638000000
-        },
-        {
           "asOf": "2024-01-27",
           "form": "10-Q",
           "assets": 101174000000,
@@ -4085,7 +4071,7 @@
         },
         {
           "asOf": "2026-07-25",
-          "form": "10-K",
+          "form": "10-Q",
           "assets": 129637000000,
           "liabilities": 79352000000,
           "equity": 50285000000,
@@ -4096,6 +4082,20 @@
           "shares": 3941434665,
           "revenue": null,
           "netIncome": null
+        },
+        {
+          "asOf": "2026-10-24",
+          "form": "10-Q",
+          "assets": 129458000000,
+          "liabilities": 77851000000,
+          "equity": 51607000000,
+          "currentAssets": 37921000000,
+          "currentLiabilities": 39462000000,
+          "cash": 15845000000,
+          "debt": 21375000000,
+          "shares": 3942586873,
+          "revenue": 18517000000,
+          "netIncome": 4552000000
         }
       ]
     },
@@ -10178,20 +10178,6 @@
       "entityName": "WALT DISNEY CO/",
       "quarters": [
         {
-          "asOf": "2023-09-30",
-          "form": "10-K",
-          "assets": 205579000000,
-          "liabilities": 106302000000,
-          "equity": 99277000000,
-          "currentAssets": 32763000000,
-          "currentLiabilities": 31139000000,
-          "cash": 14182000000,
-          "debt": 46431000000,
-          "shares": 1829778789,
-          "revenue": null,
-          "netIncome": null
-        },
-        {
           "asOf": "2023-12-30",
           "form": "10-Q",
           "assets": 197774000000,
@@ -10291,7 +10277,7 @@
         },
         {
           "asOf": "2025-09-27",
-          "form": "10-Q",
+          "form": "10-K",
           "assets": 197514000000,
           "liabilities": 87645000000,
           "equity": 109869000000,
@@ -10344,6 +10330,20 @@
           "shares": 1736511424,
           "revenue": 25248000000,
           "netIncome": 2638000000
+        },
+        {
+          "asOf": "2026-10-03",
+          "form": "10-K",
+          "assets": 206138000000,
+          "liabilities": 94538000000,
+          "equity": 111600000000,
+          "currentAssets": 25859000000,
+          "currentLiabilities": 34907000000,
+          "cash": 6679000000,
+          "debt": 44473000000,
+          "shares": 1726686902,
+          "revenue": null,
+          "netIncome": null
         }
       ]
     },
