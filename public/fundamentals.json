@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T02:53:16.139Z",
+  "generatedAt": "2026-11-20T02:38:45.129Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -4449,22 +4449,8 @@
     },
     "PANW": {
       "cik": 1327567,
-      "entityName": "Palo Alto Networks, Inc.",
+      "entityName": "PALO ALTO NETWORKS, INC",
       "quarters": [
-        {
-          "asOf": "2023-10-31",
-          "form": "10-Q",
-          "assets": 14808500000,
-          "liabilities": 12638000000,
-          "equity": 2170500000,
-          "currentAssets": 6477600000,
-          "currentLiabilities": 7513400000,
-          "cash": 3893800000,
-          "debt": 1991500000,
-          "shares": 308594604,
-          "revenue": 1878100000,
-          "netIncome": 194200000
-        },
         {
           "asOf": "2024-01-31",
           "form": "10-Q",
@@ -4607,7 +4593,7 @@
         },
         {
           "asOf": "2026-07-31",
-          "form": "10-K",
+          "form": "10-Q",
           "assets": 48460000000,
           "liabilities": 20968000000,
           "equity": 27492000000,
@@ -4618,6 +4604,20 @@
           "shares": 815000000,
           "revenue": null,
           "netIncome": null
+        },
+        {
+          "asOf": "2026-10-31",
+          "form": "10-Q",
+          "assets": 49110000000,
+          "liabilities": 20445000000,
+          "equity": 28665000000,
+          "currentAssets": 7450000000,
+          "currentLiabilities": 11356000000,
+          "cash": 3055000000,
+          "debt": 1991500000,
+          "shares": 818000000,
+          "revenue": 3445000000,
+          "netIncome": 482000000
         }
       ]
     },
