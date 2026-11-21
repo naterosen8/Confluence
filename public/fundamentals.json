@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-20T02:38:45.129Z",
+  "generatedAt": "2026-11-21T02:48:17.812Z",
   "companies": {
     "AAPL": {
       "cik": 320193,
@@ -8783,22 +8783,8 @@
     },
     "HD": {
       "cik": 354950,
-      "entityName": "The Home Depot, Inc.",
+      "entityName": "HOME DEPOT, INC.",
       "quarters": [
-        {
-          "asOf": "2023-10-29",
-          "form": "10-Q",
-          "assets": 75577000000,
-          "liabilities": 74147000000,
-          "equity": 1430000000,
-          "currentAssets": 30682000000,
-          "currentLiabilities": 23572000000,
-          "cash": 2058000000,
-          "debt": 9749000000,
-          "shares": 1000065982,
-          "revenue": 37710000000,
-          "netIncome": 3810000000
-        },
         {
           "asOf": "2024-01-28",
           "form": "10-K",
@@ -8952,6 +8938,20 @@
           "shares": 997116682,
           "revenue": 47861000000,
           "netIncome": 4766000000
+        },
+        {
+          "asOf": "2026-11-01",
+          "form": "10-Q",
+          "assets": 110102000000,
+          "liabilities": 91968000000,
+          "equity": 18134000000,
+          "currentAssets": 38255000000,
+          "currentLiabilities": 35287000000,
+          "cash": 1968000000,
+          "debt": 9749000000,
+          "shares": 997689626,
+          "revenue": 43398000000,
+          "netIncome": 3713000000
         }
       ]
     },
